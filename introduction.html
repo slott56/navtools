@@ -1,0 +1,619 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Overview &mdash; NavTools 2.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="NavTools 2.1 documentation" href="index.html"/>
+        <link rel="next" title="Navigation Calculations Module" href="navigation.html"/>
+        <link rel="prev" title="NavTools 2.1" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> NavTools
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#actors">Actors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#use-cases">Use Cases</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#execution-use-case">Execution Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#planning-use-case">Planning Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#float-plan-use-case">Float Plan Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analysis-use-case">Analysis Use Case</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#solution-overview">Solution Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#data-interface">Data Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#user-interface">User Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#architecture">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#references">References</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="navigation.html">Navigation Calculations Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#navigation-module-design">Navigation Module Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#module-docstring">Module Docstring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#problem-domain-objects">Problem Domain Objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#angleparser">AngleParser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#angle2-class">Angle2 Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#lat-subclass-of-angle">Lat Subclass of Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#lon-subclass-of-angle">Lon Subclass of Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#latlon-class">LatLon Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#globals">Globals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#distance-bearing-calculation">Distance/Bearing Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#formula">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#range-bearing-implementation">range_bearing implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#destination-calculation">Destination Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#id1">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#id2">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#destination-implementation">destination implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#declination-function">declination Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#historical-archive">Historical Archive</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#deprecation">Deprecation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#angle-class">Angle Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#globeangle-class">GlobeAngle Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#references-and-notes">References and Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="planning.html">Route Planning Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#input-parsing">Input Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#application-processing">Application Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#main-function">Main Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Track Analysis Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#input-parsing">Input Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#application-processing">Application Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#main-function">Main Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="igrf11.html">International Geomagnetic Reference Field Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#module-docstring">Module Docstring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#igrf11-fortran-comments">IGRF11 Fortran Comments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#python-imports">Python Imports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#essential-class-definition">Essential Class Definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#igrf11syn-function">igrf11syn Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#helper-functions">Helper Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="navtools_init.html">navtools <code class="docutils literal"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="testing/index.html">Testing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="testing/main.html">Main Test Script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_igrf11.html">Test IGRF11</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#test-case">Test Case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_navigation.html">Test Navigation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#globe-angle-and-angle-classes">Globe Angle and Angle classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#angle2-class">Angle2 Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#latlon-class">LatLon Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#range-bearing-function">range_bearing Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#destination-function">destination Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#declination-function">declination Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_planning.html">Test Planning</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#csv-to-routepoint-function">csv_to_RoutePoint function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gpx-to-routepoint-function">gpx_to_RoutePoint function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gen-rhumb-function">gen_rhumb Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gen-mag-bearing-function">gen_mag_bearing Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gen-schedule-function">gen_schedule Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#write-csv-function">write_csv Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#plan-function">plan Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_analysis.html">Test Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#csv-to-logentry-function-with-gpsnavx-data">csv_to_LogEntry function with GPSNavX Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#csv-to-logentry-function-with-manual-data">csv_to_LogEntry function with Manual Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#gpx-to-logentry-function">gpx_to_LogEntry function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#gen-rhumb-function">gen_rhumb Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#utility-to-compare-csv-output">Utility to compare CSV output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#write-csv-function">write_csv Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#analyze-function">analyze Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_init.html">navtools test <code class="docutils literal"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="build.html">NavTools Build</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="build.html#build-procedure">Build Procedure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build.html#build-script-design">Build Script Design</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="build.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#sphinx-build">Sphinx Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#pylit-build">PyLit Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#make-directories">Make Directories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#run-the-test-script">Run the Test Script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#the-build-sequence">The Build Sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#main-program-switch">Main Program Switch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="build.html#additional-builds">Additional Builds</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation via <code class="docutils literal"><span class="pre">setup.py</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#the-setup-py-file">The <code class="docutils literal"><span class="pre">setup.py</span></code> File</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">NavTools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Overview</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/introduction.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<p>The essential story is this:</p>
+<blockquote>
+<div>&#8220;As skipper of sailing vessel <em>Red Ranger</em>,
+I need to create detailed voyage plans with distance,
+bearing, and estimated time of arrival to each mark or waypoint.&#8221;</div></blockquote>
+<p>To put this story into context, we have a number of tools
+for voyage planning, execution and analysis. This software fills
+an essential gap among those tools. We&#8217;ll look at the three areas
+separately.</p>
+<p><strong>Planning</strong>.
+Voyage planning involves locating courses that avoid navigational hazards
+and make use of the available Aids to Navigation (ATONs).  In some cases,
+tide and current are accounted for, as well as adverse weather.</p>
+<p>For route planning, S/V <em>Red Ranger</em> carries three copies of the NOAA charts.</p>
+<ul class="simple">
+<li>Paper charts.  A mixture of old and new.</li>
+<li>The Jeppesen C-Map charts (<a class="reference external" href="http://www.c-map.com/">http://www.c-map.com/</a>) on an
+electronic chart plotter.</li>
+<li>Several copies of and GPSNavX (<a class="reference external" href="http://www.gpsnavx.com/">http://www.gpsnavx.com/</a>) and iNavX with the latest charts
+downloaded  from NOAA.  (<a class="reference external" href="http://www.charts.noaa.gov/RNCs/RNCs.shtml">http://www.charts.noaa.gov/RNCs/RNCs.shtml</a>)</li>
+</ul>
+<p>It&#8217;s not simple to sketch a route on an electronic chart and transform this into
+a schedule for sailing. Trying to do this is likely to introduce transcription errors.</p>
+<p>There are numerous piloting techniques that apply to paper charts,
+but the electronic chart support for these techniques is sketchy.</p>
+<p>It would be better to do planning in a way that doesn&#8217;t involve manual transcriptions.</p>
+<p><strong>Execution</strong>.
+For sailing a particular voyage, S/V <em>Red Ranger</em> carries several ways of assuring
+that she is on course.</p>
+<ul class="simple">
+<li>Crew observation of the ATONs, landmarks, and seascape.</li>
+<li>Paper charts and standard piloting techniques like dead reckoning,
+lines of position and course lines.</li>
+<li>Electronic Chartplotter in the cockpit.
+(Standard Horizon <a class="reference external" href="http://www.standardhorizon.com/indexVS.cfm?cmd=DisplayProducts&amp;ProdCatID=84&amp;encProdID=491E084FB06B41812BEEF96C77A4A8E2&amp;DivisionID=3&amp;isArchived=1">CP180i</a>)</li>
+<li>GPSNavX on a MacBook Pro with its own GPS antenna (entirely separate from
+the chartplotter). (<a class="reference external" href="http://www.gpsnavx.com">http://www.gpsnavx.com</a>)</li>
+<li>iNavX on a iPhones and iPad (<a class="reference external" href="http://www.inavx.com">http://www.inavx.com</a>).
+This uses a separate Dual XGPS 150 antenna (<a class="reference external" href="http://gps.dualav.com/explore-by-product/xgps150a/">http://gps.dualav.com/explore-by-product/xgps150a/</a>).</li>
+</ul>
+<p>All this tells where S/V <em>Red Ranger</em> is.
+The important gap here is in contingency planning: knowing where
+S/V <em>Red Ranger</em> should be.
+Will she arrive on time?  Do we need to change course, or
+use the auxiliary engine?  Do we need to look for an alternate
+route or anchorage?</p>
+<blockquote>
+<div><em>&#8220;The most dangerous piece of equipment is the calendar.
+The issue here is not maintaining a schedule, but sailing
+safely during daylight hours and leaving enough time to
+locate an anchorage before dark.&#8221;</em></div></blockquote>
+<p>The cockpit chartplotter provides an Estimated Time of Arrival (ETA)
+to a specific waypoint based on current
+course and speed.  It fails to provide any <em>planned</em> ETA to that waypoint that
+serves as basis for comparison.</p>
+<p><strong>Analysis</strong>.
+Logging is done several ways.</p>
+<ul class="simple">
+<li>Electronic Chartplotter in the cockpit can record a track.  Currently,
+this is difficult to upload from the chartplotter.</li>
+<li>GPSNavX on a MacBook Pro with its own GPS antenna.
+This means finding a way to secure a computer and leave it running
+to accumulate a track. This is not currently feasible on <em>Red Ranger</em>:
+there&#8217;s no way to secure the computer or provide power.</li>
+<li>GPSNavX on an iPhone or iPad with a separate GPS antenna.  This also requires
+leaving the phone running.  The track can be extracted through
+The X-Traverse web site.</li>
+<li>Paper logging of heading, speed, wind and engine for each sail change,
+tack and each hour. This is currently how track analysis is handled.</li>
+</ul>
+<p>There are no tools for retrospective analysis of logs at all.</p>
+</div>
+<div class="section" id="actors">
+<h1>Actors<a class="headerlink" href="#actors" title="Permalink to this headline">¶</a></h1>
+<p>The primary actor for the use cases is the skipper of S/V <em>Red Ranger</em>.</p>
+<p>Crew members may participate in the Execution.  However,
+the ultimate responsibility lies with the skipper.</p>
+<p>Voyage planning can be forwarded to shore crew as a kind of <strong>Float Plan</strong>.
+Using SPOT Satellite communications, we can provide actual positions so
+that the shore crew can compare positions against the voyage plan.</p>
+</div>
+<div class="section" id="use-cases">
+<h1>Use Cases<a class="headerlink" href="#use-cases" title="Permalink to this headline">¶</a></h1>
+<p>There are four broad use cases</p>
+<ul class="simple">
+<li><a class="reference internal" href="#id3">Execution Use Case</a></li>
+<li><a class="reference internal" href="#planning-use-case">Planning Use Case</a></li>
+<li><a class="reference internal" href="#float-plan-use-case">Float Plan Use Case</a></li>
+<li><a class="reference internal" href="#analysis-use-case">Analysis Use Case</a></li>
+</ul>
+<div class="section" id="execution-use-case">
+<h2>Execution Use Case<a class="headerlink" href="#execution-use-case" title="Permalink to this headline">¶</a></h2>
+<p>Consider a sample sailing story.</p>
+<ol class="arabic simple">
+<li>Actors depart their slip for a destination that involves <img class="math" src="_images/math/a640806342ec56986f0569043e31adb6660d565d.png" alt="n &gt; 2"/>
+waypoints.</li>
+<li>System (cockpit chart plotter) shows ETA to waypoint 1.  Actors arrive
+at waypoint 1, switch system to waypoint 2.</li>
+<li>System shows ETA to waypoint 2.  Actors arrive
+at waypoint 2, switch system to waypoint 3.</li>
+<li>System shows ETA to waypoint 3.  Actors realize that arrival time is
+now unsafe (i.e., after dark).</li>
+</ol>
+<p>At waypoint 1 &#8211; due to adverse wind or currents &#8211; <em>Red Ranger</em>
+could have been behind the overall schedule, and the actors needed to know this
+before setting course for waypoint 2.</p>
+<p>This means that waypoint-by-waypoint planned ETA&#8217;s are required for safe
+execution of a schedule. The skipper can then compare planned ETA&#8217;s with actual
+ETA&#8217;s to determine if contingency plans should be executed.</p>
+</div>
+<div class="section" id="planning-use-case">
+<h2>Planning Use Case<a class="headerlink" href="#planning-use-case" title="Permalink to this headline">¶</a></h2>
+<p>The overall planning use case creates a
+a waypoint-by-waypoint schedule or &#8220;Voyage Track&#8221;.
+See Bowditch <a class="reference internal" href="#bowditch" id="id1">[bowditch]</a>, section 2508, Constructing a Voyage Track.
+Also, see Bowditch <a class="reference internal" href="#bowditch" id="id2">[bowditch]</a>, section 802 for more information on planning.</p>
+<table class="docutils citation" frame="void" id="bowditch" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[bowditch]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id2">2</a>, <a class="fn-backref" href="#id4">3</a>)</em> THE AMERICAN PRACTICAL NAVIGATOR.  <a class="reference external" href="http://www.irbs.com/bowditch/">http://www.irbs.com/bowditch/</a>
+Also <a class="reference external" href="http://msi.nga.mil/MSISiteContent/StaticFiles/NAV_PUBS/APN/pub9.zip">http://msi.nga.mil/MSISiteContent/StaticFiles/NAV_PUBS/APN/pub9.zip</a></td></tr>
+</tbody>
+</table>
+<ol class="arabic simple">
+<li>Actor plans the route in general.  This is a separate use
+case, outside the scope of this document.  System saves
+the route as a list of waypoints.</li>
+<li>Actor runs the &#8220;route_planning&#8221; application.  The system
+creates a &#8220;schedule&#8221; file with the waypoints plus
+additional information like distance to next waypoint,
+bearing of next waypoint, and ETA.</li>
+<li>Actor runs a spreadsheet application (Open Office Org, for example),
+and imports the schedule file.  This is a separate use
+case, outside the scope of this document.
+The system prints the resulting schedule or downloads it to an iPad.</li>
+</ol>
+<p>The actor can cycle through this use case to create alternatives
+and contingency plans.</p>
+</div>
+<div class="section" id="float-plan-use-case">
+<h2>Float Plan Use Case<a class="headerlink" href="#float-plan-use-case" title="Permalink to this headline">¶</a></h2>
+<p>This involves two extensions to the <a class="reference internal" href="#planning-use-case">Planning Use Case</a> and <span class="target" id="id3">Execution Use Case</span>.</p>
+<ul>
+<li><p class="first">Instead of merely printing or saving the plan for their own use,
+the skipper merges the plan with a description of the vessel and crew.
+This merged document becomes a float plan that can be sent to trusted
+on-shore people to act as a check-list against periodic notification.</p>
+<p><em>Red Ranger</em> uses a Spot Tracker (<a class="reference external" href="http://findmespot.com/en/">http://findmespot.com/en/</a>). A noon email
+is sent to confirm progress. An email could be sent for each waypoint,
+in addition to a noon position.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="analysis-use-case">
+<h2>Analysis Use Case<a class="headerlink" href="#analysis-use-case" title="Permalink to this headline">¶</a></h2>
+<p>In retrospect, a track may be analyzed to compute actual distance
+run (and times of arrival).  This can be compared with the plan to
+improve the quality of the planning process.</p>
+<p>The essential feature is analysis of the track created by the
+GPS chartplotter (or computer) during sailing.</p>
+<ol class="arabic simple">
+<li>Actor extracts the track from the GPS chartplotter.  This is a separate use
+case, outside the scope of this document.  System saves
+the track as a list of positions and times.</li>
+<li>Actor runs the &#8220;track_analysis&#8221; application.  The system
+creates a file with the track position plus
+additional information like distance to next position,
+cumulative time and cumulative distance.</li>
+<li>Actor runs a spreadsheet application (Open Office Org, for example),
+and imports the track file.  This is a separate use
+case, outside the scope of this document.
+The actor can then do additional analysis on these results.</li>
+</ol>
+</div>
+</div>
+<div class="section" id="solution-overview">
+<h1>Solution Overview<a class="headerlink" href="#solution-overview" title="Permalink to this headline">¶</a></h1>
+<p>The core planning software is GPSNavX on an iMac.
+This application can export a route file in GPX or CSV notation.</p>
+<p>These GPX or CSV files can be imported and parsed by a Python application,
+which can use a set of navigation calculations to compute
+range, bearing, time for each leg.  It can also compute
+an accumulated time and accumulated distance.</p>
+<p>The Python application can emit CSV files for use in other desktop tools.
+A spreadsheet can be used to print
+a paper schedule is used for cockpit decision-making.
+The actual time of arrival (ATA) to each waypoint can be logged.
+The gap between ETA and ATA supports a number of sailing decisions.</p>
+<p>A spreadsheet can be emailed to support a float plan. And a spreadsheet
+can be used for retrospective analysis of voyages.</p>
+<div class="section" id="data-interface">
+<h2>Data Interface<a class="headerlink" href="#data-interface" title="Permalink to this headline">¶</a></h2>
+<p>The application reads GPX or CSV files and writes a CSV file.</p>
+<p>It relies on an additional configuration parameter:
+the anticipated speed of the boat on each leg of the course.  Ideally,
+this is part of the GPX route.  GPXNavX, however, doesn&#8217;t seem
+to have an easy way to enter it.</p>
+<p>Further, in a sailboat, a default value is the only thing
+that makes sense.  Because of the hull speed of displacement
+hulls (like S/V <em>Red Ranger</em>) there are further constraints.</p>
+<p><img class="math" src="_images/math/100d20c21b8b4d6f7881503d29d640719539cc0d.png" alt="1.34\times\sqrt{LWL}"/> is the maximum hull speed.
+A more useful default sailing  speed is 5 kn.</p>
+<p>An additional configuration detail is the magnetic compass deviation.
+This varies from location to location around the planet, and also
+with the date on which the trip is made. We can compute this using
+the IGRF module.</p>
+<p>Additional inputs could include details from the serial interface.
+A USB GPS antenna (Like the <a class="reference external" href="http://usglobalsat.com/p-688-bu-353-s4.aspx#images/product/large/688.jpg">BU-535</a>) can be read via PySerial.</p>
+</div>
+<div class="section" id="user-interface">
+<h2>User Interface<a class="headerlink" href="#user-interface" title="Permalink to this headline">¶</a></h2>
+<p>The application is essentially a simple &#8220;filter&#8221;.
+Consistent with the <strong>*nix</strong> philosophy, the
+interface is a simple CLI that reads a file or standard input.</p>
+<p>Here&#8217;s a concept of how this might be used.</p>
+<div class="highlight-python"><div class="highlight"><pre>python -m navtools.planning my_trip.gpx
+</pre></div>
+</div>
+<p>This creates a <code class="file docutils literal"><span class="pre">my_trip</span> <span class="pre">Schedule.csv</span></code> file with the schedule
+calculations.</p>
+<div class="highlight-python"><div class="highlight"><pre>python -m navtools.analysis some_log.csv
+</pre></div>
+</div>
+<p>This creates a <code class="file docutils literal"><span class="pre">some_log</span> <span class="pre">Distance.csv</span></code> file with the distance
+and speed calculation.</p>
+</div>
+</div>
+<div class="section" id="architecture">
+<h1>Architecture<a class="headerlink" href="#architecture" title="Permalink to this headline">¶</a></h1>
+<p>There are several layers to this application.</p>
+<ol class="arabic simple">
+<li>Fundamental Navigation Calculations.  These are the domain
+objects and functions. This includes GPS coordinates, range and bearing
+calculations.  It also includes compass deviation calculations.</li>
+<li>The GPX or CSV input parsing.  This will create Navigation
+objects from the input file.  These objects can then be transformed
+into the output CSV file.</li>
+<li>The &#8220;main&#8221; applications.  Each of these opens a file, acquires the
+input route, uses the navigation calculations, and creates
+the output schedule or analysis.</li>
+<li>The CLI overheads.</li>
+</ol>
+<p>Based on the potential for reusability, we can package these
+layers into several modules.</p>
+</div>
+<div class="section" id="consequences">
+<h1>Consequences<a class="headerlink" href="#consequences" title="Permalink to this headline">¶</a></h1>
+<p>This application is not &#8220;plugged into&#8221; GPSNavX.  Consequently, planning
+involves multiple steps with multiple tools.  A route is created, the ETA&#8217;s examined, and
+waypaints added to handle overnight anchorages.
+Any change to a waypoint means the schedule must be recalculated.</p>
+<p>A tool like <code class="docutils literal"><span class="pre">scons</span></code> can be used to &#8220;automate&#8221; creation of the
+schedule from the <code class="file docutils literal"><span class="pre">.GPX</span></code> file.  Even this is not <em>totally</em> automated,
+since someone has to remember to regenerate the schedule after
+modifying the route.</p>
+<p>Additional annotations that should be included on the paper chart
+(like ATON details, for example) aren&#8217;t present in this schedule.
+The details aren&#8217;t in the GPX file, and can&#8217;t easily be located.</p>
+<p>To an extent, the online light list <a class="reference external" href="http://www.navcen.uscg.gov/?pageName=lightLists">http://www.navcen.uscg.gov/?pageName=lightLists</a>
+could be consulted to provide waypoint information.  Locating the lights
+passed along the track as well as lights near each waypoint is challenging.</p>
+</div>
+<div class="section" id="references">
+<h1>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h1>
+<p>See <a class="reference internal" href="#bowditch" id="id4">[bowditch]</a> Chapters 21 and 22.</p>
+<p>See <a class="reference external" href="http://www.ngdc.noaa.gov/IAGA/vmod/igrf.html">http://www.ngdc.noaa.gov/IAGA/vmod/igrf.html</a> for information on the
+magnetic declination.</p>
+<p>The International Union of Geodesy and Geophysics (IUGG) defines mean radius values.
+This is used to convert angles to distances.</p>
+<p>GPX format is described here: <a class="reference external" href="http://www.topografix.com/gpx.asp">http://www.topografix.com/gpx.asp</a></p>
+<p>Here&#8217;s the official GPX schema: <a class="reference external" href="http://www.topografix.com/GPX/1/1/">http://www.topografix.com/GPX/1/1/</a></p>
+<p>See <a class="reference external" href="http://williams.best.vwh.net/avform.htm">http://williams.best.vwh.net/avform.htm</a></p>
+<p>See <a class="reference external" href="http://www.movable-type.co.uk/scripts/latlong.html">http://www.movable-type.co.uk/scripts/latlong.html</a>, © 2002-2010 Chris Veness</p>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="navigation.html" class="btn btn-neutral float-right" title="Navigation Calculations Module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="NavTools 2.1" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2012, S.Lott.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

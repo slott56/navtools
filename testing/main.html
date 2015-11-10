@@ -1,0 +1,380 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Main Test Script &mdash; NavTools 2.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="NavTools 2.1 documentation" href="../index.html"/>
+        <link rel="up" title="Testing" href="index.html"/>
+        <link rel="next" title="Test IGRF11" href="test_igrf11.html"/>
+        <link rel="prev" title="Testing" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="../index.html" class="icon icon-home"> NavTools
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#actors">Actors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#use-cases">Use Cases</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#execution-use-case">Execution Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#planning-use-case">Planning Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#float-plan-use-case">Float Plan Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#analysis-use-case">Analysis Use Case</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#solution-overview">Solution Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#data-interface">Data Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#user-interface">User Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#architecture">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#references">References</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../navigation.html">Navigation Calculations Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#navigation-module-design">Navigation Module Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#module-docstring">Module Docstring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#problem-domain-objects">Problem Domain Objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#angleparser">AngleParser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#angle2-class">Angle2 Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#lat-subclass-of-angle">Lat Subclass of Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#lon-subclass-of-angle">Lon Subclass of Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#latlon-class">LatLon Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#globals">Globals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#distance-bearing-calculation">Distance/Bearing Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#formula">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#range-bearing-implementation">range_bearing implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#destination-calculation">Destination Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#id1">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#id2">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#destination-implementation">destination implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#declination-function">declination Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#historical-archive">Historical Archive</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#deprecation">Deprecation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#angle-class">Angle Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#globeangle-class">GlobeAngle Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#references-and-notes">References and Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../planning.html">Route Planning Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../planning.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../planning.html#input-parsing">Input Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../planning.html#application-processing">Application Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../planning.html#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../planning.html#main-function">Main Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../planning.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../analysis.html">Track Analysis Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../analysis.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis.html#input-parsing">Input Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis.html#application-processing">Application Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis.html#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis.html#main-function">Main Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../igrf11.html">International Geomagnetic Reference Field Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../igrf11.html#module-docstring">Module Docstring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../igrf11.html#igrf11-fortran-comments">IGRF11 Fortran Comments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../igrf11.html#python-imports">Python Imports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../igrf11.html#essential-class-definition">Essential Class Definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../igrf11.html#igrf11syn-function">igrf11syn Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../igrf11.html#helper-functions">Helper Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../navtools_init.html">navtools <code class="docutils literal"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Testing</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="">Main Test Script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="test_igrf11.html">Test IGRF11</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="test_igrf11.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_igrf11.html#test-case">Test Case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_igrf11.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_igrf11.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="test_navigation.html">Test Navigation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="test_navigation.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_navigation.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="test_navigation.html#globe-angle-and-angle-classes">Globe Angle and Angle classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_navigation.html#angle2-class">Angle2 Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_navigation.html#latlon-class">LatLon Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_navigation.html#range-bearing-function">range_bearing Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_navigation.html#destination-function">destination Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_navigation.html#declination-function">declination Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="test_navigation.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_navigation.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="test_planning.html">Test Planning</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="test_planning.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_planning.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#csv-to-routepoint-function">csv_to_RoutePoint function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#gpx-to-routepoint-function">gpx_to_RoutePoint function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#gen-rhumb-function">gen_rhumb Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#gen-mag-bearing-function">gen_mag_bearing Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#gen-schedule-function">gen_schedule Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#write-csv-function">write_csv Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#plan-function">plan Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="test_planning.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_planning.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="test_analysis.html">Test Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="test_analysis.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_analysis.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#csv-to-logentry-function-with-gpsnavx-data">csv_to_LogEntry function with GPSNavX Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#csv-to-logentry-function-with-manual-data">csv_to_LogEntry function with Manual Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#gpx-to-logentry-function">gpx_to_LogEntry function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#gen-rhumb-function">gen_rhumb Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#utility-to-compare-csv-output">Utility to compare CSV output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#write-csv-function">write_csv Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#analyze-function">analyze Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="test_analysis.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_analysis.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="test_init.html">navtools test <code class="docutils literal"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../build.html">NavTools Build</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../build.html#build-procedure">Build Procedure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../build.html#build-script-design">Build Script Design</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#sphinx-build">Sphinx Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#pylit-build">PyLit Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#make-directories">Make Directories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#run-the-test-script">Run the Test Script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#the-build-sequence">The Build Sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#main-program-switch">Main Program Switch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../build.html#additional-builds">Additional Builds</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation via <code class="docutils literal"><span class="pre">setup.py</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#the-setup-py-file">The <code class="docutils literal"><span class="pre">setup.py</span></code> File</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">NavTools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Testing</a> &raquo;</li>
+      
+    <li>Main Test Script</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/testing/main.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="main-test-script">
+<h1>Main Test Script<a class="headerlink" href="#main-test-script" title="Permalink to this headline">¶</a></h1>
+<p>This module imports the other test modules and builds a complete suite
+from the individual module suites.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;navtools test script.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">test.test_igrf11</span>
+<span class="kn">import</span> <span class="nn">test.test_navigation</span>
+<span class="kn">import</span> <span class="nn">test.test_planning</span>
+<span class="kn">import</span> <span class="nn">test.test_analysis</span>
+</pre></div>
+</div>
+<p>Construction of an overall suite depends on each module providing
+and easy-to-use <code class="xref py py-func docutils literal"><span class="pre">suite()</span></code> function that returns the module&#8217;s suite.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">suite</span><span class="p">():</span>
+    <span class="n">s</span><span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestSuite</span><span class="p">()</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">addTests</span><span class="p">(</span> <span class="n">test</span><span class="o">.</span><span class="n">test_igrf11</span><span class="o">.</span><span class="n">suite</span><span class="p">()</span> <span class="p">)</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">addTests</span><span class="p">(</span> <span class="n">test</span><span class="o">.</span><span class="n">test_navigation</span><span class="o">.</span><span class="n">suite</span><span class="p">()</span> <span class="p">)</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">addTests</span><span class="p">(</span> <span class="n">test</span><span class="o">.</span><span class="n">test_planning</span><span class="o">.</span><span class="n">suite</span><span class="p">()</span> <span class="p">)</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">addTests</span><span class="p">(</span> <span class="n">test</span><span class="o">.</span><span class="n">test_analysis</span><span class="o">.</span><span class="n">suite</span><span class="p">()</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">s</span>
+
+<span class="k">def</span> <span class="nf">run</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">(</span><span class="n">warnings</span><span class="o">=</span><span class="s">&#39;once&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">())</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">result</span><span class="o">=</span> <span class="n">run</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">failures</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="test_igrf11.html" class="btn btn-neutral float-right" title="Test IGRF11" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Testing" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2012, S.Lott.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'2.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,888 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>International Geomagnetic Reference Field Module &mdash; NavTools 2.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="NavTools 2.1 documentation" href="index.html"/>
+        <link rel="next" title="navtools __init__.py" href="navtools_init.html"/>
+        <link rel="prev" title="Track Analysis Application" href="analysis.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> NavTools
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#actors">Actors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#use-cases">Use Cases</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#execution-use-case">Execution Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#planning-use-case">Planning Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#float-plan-use-case">Float Plan Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#analysis-use-case">Analysis Use Case</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#solution-overview">Solution Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#data-interface">Data Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#user-interface">User Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#architecture">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#references">References</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="navigation.html">Navigation Calculations Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#navigation-module-design">Navigation Module Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#module-docstring">Module Docstring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#problem-domain-objects">Problem Domain Objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#angleparser">AngleParser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#angle2-class">Angle2 Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#lat-subclass-of-angle">Lat Subclass of Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#lon-subclass-of-angle">Lon Subclass of Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#latlon-class">LatLon Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#globals">Globals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#distance-bearing-calculation">Distance/Bearing Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#formula">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#range-bearing-implementation">range_bearing implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#destination-calculation">Destination Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#id1">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#id2">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#destination-implementation">destination implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#declination-function">declination Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#historical-archive">Historical Archive</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#deprecation">Deprecation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#angle-class">Angle Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#globeangle-class">GlobeAngle Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#references-and-notes">References and Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="planning.html">Route Planning Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#input-parsing">Input Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#application-processing">Application Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#main-function">Main Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Track Analysis Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#input-parsing">Input Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#application-processing">Application Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#main-function">Main Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">International Geomagnetic Reference Field Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-docstring">Module Docstring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#igrf11-fortran-comments">IGRF11 Fortran Comments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#python-imports">Python Imports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#essential-class-definition">Essential Class Definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#igrf11syn-function">igrf11syn Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#helper-functions">Helper Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="navtools_init.html">navtools <code class="docutils literal"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="testing/index.html">Testing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="testing/main.html">Main Test Script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_igrf11.html">Test IGRF11</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#test-case">Test Case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_navigation.html">Test Navigation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#globe-angle-and-angle-classes">Globe Angle and Angle classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#angle2-class">Angle2 Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#latlon-class">LatLon Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#range-bearing-function">range_bearing Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#destination-function">destination Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#declination-function">declination Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_planning.html">Test Planning</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#csv-to-routepoint-function">csv_to_RoutePoint function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gpx-to-routepoint-function">gpx_to_RoutePoint function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gen-rhumb-function">gen_rhumb Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gen-mag-bearing-function">gen_mag_bearing Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gen-schedule-function">gen_schedule Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#write-csv-function">write_csv Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#plan-function">plan Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_analysis.html">Test Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#csv-to-logentry-function-with-gpsnavx-data">csv_to_LogEntry function with GPSNavX Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#csv-to-logentry-function-with-manual-data">csv_to_LogEntry function with Manual Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#gpx-to-logentry-function">gpx_to_LogEntry function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#gen-rhumb-function">gen_rhumb Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#utility-to-compare-csv-output">Utility to compare CSV output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#write-csv-function">write_csv Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#analyze-function">analyze Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_init.html">navtools test <code class="docutils literal"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="build.html">NavTools Build</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="build.html#build-procedure">Build Procedure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build.html#build-script-design">Build Script Design</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="build.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#sphinx-build">Sphinx Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#pylit-build">PyLit Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#make-directories">Make Directories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#run-the-test-script">Run the Test Script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#the-build-sequence">The Build Sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#main-program-switch">Main Program Switch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="build.html#additional-builds">Additional Builds</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation via <code class="docutils literal"><span class="pre">setup.py</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#the-setup-py-file">The <code class="docutils literal"><span class="pre">setup.py</span></code> File</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">NavTools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>International Geomagnetic Reference Field Module</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/igrf11.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="international-geomagnetic-reference-field-module">
+<span id="igrf11"></span><h1>International Geomagnetic Reference Field Module<a class="headerlink" href="#international-geomagnetic-reference-field-module" title="Permalink to this headline">¶</a></h1>
+<p>This module computes the compass deviation (or variance)
+at a given point.  It allows mapping from true bearings to
+magnetic bearings.</p>
+<span class="target" id="module-igrf11"></span><p>See <a class="reference external" href="http://www.ngdc.noaa.gov/IAGA/vmod/igrf.html">http://www.ngdc.noaa.gov/IAGA/vmod/igrf.html</a></p>
+<div class="admonition important">
+<p class="first admonition-title">Important</p>
+<p>Public Domain</p>
+<p class="last">&#8220;The geomag 7.0 software code is in the public domain and not licensed or under copyright&#8221;</p>
+</div>
+<p>The model is in the <code class="file docutils literal"><span class="pre">igrf11coeffs.txt</span></code> file.</p>
+<p>This can be downloaded from <a class="reference external" href="http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt">http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt</a></p>
+<p>The test cases from from the Geomag 7.0 software, available here
+<a class="reference external" href="http://www.ngdc.noaa.gov/IAGA/vmod/geomag70_linux.tar.gz">http://www.ngdc.noaa.gov/IAGA/vmod/geomag70_linux.tar.gz</a></p>
+<p>Specifically, the file <code class="file docutils literal"><span class="pre">geomag70_linux/sample_out_IGRF11.txt</span></code>
+provides usable, known unit test results.</p>
+<p>This follows the lead of <a class="reference external" href="http://www.mathworks.com/matlabcentral/fileexchange/28874-igrf-magnetic-field">http://www.mathworks.com/matlabcentral/fileexchange/28874-igrf-magnetic-field</a></p>
+<p>There are two simplifications from the Fortran codes:</p>
+<ol class="arabic simple">
+<li><code class="docutils literal"><span class="pre">isv</span> <span class="pre">=</span> <span class="pre">0</span></code>: main field only.
+We only want current declination, not rate of change.</li>
+<li>Latitude and longitude supplied; latitude is converted to colatitude.</li>
+</ol>
+<p>Typical use is something like this.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">igrf11syn</span> <span class="o">=</span> <span class="n">igrf11</span><span class="o">.</span><span class="n">IGRF11</span><span class="p">(</span> <span class="s">&quot;igrf11coeffs.txt&quot;</span> <span class="p">)</span>
+
+<span class="n">today</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+<span class="n">first_of_year</span><span class="o">=</span> <span class="n">today</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span> <span class="n">month</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="mi">1</span> <span class="p">)</span>
+<span class="n">date</span><span class="o">=</span> <span class="n">today</span><span class="o">.</span><span class="n">year</span> <span class="o">+</span> <span class="p">(</span><span class="n">today</span><span class="o">.</span><span class="n">toordinal</span><span class="p">()</span> <span class="o">-</span> <span class="n">first_of_year</span><span class="o">.</span><span class="n">toordinal</span><span class="p">())</span><span class="o">/</span><span class="mf">365.242</span>
+
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">igrf11syn</span><span class="p">(</span> <span class="n">date</span><span class="p">,</span> <span class="n">nlat</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">,</span> <span class="n">elong</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span> <span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="mf">180.0</span><span class="o">/</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="c"># Declination or Variance</span>
+</pre></div>
+</div>
+<p>From the web page.</p>
+<div class="math">
+<p><img src="_images/math/dc573ae099cf1cb0a7f3327e90292c62d7a20af3.png" alt="V(r,\theta,\lambda,t) = R \sum_{n=1}^{N}(\frac{R}{r})^{n+1}\sum_{m=0}^{n}(g_n^m(t)\cos m \lambda+h_n^m(t)\sin m \lambda) P_n^m(\theta)"/></p>
+</div><p>With <img class="math" src="_images/math/fb32d4ea506deb33a5376b900ec04844e341d3c1.png" alt="g_n^m"/> and <img class="math" src="_images/math/eebe3cee5b2239b055007dc4cba5f043339b3a1c.png" alt="h_n^m"/> are the coefficients to determine
+phase and amplitude.</p>
+<p><img class="math" src="_images/math/018029e560ac9e9b54d682388313892d47154867.png" alt="P_n^m"/> are associated Legendre functions of the first kind
+of degree n, order m.</p>
+<p>R is the radius of the Earth.</p>
+<p>The position <img class="math" src="_images/math/b6abb214ae2d28a9409611d755bf22296c79a762.png" alt="r,\theta,\lambda,t"/> is the altitude, latitude,
+longitude and time.</p>
+<div class="section" id="module-docstring">
+<h2>Module Docstring<a class="headerlink" href="#module-docstring" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;IGRF - International Geomagnetic Reference Field</span>
+
+<span class="sd">http://www.ngdc.noaa.gov/IAGA/vmod/igrf.html</span>
+
+<span class="sd">This is based on http://www.ngdc.noaa.gov/IAGA/vmod/igrf11.f</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="igrf11-fortran-comments">
+<h2>IGRF11 Fortran Comments<a class="headerlink" href="#igrf11-fortran-comments" title="Permalink to this headline">¶</a></h2>
+<p>These are two important comment blocks from the <code class="file docutils literal"><span class="pre">igrf11.f</span></code> file.</p>
+<div class="highlight-python"><div class="highlight"><pre>C     This is a program for synthesising geomagnetic field values from the
+C     International Geomagnetic Reference Field series of models as agreed
+c     in December 2009 by IAGA Working Group V-MOD.
+C     It is the 11th generation IGRF, ie the 10th revision.
+C     The main-field models for 1900.0, 1905.0,..1940.0 and 2010.0 are
+C     non-definitive, those for 1945.0, 1950.0,...2005.0 are definitive and
+C     the secular-variation model for 2010.0 to 2015.0 is non-definitive.
+C
+C     Main-field models are to degree and order 10 (ie 120 coefficients)
+C     for 1900.0-1995.0 and to 13 (ie 195 coefficients) for 2000.0 onwards.
+C     The predictive secular-variation model is to degree and order 8 (ie 80
+C     coefficients).
+C
+C     Options include values at different locations at different
+C     times (spot), values at same location at one year intervals
+C     (time series), grid of values at one time (grid); geodetic or
+C     geocentric coordinates, latitude &amp; longitude entered as decimal
+C     degrees or degrees &amp; minutes (not in grid), choice of main field
+C     or secular variation or both (grid only).
+C Recent history of code:
+c     Aug 2003:
+c     Adapted from 8th generation version to include new maximum degree for
+c     main-field models for 2000.0 and onwards and use WGS84 spheroid instead
+c     of International Astronomical Union 1966 spheroid as recommended by IAGA
+c     in July 2003. Reference radius remains as 6371.2 km - it is NOT the mean
+c     radius (= 6371.0 km) but 6371.2 km is what is used in determining the
+c     coefficients.
+c     Dec 2004:
+c     Adapted for 10th generation
+c     Jul 2005:
+c     1995.0 coefficients as published in igrf9coeffs.xls and igrf10coeffs.xls
+c     now used in code - (Kimmo Korhonen spotted 1 nT difference in 11 coefficients)
+c     Dec 2009:
+c     Adapted for 11th generation
+</pre></div>
+</div>
+<p>This is the comment from the relevant subroutine.</p>
+<div class="highlight-python"><div class="highlight"><pre>      subroutine igrf11syn (isv,date,itype,alt,colat,elong,x,y,z,f)
+c
+c     This is a synthesis routine for the 11th generation IGRF as agreed
+c     in December 2009 by IAGA Working Group V-MOD. It is valid 1900.0 to
+c     2015.0 inclusive. Values for dates from 1945.0 to 2005.0 inclusive are
+c     definitive, otherwise they are non-definitive.
+c   INPUT
+c     isv   = 0 if main-field values are required
+c     isv   = 1 if secular variation values are required
+c     date  = year A.D. Must be greater than or equal to 1900.0 and
+c             less than or equal to 2020.0. Warning message is given
+c             for dates greater than 2015.0. Must be double precision.
+c     itype = 1 if geodetic (spheroid)
+c     itype = 2 if geocentric (sphere)
+c     alt   = height in km above sea level if itype = 1
+c           = distance from centre of Earth in km if itype = 2 (&gt;3485 km)
+c     colat = colatitude (0-180)
+c     elong = east-longitude (0-360)
+c     alt, colat and elong must be double precision.
+c   OUTPUT
+c     x     = north component (nT) if isv = 0, nT/year if isv = 1
+c     y     = east component (nT) if isv = 0, nT/year if isv = 1
+c     z     = vertical component (nT) if isv = 0, nT/year if isv = 1
+c     f     = total intensity (nT) if isv = 0, rubbish if isv = 1
+c
+c     To get the other geomagnetic elements (D, I, H and secular
+c     variations dD, dH, dI and dF) use routines ptoc and ptocsv.
+c
+c     Adapted from 8th generation version to include new maximum degree for
+c     main-field models for 2000.0 and onwards and use WGS84 spheroid instead
+c     of International Astronomical Union 1966 spheroid as recommended by IAGA
+c     in July 2003. Reference radius remains as 6371.2 km - it is NOT the mean
+c     radius (= 6371.0 km) but 6371.2 km is what is used in determining the
+c     coefficients. Adaptation by Susan Macmillan, August 2003 (for
+c     9th generation), December 2004 &amp; December 2009.
+c
+c     Coefficients at 1995.0 incorrectly rounded (rounded up instead of
+c     to even) included as these are the coefficients published in Excel
+c     spreadsheet July 2005.
+c
+</pre></div>
+</div>
+</div>
+<div class="section" id="python-imports">
+<h2>Python Imports<a class="headerlink" href="#python-imports" title="Permalink to this headline">¶</a></h2>
+<p>This depends on a few Python modules.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="essential-class-definition">
+<h2>Essential Class Definition<a class="headerlink" href="#essential-class-definition" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="igrf11.IGRF11">
+<em class="property">class </em><code class="descclassname">igrf11.</code><code class="descname">IGRF11</code><a class="headerlink" href="#igrf11.IGRF11" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>The IGRF11 calculation requires a complex table of coefficients.
+By defining a callable object, we can bind the coefficient loading
+with the rest of the calculations.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">IGRF11</span><span class="p">(</span> <span class="n">Callable</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The IGRF11 model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="igrf11.__init__">
+<code class="descclassname">igrf11.</code><code class="descname">__init__</code><span class="sig-paren">(</span><em>model</em><span class="sig-paren">)</span><a class="headerlink" href="#igrf11.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialization is a matter of loading the coefficients
+from the appropriate file.  Ideally, this is part of the
+installation, but the file could be located elsewhere.</p>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="s">&quot;./igrf11coeffs.txt&quot;</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Initialize the model coefficients.</span>
+
+<span class="sd">    :param model: the :file:`igrf11coeffs.txt` file.</span>
+
+<span class="sd">    This will look in the named directory.</span>
+<span class="sd">    It will look in the installed directory for the given name.</span>
+<span class="sd">    And (since you may be running from the distribution kit)</span>
+<span class="sd">    it will look in the parent of the installed directory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">named</span><span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">installed</span><span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span> <span class="n">named</span><span class="o">.</span><span class="n">name</span> <span class="p">)</span>
+    <span class="n">parent</span><span class="o">=</span> <span class="n">installed</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="n">named</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">for</span> <span class="n">location</span> <span class="ow">in</span> <span class="n">named</span><span class="p">,</span> <span class="n">installed</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_coeffs</span><span class="p">(</span> <span class="n">location</span> <span class="p">)</span>
+            <span class="k">break</span>
+        <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span> <span class="s">&quot;Not Found {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">continue</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="igrf11.load_coeffs">
+<code class="descclassname">igrf11.</code><code class="descname">load_coeffs</code><span class="sig-paren">(</span><em>file_name</em><span class="sig-paren">)</span><a class="headerlink" href="#igrf11.load_coeffs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Coefficient loading includes disentangling the unpleasant sparse matrix optimizations.  The Fortran program had a number of very clever techniques
+to ruthlessly minimize the memory footprint.</p>
+<p>The file has a number of comment lines which begin with <code class="docutils literal"><span class="pre">#</span></code>.
+These are simply skipped.</p>
+<p>The file has heading lines.  The last of these starts with <code class="docutils literal"><span class="pre">g/h</span></code>.
+This line provides useful column titles.</p>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">load_coeffs</span><span class="p">(</span> <span class="n">file_name</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return two dictionaries of g and h coefficients by year and [n,m] index.</span>
+
+<span class="sd">    Note that the igrf11 legacy fortran code has a bunch of unpleasant sparse matrix optimizations.</span>
+<span class="sd">    Legacy g and h coefficients were loaded in a single, horrible array.</span>
+
+<span class="sd">    Years 1900 through 1990 have 120 values.  Degree of 10.</span>
+<span class="sd">    Years 1995 to 2012 have 195 values.  Degree of 13.</span>
+
+<span class="sd">    :param file_name: the path to the :file:`igrf11coeffs.txt` file.</span>
+<span class="sd">        Ideally this  is a :class:`pathlib.Path`, but a string will do.</span>
+
+<span class="sd">    Ideally we&#39;d use :mod:`urllib2` instead of simple</span>
+<span class="sd">    :func:`open` so that we could use</span>
+<span class="sd">    &quot;file:///path/to/file&quot; or &quot;http://server/path/to/file&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_path</span><span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+    <span class="n">g</span><span class="o">=</span> <span class="p">{}</span>
+    <span class="n">h</span><span class="o">=</span> <span class="p">{}</span>
+    <span class="n">legacy_gh</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">with</span> <span class="n">file_path</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">source</span><span class="p">:</span>
+        <span class="n">row_iter</span><span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">row_iter</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">row</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;#&quot;</span><span class="p">):</span> <span class="k">break</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">row_iter</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;g/h&quot;</span><span class="p">):</span> <span class="k">break</span>
+        <span class="n">headings</span><span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">years</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">])</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">headings</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">+</span> <span class="p">[</span><span class="mi">2015</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">years</span><span class="p">:</span>
+            <span class="n">legacy_gh</span><span class="p">[</span><span class="n">y</span><span class="p">]</span><span class="o">=</span> <span class="p">[</span> <span class="bp">None</span> <span class="p">]</span> <span class="c"># Fortran is 1-based; fill in the zero slot.</span>
+            <span class="n">g</span><span class="p">[</span><span class="n">y</span><span class="p">]</span><span class="o">=</span> <span class="p">{}</span>
+            <span class="n">h</span><span class="p">[</span><span class="n">y</span><span class="p">]</span><span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span> <span class="n">r</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">row_iter</span> <span class="p">):</span>
+            <span class="n">g_or_h</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">n</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+            <span class="n">coefs</span><span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="mi">3</span><span class="p">:])</span>
+            <span class="k">for</span> <span class="n">yr</span><span class="p">,</span> <span class="n">coef</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">years</span><span class="p">,</span><span class="n">coefs</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">g_or_h</span> <span class="o">==</span> <span class="s">&quot;g&quot;</span><span class="p">:</span>
+                    <span class="n">g</span><span class="p">[</span><span class="n">yr</span><span class="p">][</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">]</span><span class="o">=</span> <span class="n">coef</span>
+                <span class="k">elif</span> <span class="n">g_or_h</span> <span class="o">==</span> <span class="s">&quot;h&quot;</span><span class="p">:</span>
+                    <span class="n">h</span><span class="p">[</span><span class="n">yr</span><span class="p">][</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">]</span><span class="o">=</span> <span class="n">coef</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span> <span class="s">&quot;Bad Data&quot;</span> <span class="p">)</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">120</span> <span class="ow">and</span> <span class="n">yr</span> <span class="o">&lt;=</span> <span class="mi">1990</span><span class="p">:</span>
+                    <span class="k">continue</span> <span class="c"># Skip these to be consistent with Fortran.</span>
+                <span class="n">legacy_gh</span><span class="p">[</span><span class="n">yr</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">coef</span> <span class="p">)</span>
+    <span class="c"># pprint.pprint( legacy_gh ) # confirm that we have the same structure.</span>
+    <span class="k">return</span> <span class="n">g</span><span class="p">,</span> <span class="n">h</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p>Use urllib2</p>
+<p>The coefficient file should be opened as a URL, not a local
+file.  While most use cases involve disconnected computers,
+with a statically downloaded file, it&#8217;s easy to cover
+<em>all</em> the bases by opening a URL.</p>
+<p>The official file:
+<a class="reference external" href="http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt">http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt</a></p>
+<p class="last">The local installation of this application is used to track
+down a copy.</p>
+</div>
+<dl class="method">
+<dt id="igrf11.__call__">
+<code class="descclassname">igrf11.</code><code class="descname">__call__</code><span class="sig-paren">(</span><em>date</em>, <em>nlat</em>, <em>elong</em>, <em>alt=0.0</em>, <em>coord='D'</em><span class="sig-paren">)</span><a class="headerlink" href="#igrf11.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>The synthesis function that computes the IGRF model
+for a given point in time and space.</p>
+<p>There are a few major steps to this algorithm.</p>
+<ol class="arabic simple">
+<li>Resolve Year and determine if we&#8217;re doing Interpolation or Extrapolation.</li>
+<li>Initialize the calculation.</li>
+<li>Compute the Schmidt quasi-normal coefficients p and x(=q).</li>
+<li>Convert back to coordinate system specified by <code class="docutils literal"><span class="pre">coord</span></code>.</li>
+</ol>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">nlat</span><span class="p">,</span> <span class="n">elong</span><span class="p">,</span> <span class="n">alt</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">coord</span><span class="o">=</span><span class="s">&#39;D&#39;</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;IGRF 11 model.</span>
+
+<span class="sd">    :param date: is floating-point year + day/365.242.</span>
+<span class="sd">    :param nlat: north latitude (in radians)</span>
+<span class="sd">    :param elog: east longitude (in radians)</span>
+<span class="sd">    :param alt: altitude above surface in kilometers for &quot;D&quot; (geodetic)</span>
+<span class="sd">        or radius in kilometers for &quot;C&quot; (geocentric)</span>
+<span class="sd">    :returns: tuple of x, y, z and f;</span>
+<span class="sd">        x     = north component (nT)</span>
+<span class="sd">        y     = east component (nT)</span>
+<span class="sd">        z     = vertical component (nT)</span>
+<span class="sd">        f     = total intensity (nT)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Note that these will use one-based indexing.</span>
+    <span class="n">p</span><span class="o">=</span> <span class="p">{}</span>
+    <span class="n">q</span><span class="o">=</span> <span class="p">{}</span>
+    <span class="n">cl</span><span class="o">=</span> <span class="p">{}</span>
+    <span class="n">sl</span><span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">colat</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="o">-</span><span class="n">nlat</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span>
+
+    <span class="c">## Resolve Year and Interpolation/Extrapolation</span>
+    <span class="k">if</span> <span class="n">date</span> <span class="o">&lt;</span> <span class="mi">2010</span><span class="p">:</span>
+        <span class="n">ll</span><span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">date</span><span class="o">-</span><span class="mi">1900</span><span class="p">)</span><span class="o">//</span><span class="mi">5</span>  <span class="c"># year index</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">date</span><span class="o">-</span><span class="mi">1900</span><span class="p">)</span><span class="o">/</span><span class="mi">5</span><span class="o">-</span><span class="n">ll</span> <span class="c"># weighting factor</span>
+        <span class="k">if</span> <span class="n">date</span> <span class="o">&lt;</span> <span class="mi">1995</span><span class="p">:</span>
+            <span class="n">nmx</span> <span class="o">=</span> <span class="mi">10</span> <span class="c"># degrees</span>
+            <span class="n">kmx</span> <span class="o">=</span> <span class="p">(</span><span class="n">nmx</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nmx</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span> <span class="c"># total number of coefficients</span>
+
+            <span class="c"># unused Fortran indexing</span>
+            <span class="c">#nc = nmx*(nmx+2) # size of gh array = 120</span>
+            <span class="c">#ll = nc*ll # index of year index in original massive gh array</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nmx</span> <span class="o">=</span> <span class="mi">13</span> <span class="c"># degrees</span>
+            <span class="n">kmx</span> <span class="o">=</span> <span class="p">(</span><span class="n">nmx</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nmx</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span> <span class="c"># total number of coefficients</span>
+
+            <span class="c"># unused Fortran indexing</span>
+            <span class="c">#nc = nmx*(nmx+2) # size of gh array = 195</span>
+            <span class="c">#ll = 120*19 + nc*(date-1995)//5 # 19 small models, rest ore large models</span>
+        <span class="n">tc</span><span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">t</span> <span class="c"># weighting factor</span>
+
+        <span class="n">year</span><span class="o">=</span> <span class="mi">1900</span><span class="o">+</span><span class="mi">5</span><span class="o">*</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">date</span><span class="p">)</span><span class="o">-</span><span class="mi">1900</span><span class="p">)</span><span class="o">//</span><span class="mi">5</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c">#Extrapolating past 2010.</span>
+        <span class="n">t</span><span class="o">=</span> <span class="n">date</span> <span class="o">-</span> <span class="mi">2010</span>
+        <span class="n">tc</span><span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">nmx</span> <span class="o">=</span> <span class="mi">13</span> <span class="c"># degrees</span>
+        <span class="n">kmx</span> <span class="o">=</span> <span class="p">(</span><span class="n">nmx</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nmx</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span> <span class="c"># total number of coefficients</span>
+
+        <span class="c"># unused Fortran indexing</span>
+        <span class="c">#nc = nmx*(nmx+2) # size of gh array = 195 for last two years</span>
+        <span class="c">#ll = 120*19+3*195 # next-to-last year&#39;s coefficients</span>
+
+        <span class="n">year</span><span class="o">=</span> <span class="mi">2010</span>
+
+    <span class="c">##print( &quot;date {0}, year_key {1}, ll {2}, nc {3}&quot;.format(date, year_key, ll, nc) )</span>
+
+    <span class="c">## 2</span>
+    <span class="n">r</span>     <span class="o">=</span> <span class="n">alt</span> <span class="c"># radius for Geocentric; will be fixed for geodetic</span>
+    <span class="n">ct</span>    <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">colat</span><span class="p">)</span>
+    <span class="n">st</span>    <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">colat</span><span class="p">)</span>
+    <span class="n">cl</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">elong</span><span class="p">)</span>
+    <span class="n">sl</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">elong</span><span class="p">)</span>
+    <span class="n">cd</span>    <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">sd</span>    <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="k">if</span> <span class="n">coord</span> <span class="o">==</span> <span class="s">&quot;D&quot;</span><span class="p">:</span>
+        <span class="c">##  conversion from geodetic to geocentric coordinates</span>
+        <span class="c">##  (using the WGS84 spheroid)</span>
+        <span class="n">a2</span>    <span class="o">=</span> <span class="mf">40680631.6</span>
+        <span class="n">b2</span>    <span class="o">=</span> <span class="mf">40408296.0</span>
+        <span class="n">one</span>   <span class="o">=</span> <span class="n">a2</span><span class="o">*</span><span class="n">st</span><span class="o">*</span><span class="n">st</span>
+        <span class="n">two</span>   <span class="o">=</span> <span class="n">b2</span><span class="o">*</span><span class="n">ct</span><span class="o">*</span><span class="n">ct</span>
+        <span class="n">three</span> <span class="o">=</span> <span class="n">one</span> <span class="o">+</span> <span class="n">two</span>
+        <span class="n">rho</span>   <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">three</span><span class="p">)</span>
+        <span class="n">r</span>     <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">alt</span><span class="o">*</span><span class="p">(</span><span class="n">alt</span> <span class="o">+</span> <span class="mf">2.0</span><span class="o">*</span><span class="n">rho</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">a2</span><span class="o">*</span><span class="n">one</span> <span class="o">+</span> <span class="n">b2</span><span class="o">*</span><span class="n">two</span><span class="p">)</span><span class="o">/</span><span class="n">three</span><span class="p">)</span>
+        <span class="n">cd</span>    <span class="o">=</span> <span class="p">(</span><span class="n">alt</span> <span class="o">+</span> <span class="n">rho</span><span class="p">)</span><span class="o">/</span><span class="n">r</span>
+        <span class="n">sd</span>    <span class="o">=</span> <span class="p">(</span><span class="n">a2</span> <span class="o">-</span> <span class="n">b2</span><span class="p">)</span><span class="o">/</span><span class="n">rho</span><span class="o">*</span><span class="n">ct</span><span class="o">*</span><span class="n">st</span><span class="o">/</span><span class="n">r</span>
+        <span class="n">one</span>   <span class="o">=</span> <span class="n">ct</span>
+        <span class="n">ct</span>    <span class="o">=</span> <span class="n">ct</span><span class="o">*</span><span class="n">cd</span> <span class="o">-</span>  <span class="n">st</span><span class="o">*</span><span class="n">sd</span>
+        <span class="n">st</span>    <span class="o">=</span> <span class="n">st</span><span class="o">*</span><span class="n">cd</span> <span class="o">+</span> <span class="n">one</span><span class="o">*</span><span class="n">sd</span>
+
+    <span class="c">## 3</span>
+    <span class="n">ratio</span> <span class="o">=</span> <span class="mf">6371.2</span><span class="o">/</span><span class="n">r</span> <span class="c"># Earth Mean Radius in km</span>
+    <span class="n">rr</span>    <span class="o">=</span> <span class="n">ratio</span><span class="o">*</span><span class="n">ratio</span>
+
+    <span class="c">## computation of Schmidt quasi-normal coefficients p and x(=q)</span>
+
+    <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>  <span class="o">=</span> <span class="n">st</span>
+    <span class="n">q</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">q</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>  <span class="o">=</span>  <span class="n">ct</span>
+
+    <span class="c">#l     = 1</span>
+    <span class="n">n</span>     <span class="o">=</span> <span class="mi">0</span> <span class="c"># Outer loop (from 1 to nmx)</span>
+    <span class="n">m</span>     <span class="o">=</span> <span class="mi">1</span> <span class="c"># Inner loop (from 1 to n)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">kmx</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">m</span><span class="p">:</span>
+            <span class="n">m</span><span class="o">=</span> <span class="mi">0</span>
+            <span class="n">n</span><span class="o">=</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span>
+            <span class="n">rr</span><span class="o">=</span> <span class="n">rr</span><span class="o">*</span><span class="n">ratio</span>
+            <span class="n">fn</span><span class="o">=</span> <span class="n">n</span>
+            <span class="n">gn</span><span class="o">=</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span>
+        <span class="c">## 4</span>
+        <span class="n">fm</span><span class="o">=</span> <span class="n">m</span>
+        <span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="n">n</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">one</span>   <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="mf">0.5</span><span class="o">/</span><span class="n">fm</span><span class="p">)</span>
+                <span class="n">j</span>     <span class="o">=</span> <span class="n">k</span> <span class="o">-</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="n">p</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>  <span class="o">=</span> <span class="n">one</span><span class="o">*</span><span class="n">st</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>  <span class="o">=</span> <span class="n">one</span><span class="o">*</span><span class="p">(</span><span class="n">st</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">ct</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                <span class="n">cl</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="n">cl</span><span class="p">[</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">cl</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">sl</span><span class="p">[</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">sl</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">sl</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="n">sl</span><span class="p">[</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">cl</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">cl</span><span class="p">[</span><span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">sl</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c"># m != n</span>
+            <span class="c">## 5</span>
+            <span class="n">gmm</span>    <span class="o">=</span> <span class="n">m</span><span class="o">*</span><span class="n">m</span>
+            <span class="n">one</span>   <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">fn</span><span class="o">*</span><span class="n">fn</span> <span class="o">-</span> <span class="n">gmm</span><span class="p">)</span>
+            <span class="n">two</span>   <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">gn</span><span class="o">*</span><span class="n">gn</span> <span class="o">-</span> <span class="n">gmm</span><span class="p">)</span><span class="o">/</span><span class="n">one</span>
+            <span class="n">three</span> <span class="o">=</span> <span class="p">(</span><span class="n">fn</span> <span class="o">+</span> <span class="n">gn</span><span class="p">)</span><span class="o">/</span><span class="n">one</span>
+            <span class="n">i</span>     <span class="o">=</span> <span class="n">k</span> <span class="o">-</span> <span class="n">n</span>
+            <span class="n">j</span>     <span class="o">=</span> <span class="n">i</span> <span class="o">-</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">p</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>  <span class="o">=</span> <span class="n">three</span><span class="o">*</span><span class="n">ct</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">two</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>  <span class="o">=</span> <span class="n">three</span><span class="o">*</span><span class="p">(</span><span class="n">ct</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">st</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span> <span class="n">two</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+
+        <span class="c">## 6</span>
+        <span class="c">## synthesis of x, y and z in geocentric coordinates</span>
+        <span class="c"># unused Fortran indexing</span>
+        <span class="c">#lm = ll + l # Index into gh based on ll (year) + l (iteration)</span>
+        <span class="c">#print( &quot;n {0}, m {1}, gh[year][n,m] {2}&quot;.format(n,m,l) )</span>
+
+        <span class="n">g_year</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">]</span>
+        <span class="n">g_next</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="p">[</span><span class="n">year</span><span class="o">+</span><span class="mi">5</span><span class="p">][</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">]</span>
+        <span class="n">one</span>   <span class="o">=</span> <span class="p">(</span><span class="n">tc</span><span class="o">*</span><span class="n">g_year</span> <span class="o">+</span> <span class="n">t</span><span class="o">*</span><span class="n">g_next</span><span class="p">)</span><span class="o">*</span><span class="n">rr</span>
+        <span class="k">if</span> <span class="n">m</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c"># m non-zero case, use h.</span>
+            <span class="n">h_year</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">[</span><span class="n">year</span><span class="p">][</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">]</span>
+            <span class="n">h_next</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">[</span><span class="n">year</span><span class="o">+</span><span class="mi">5</span><span class="p">][</span><span class="n">n</span><span class="p">,</span><span class="n">m</span><span class="p">]</span>
+
+            <span class="n">two</span>   <span class="o">=</span> <span class="p">(</span><span class="n">tc</span><span class="o">*</span><span class="n">h_year</span> <span class="o">+</span> <span class="n">t</span><span class="o">*</span><span class="n">h_next</span><span class="p">)</span><span class="o">*</span><span class="n">rr</span>
+            <span class="n">three</span> <span class="o">=</span> <span class="n">one</span><span class="o">*</span><span class="n">cl</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">+</span> <span class="n">two</span><span class="o">*</span><span class="n">sl</span><span class="p">[</span><span class="n">m</span><span class="p">]</span>
+            <span class="n">x</span>     <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">three</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="n">z</span>     <span class="o">=</span> <span class="n">z</span> <span class="o">-</span> <span class="p">(</span><span class="n">fn</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">*</span><span class="n">three</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">st</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> <span class="c"># sine colat == 0  is equator?</span>
+                <span class="n">y</span>     <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="p">(</span><span class="n">one</span><span class="o">*</span><span class="n">sl</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">-</span> <span class="n">two</span><span class="o">*</span><span class="n">cl</span><span class="p">[</span><span class="n">m</span><span class="p">])</span><span class="o">*</span><span class="n">fm</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">/</span><span class="n">st</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c">## 7</span>
+                <span class="n">y</span>     <span class="o">=</span> <span class="n">y</span> <span class="o">+</span> <span class="p">(</span><span class="n">one</span><span class="o">*</span><span class="n">sl</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">-</span> <span class="n">two</span><span class="o">*</span><span class="n">cl</span><span class="p">[</span><span class="n">m</span><span class="p">])</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">*</span><span class="n">ct</span>
+            <span class="c">## 8</span>
+            <span class="c">#l     = l + 2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># m=0 case, use g only.</span>
+            <span class="c">## 9</span>
+            <span class="n">x</span>     <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">one</span><span class="o">*</span><span class="n">q</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="n">z</span>     <span class="o">=</span> <span class="n">z</span> <span class="o">-</span> <span class="p">(</span><span class="n">fn</span> <span class="o">+</span> <span class="mf">1.0</span><span class="p">)</span><span class="o">*</span><span class="n">one</span><span class="o">*</span><span class="n">p</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="c">#l     = l + 1</span>
+        <span class="c">## 10</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">m</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="c"># End of the coefficient loop on k</span>
+
+    <span class="c">## conversion back to coordinate system specified by itype</span>
+    <span class="n">one</span>   <span class="o">=</span> <span class="n">x</span>
+    <span class="n">x</span>     <span class="o">=</span> <span class="n">x</span><span class="o">*</span><span class="n">cd</span> <span class="o">+</span>   <span class="n">z</span><span class="o">*</span><span class="n">sd</span>
+    <span class="n">z</span>     <span class="o">=</span> <span class="n">z</span><span class="o">*</span><span class="n">cd</span> <span class="o">-</span> <span class="n">one</span><span class="o">*</span><span class="n">sd</span>
+    <span class="n">f</span>     <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="n">y</span><span class="o">*</span><span class="n">y</span> <span class="o">+</span> <span class="n">z</span><span class="o">*</span><span class="n">z</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">f</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="igrf11syn-function">
+<h2>igrf11syn Function<a class="headerlink" href="#igrf11syn-function" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="#igrf11.IGRF11" title="igrf11.IGRF11"><code class="xref py py-class docutils literal"><span class="pre">IGRF11</span></code></a> class is used to create a callable object
+that does IGRF11 computations.</p>
+<dl class="function">
+<dt id="igrf11.igrf11syn">
+<code class="descclassname">igrf11.</code><code class="descname">igrf11syn</code><span class="sig-paren">(</span><em>date</em>, <em>nlat</em>, <em>elong</em>, <em>alt=0.0</em>, <em>coord='D'</em><span class="sig-paren">)</span><a class="headerlink" href="#igrf11.igrf11syn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This loads the default coefficient set, <code class="file docutils literal"><span class="pre">igrf11coeffs.txt</span></code>
+extracted from the geomag7.0 installation.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">igrf11syn</span> <span class="o">=</span> <span class="n">IGRF11</span><span class="p">(</span> <span class="s">&quot;igrf11coeffs.txt&quot;</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="helper-functions">
+<h2>Helper Functions<a class="headerlink" href="#helper-functions" title="Permalink to this headline">¶</a></h2>
+<p>Often, we simply want the current declination
+at a given latitude and longitude.</p>
+<dl class="function">
+<dt id="igrf11.declination">
+<code class="descclassname">igrf11.</code><code class="descname">declination</code><span class="sig-paren">(</span><em>nlat</em>, <em>elong</em>, <em>date=None</em><span class="sig-paren">)</span><a class="headerlink" href="#igrf11.declination" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>nlat</strong> &#8211; North Latitude in degrees.</li>
+<li><strong>elong</strong> &#8211; East Longitude in degrees.</li>
+<li><strong>date</strong> &#8211; Date to use; defaults to current date.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">declination</span><span class="p">(</span> <span class="n">nlat</span><span class="p">,</span> <span class="n">elong</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="bp">None</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;IGRF 11 model for declination today.</span>
+
+<span class="sd">    :param nlat: north latitude as floating-point degrees</span>
+<span class="sd">    :param elog: east longitude as floating-point degrees</span>
+<span class="sd">    :param date: :py:class:`datetime.date` in question, default is today.</span>
+<span class="sd">    :returns: declination as degrees.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">date</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+    <span class="n">first_of_year</span><span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span> <span class="n">month</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="mi">1</span> <span class="p">)</span>
+    <span class="n">astro_dt_tm</span><span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">year</span> <span class="o">+</span> <span class="p">(</span><span class="n">date</span><span class="o">.</span><span class="n">toordinal</span><span class="p">()</span> <span class="o">-</span> <span class="n">first_of_year</span><span class="o">.</span><span class="n">toordinal</span><span class="p">())</span><span class="o">/</span><span class="mf">365.242</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">igrf11syn</span><span class="p">(</span> <span class="n">astro_dt_tm</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">nlat</span><span class="p">),</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">elong</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span> <span class="c"># Declination</span>
+    <span class="k">return</span> <span class="n">D</span>
+</pre></div>
+</div>
+<p>This is a handy function to convert a simple degree value
+into a proper <code class="samp docutils literal"><span class="pre">(degree,minute)</span></code> pair with appropriate
+signs.</p>
+<dl class="function">
+<dt id="igrf11.deg2dm">
+<code class="descclassname">igrf11.</code><code class="descname">deg2dm</code><span class="sig-paren">(</span><em>deg</em><span class="sig-paren">)</span><a class="headerlink" href="#igrf11.deg2dm" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>deg</strong> &#8211; </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(deg, minute) values</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">deg2dm</span><span class="p">(</span> <span class="n">deg</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;deg2dm( degrees ) -&gt; deg, min</span>
+
+<span class="sd">    :param deg: Degrees to convert</span>
+<span class="sd">    :return: tuple of :samp:`({deg}, {min})` with proper signs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sign</span><span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">deg</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">+</span><span class="mi">1</span>
+    <span class="n">ad</span><span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">deg</span><span class="p">)</span>
+    <span class="n">d</span><span class="o">=</span> <span class="n">sign</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="n">ad</span><span class="p">)</span>
+    <span class="n">m</span><span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">60</span><span class="o">*</span><span class="p">(</span><span class="n">ad</span><span class="o">-</span><span class="nb">int</span><span class="p">(</span><span class="n">ad</span><span class="p">))</span><span class="o">+.</span><span class="mi">5</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">sign</span> <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">d</span><span class="p">,</span> <span class="n">m</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="navtools_init.html" class="btn btn-neutral float-right" title="navtools __init__.py" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="analysis.html" class="btn btn-neutral" title="Track Analysis Application" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2012, S.Lott.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

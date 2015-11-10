@@ -1,0 +1,498 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Test IGRF11 &mdash; NavTools 2.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="NavTools 2.1 documentation" href="../index.html"/>
+        <link rel="up" title="Testing" href="index.html"/>
+        <link rel="next" title="Test Navigation" href="test_navigation.html"/>
+        <link rel="prev" title="Main Test Script" href="main.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="../index.html" class="icon icon-home"> NavTools
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#actors">Actors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#use-cases">Use Cases</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#execution-use-case">Execution Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#planning-use-case">Planning Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#float-plan-use-case">Float Plan Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#analysis-use-case">Analysis Use Case</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#solution-overview">Solution Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#data-interface">Data Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#user-interface">User Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#architecture">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#references">References</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../navigation.html">Navigation Calculations Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#navigation-module-design">Navigation Module Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#module-docstring">Module Docstring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#problem-domain-objects">Problem Domain Objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#angleparser">AngleParser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#angle2-class">Angle2 Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#lat-subclass-of-angle">Lat Subclass of Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#lon-subclass-of-angle">Lon Subclass of Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#latlon-class">LatLon Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#globals">Globals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#distance-bearing-calculation">Distance/Bearing Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#formula">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#range-bearing-implementation">range_bearing implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#destination-calculation">Destination Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#id1">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#id2">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#destination-implementation">destination implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#declination-function">declination Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#historical-archive">Historical Archive</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#deprecation">Deprecation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#angle-class">Angle Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#globeangle-class">GlobeAngle Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#references-and-notes">References and Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../planning.html">Route Planning Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../planning.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../planning.html#input-parsing">Input Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../planning.html#application-processing">Application Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../planning.html#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../planning.html#main-function">Main Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../planning.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../analysis.html">Track Analysis Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../analysis.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis.html#input-parsing">Input Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis.html#application-processing">Application Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis.html#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis.html#main-function">Main Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../igrf11.html">International Geomagnetic Reference Field Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../igrf11.html#module-docstring">Module Docstring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../igrf11.html#igrf11-fortran-comments">IGRF11 Fortran Comments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../igrf11.html#python-imports">Python Imports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../igrf11.html#essential-class-definition">Essential Class Definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../igrf11.html#igrf11syn-function">igrf11syn Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../igrf11.html#helper-functions">Helper Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../navtools_init.html">navtools <code class="docutils literal"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Testing</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="main.html">Main Test Script</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Test IGRF11</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-case">Test Case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="test_navigation.html">Test Navigation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="test_navigation.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_navigation.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="test_navigation.html#globe-angle-and-angle-classes">Globe Angle and Angle classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_navigation.html#angle2-class">Angle2 Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_navigation.html#latlon-class">LatLon Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_navigation.html#range-bearing-function">range_bearing Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_navigation.html#destination-function">destination Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_navigation.html#declination-function">declination Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="test_navigation.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_navigation.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="test_planning.html">Test Planning</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="test_planning.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_planning.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#csv-to-routepoint-function">csv_to_RoutePoint function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#gpx-to-routepoint-function">gpx_to_RoutePoint function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#gen-rhumb-function">gen_rhumb Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#gen-mag-bearing-function">gen_mag_bearing Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#gen-schedule-function">gen_schedule Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#write-csv-function">write_csv Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#plan-function">plan Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="test_planning.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_planning.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="test_analysis.html">Test Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="test_analysis.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_analysis.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#csv-to-logentry-function-with-gpsnavx-data">csv_to_LogEntry function with GPSNavX Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#csv-to-logentry-function-with-manual-data">csv_to_LogEntry function with Manual Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#gpx-to-logentry-function">gpx_to_LogEntry function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#gen-rhumb-function">gen_rhumb Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#utility-to-compare-csv-output">Utility to compare CSV output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#write-csv-function">write_csv Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#analyze-function">analyze Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="test_analysis.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_analysis.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="test_init.html">navtools test <code class="docutils literal"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../build.html">NavTools Build</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../build.html#build-procedure">Build Procedure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../build.html#build-script-design">Build Script Design</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#sphinx-build">Sphinx Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#pylit-build">PyLit Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#make-directories">Make Directories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#run-the-test-script">Run the Test Script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#the-build-sequence">The Build Sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#main-program-switch">Main Program Switch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../build.html#additional-builds">Additional Builds</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation via <code class="docutils literal"><span class="pre">setup.py</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#the-setup-py-file">The <code class="docutils literal"><span class="pre">setup.py</span></code> File</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">NavTools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Testing</a> &raquo;</li>
+      
+    <li>Test IGRF11</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/testing/test_igrf11.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="test-igrf11">
+<h1>Test IGRF11<a class="headerlink" href="#test-igrf11" title="Permalink to this headline">¶</a></h1>
+<p>Use sample data from geomag 7.0 implementation to test the <a class="reference internal" href="../igrf11.html#module-igrf11" title="igrf11"><code class="xref py py-mod docutils literal"><span class="pre">igrf11</span></code></a> module.</p>
+<p>Date: xxxx.xxx for decimal  (1947.32)</p>
+<blockquote>
+<div><p>YYYY,MM,DD for year, month, day  (1947,10,13)</p>
+<p>or start_date-end_date (1943.21-1966.11)</p>
+<p>or start_date-end_date-step (1943.21-1966.11-1.2)</p>
+</div></blockquote>
+<dl class="docutils">
+<dt>Coord:</dt>
+<dd><p class="first">D - Geodetic (WGS84 latitude and altitude above mean sea level)</p>
+<p class="last">C - Geocentric (spherical, altitude relative to Earth&#8217;s center)</p>
+</dd>
+<dt>Altitude:</dt>
+<dd><p class="first">Kxxxxxx.xxx for kilometers  (K1000.13)</p>
+<p>Mxxxxxx.xxx for meters  (M1389.24)</p>
+<p class="last">Fxxxxxx.xxx for feet  (F192133.73)</p>
+</dd>
+</dl>
+<p>Lat/Lon: xxx.xxx for decimal  (-76.53)</p>
+<blockquote>
+<div><p>ddd,mm,ss for degrees, minutes, seconds (-60,23,22)</p>
+<p>(Lat and Lon must be specified in the same format,
+for ddd,mm,ss format, two commas each are required
+and decimals of arc-seconds are ignored)</p>
+</div></blockquote>
+<div class="section" id="overheads">
+<h2>Overheads<a class="headerlink" href="#overheads" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">navtools.igrf11</span> <span class="kn">import</span> <span class="n">igrf11syn</span><span class="p">,</span> <span class="n">deg2dm</span>
+
+<span class="n">logger</span><span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="n">details</span><span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="c"># to see the test cases.</span>
+<span class="c"># details= None # to silence the log.</span>
+
+<span class="n">sample_output</span><span class="o">=</span> <span class="s">&quot;geomag70_linux/sample_out_IGRF11.txt&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="test-case">
+<h2>Test Case<a class="headerlink" href="#test-case" title="Permalink to this headline">¶</a></h2>
+<p>Each test case is built from the &#8220;sample output&#8221; file
+in the Geomag distribution.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Test_Geomag</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">coord</span><span class="p">,</span> <span class="n">D_deg</span><span class="p">,</span> <span class="n">D_min</span> <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span> <span class="n">Test_Geomag</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">date</span><span class="o">=</span> <span class="n">date</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="o">=</span> <span class="n">lat</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="o">=</span> <span class="n">lon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="o">=</span> <span class="n">alt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="o">=</span> <span class="n">coord</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">D_deg</span><span class="o">=</span> <span class="n">D_deg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">D_min</span><span class="o">=</span> <span class="n">D_min</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">runTest</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">igrf11syn</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span> <span class="n">coord</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">coord</span> <span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="mf">180.0</span><span class="o">/</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="c"># Declination</span>
+
+    <span class="n">deg</span><span class="p">,</span> <span class="nb">min</span> <span class="o">=</span> <span class="n">deg2dm</span><span class="p">(</span> <span class="n">D</span> <span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s">&quot;Result: {0:10.5f} {1} K{2:&lt;6.1f} {3:&lt;10.3f} {4:&lt;10.3f} {5:5s} {6:5s}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">coord</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alt</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">deg</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;d&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">min</span><span class="p">)</span><span class="o">+</span><span class="s">&quot;m&quot;</span> <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">D_deg</span><span class="p">,</span> <span class="s">&quot;{0}d&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">deg</span><span class="p">)</span> <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">D_min</span><span class="p">,</span> <span class="s">&quot;{0}m&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">min</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="suite-function">
+<h2>suite Function<a class="headerlink" href="#suite-function" title="Permalink to this headline">¶</a></h2>
+<p>These utility functions parse the wide variety of inputs provided.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">parse_date</span><span class="p">(</span> <span class="n">date_str</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="s">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">date_str</span><span class="p">:</span>
+        <span class="c"># y,m,d format.</span>
+        <span class="n">dt</span><span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">(</span> <span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">date_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="n">first_of_year</span><span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span> <span class="n">month</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="mi">1</span> <span class="p">)</span>
+        <span class="n">date</span><span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">year</span> <span class="o">+</span> <span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">toordinal</span><span class="p">()</span> <span class="o">-</span> <span class="n">first_of_year</span><span class="o">.</span><span class="n">toordinal</span><span class="p">())</span><span class="o">/</span><span class="mf">365.242</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># floating-point date</span>
+        <span class="n">date</span><span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">date_str</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">date</span>
+
+<span class="k">def</span> <span class="nf">parse_altitude</span><span class="p">(</span> <span class="n">alt_str</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="n">alt_str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;F&quot;</span><span class="p">):</span>
+        <span class="c"># Feet to km</span>
+        <span class="n">alt</span><span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">alt_str</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span><span class="o">/</span><span class="mf">3280.8399</span>
+    <span class="k">elif</span> <span class="n">alt_str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;M&quot;</span><span class="p">):</span>
+        <span class="c"># m to km</span>
+        <span class="n">alt</span><span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">alt_str</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span><span class="o">/</span><span class="mi">1000</span>
+    <span class="k">elif</span> <span class="n">alt_str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;K&quot;</span><span class="p">):</span>
+        <span class="n">alt</span><span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">alt_str</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span> <span class="s">&quot;Unknown altitude units&quot;</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">alt</span>
+
+<span class="k">def</span> <span class="nf">parse_lat_lon</span><span class="p">(</span> <span class="n">ll_str</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="s">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">ll_str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ll_str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">):</span>
+            <span class="n">sign</span><span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">ll_str</span><span class="o">=</span> <span class="n">ll_str</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sign</span><span class="o">=</span> <span class="o">+</span><span class="mi">1</span>
+        <span class="n">d</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="k">else</span> <span class="mf">0.0</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">sign</span><span class="o">*</span><span class="p">(</span><span class="n">d</span> <span class="o">+</span> <span class="p">(</span><span class="n">m</span> <span class="o">+</span> <span class="n">s</span><span class="o">/</span><span class="mi">60</span><span class="p">)</span><span class="o">/</span><span class="mi">60</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">ll_str</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The suite is a set of test cases built from the Geomag sample output file.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">suite</span><span class="p">():</span>
+    <span class="n">s</span><span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestSuite</span><span class="p">()</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">sample_output</span><span class="p">,</span><span class="s">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">expected</span><span class="p">:</span>
+        <span class="n">rdr</span><span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span> <span class="n">expected</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s">&#39; &#39;</span><span class="p">,</span> <span class="n">skipinitialspace</span><span class="o">=</span><span class="bp">True</span> <span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rdr</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s">&quot;Source: {0:10s} {1} {2:7s} {3:10s} {4:10s} {5:5s} {6:5s}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">row</span><span class="p">[</span><span class="s">&#39;Date&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;Coord-System&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;Altitude&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;Latitude&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;Longitude&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;D_deg&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;D_min&#39;</span><span class="p">]</span> <span class="p">),</span>
+                <span class="p">)</span>
+
+            <span class="n">date</span><span class="o">=</span> <span class="n">parse_date</span><span class="p">(</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;Date&#39;</span><span class="p">]</span> <span class="p">)</span>
+            <span class="n">lat</span><span class="o">=</span> <span class="n">parse_lat_lon</span><span class="p">(</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;Latitude&#39;</span><span class="p">]</span> <span class="p">)</span>
+            <span class="n">lon</span><span class="o">=</span> <span class="n">parse_lat_lon</span><span class="p">(</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;Longitude&#39;</span><span class="p">]</span> <span class="p">)</span>
+            <span class="n">alt</span><span class="o">=</span> <span class="n">parse_altitude</span><span class="p">(</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;Altitude&#39;</span><span class="p">]</span> <span class="p">)</span>
+
+            <span class="n">case</span><span class="o">=</span> <span class="n">Test_Geomag</span><span class="p">(</span> <span class="n">date</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">alt</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;Coord-System&#39;</span><span class="p">],</span>
+                <span class="n">row</span><span class="p">[</span><span class="s">&#39;D_deg&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;D_min&#39;</span><span class="p">]</span>  <span class="p">)</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">addTest</span><span class="p">(</span> <span class="n">case</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">s</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="main-script">
+<h2>Main Script<a class="headerlink" href="#main-script" title="Permalink to this headline">¶</a></h2>
+<p>Run the test suite from the test classes. We can use this for debugging purposes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span> <span class="n">stream</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span> <span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">result</span><span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">run</span><span class="p">(</span> <span class="n">suite</span><span class="p">()</span> <span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">failures</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="test_navigation.html" class="btn btn-neutral float-right" title="Test Navigation" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="main.html" class="btn btn-neutral" title="Main Test Script" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2012, S.Lott.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'2.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

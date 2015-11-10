@@ -1,0 +1,501 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Test Navigation &mdash; NavTools 2.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="NavTools 2.1 documentation" href="../index.html"/>
+        <link rel="up" title="Testing" href="index.html"/>
+        <link rel="next" title="Test Planning" href="test_planning.html"/>
+        <link rel="prev" title="Test IGRF11" href="test_igrf11.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="../index.html" class="icon icon-home"> NavTools
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#actors">Actors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#use-cases">Use Cases</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#execution-use-case">Execution Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#planning-use-case">Planning Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#float-plan-use-case">Float Plan Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#analysis-use-case">Analysis Use Case</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#solution-overview">Solution Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#data-interface">Data Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../introduction.html#user-interface">User Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#architecture">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#references">References</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../navigation.html">Navigation Calculations Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#navigation-module-design">Navigation Module Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#module-docstring">Module Docstring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#problem-domain-objects">Problem Domain Objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#angleparser">AngleParser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#angle2-class">Angle2 Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#lat-subclass-of-angle">Lat Subclass of Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#lon-subclass-of-angle">Lon Subclass of Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#latlon-class">LatLon Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#globals">Globals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#distance-bearing-calculation">Distance/Bearing Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#formula">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#range-bearing-implementation">range_bearing implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#destination-calculation">Destination Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#id1">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#id2">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#destination-implementation">destination implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#declination-function">declination Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#historical-archive">Historical Archive</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#deprecation">Deprecation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#angle-class">Angle Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../navigation.html#globeangle-class">GlobeAngle Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../navigation.html#references-and-notes">References and Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../planning.html">Route Planning Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../planning.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../planning.html#input-parsing">Input Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../planning.html#application-processing">Application Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../planning.html#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../planning.html#main-function">Main Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../planning.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../analysis.html">Track Analysis Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../analysis.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis.html#input-parsing">Input Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis.html#application-processing">Application Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis.html#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis.html#main-function">Main Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../analysis.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../igrf11.html">International Geomagnetic Reference Field Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../igrf11.html#module-docstring">Module Docstring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../igrf11.html#igrf11-fortran-comments">IGRF11 Fortran Comments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../igrf11.html#python-imports">Python Imports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../igrf11.html#essential-class-definition">Essential Class Definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../igrf11.html#igrf11syn-function">igrf11syn Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../igrf11.html#helper-functions">Helper Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../navtools_init.html">navtools <code class="docutils literal"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Testing</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="main.html">Main Test Script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="test_igrf11.html">Test IGRF11</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="test_igrf11.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_igrf11.html#test-case">Test Case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_igrf11.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_igrf11.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Test Navigation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#globe-angle-and-angle-classes">Globe Angle and Angle classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#angle2-class">Angle2 Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#latlon-class">LatLon Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#range-bearing-function">range_bearing Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#destination-function">destination Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#declination-function">declination Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="test_planning.html">Test Planning</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="test_planning.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_planning.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#csv-to-routepoint-function">csv_to_RoutePoint function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#gpx-to-routepoint-function">gpx_to_RoutePoint function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#gen-rhumb-function">gen_rhumb Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#gen-mag-bearing-function">gen_mag_bearing Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#gen-schedule-function">gen_schedule Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#write-csv-function">write_csv Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_planning.html#plan-function">plan Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="test_planning.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_planning.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="test_analysis.html">Test Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="test_analysis.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_analysis.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#csv-to-logentry-function-with-gpsnavx-data">csv_to_LogEntry function with GPSNavX Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#csv-to-logentry-function-with-manual-data">csv_to_LogEntry function with Manual Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#gpx-to-logentry-function">gpx_to_LogEntry function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#gen-rhumb-function">gen_rhumb Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#utility-to-compare-csv-output">Utility to compare CSV output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#write-csv-function">write_csv Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="test_analysis.html#analyze-function">analyze Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="test_analysis.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_analysis.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="test_init.html">navtools test <code class="docutils literal"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../build.html">NavTools Build</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../build.html#build-procedure">Build Procedure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../build.html#build-script-design">Build Script Design</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#sphinx-build">Sphinx Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#pylit-build">PyLit Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#make-directories">Make Directories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#run-the-test-script">Run the Test Script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#the-build-sequence">The Build Sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../build.html#main-program-switch">Main Program Switch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../build.html#additional-builds">Additional Builds</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation via <code class="docutils literal"><span class="pre">setup.py</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#the-setup-py-file">The <code class="docutils literal"><span class="pre">setup.py</span></code> File</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">NavTools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Testing</a> &raquo;</li>
+      
+    <li>Test Navigation</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/testing/test_navigation.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="test-navigation">
+<h1>Test Navigation<a class="headerlink" href="#test-navigation" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="../navigation.html#module-navigation" title="navigation"><code class="xref py py-mod docutils literal"><span class="pre">navigation</span></code></a> module includes the rather complex calculations
+for range and bearing.  It also &#8220;wraps&#8221; the declination from
+IGRF11.</p>
+<div class="section" id="overheads">
+<h2>Overheads<a class="headerlink" href="#overheads" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">doctest</span>
+<span class="kn">import</span> <span class="nn">navtools.navigation</span>
+<span class="kn">from</span> <span class="nn">navtools.navigation</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Angle</span><span class="p">,</span> <span class="n">GlobeAngle</span><span class="p">,</span> <span class="n">Angle2</span><span class="p">,</span> <span class="n">LatLon</span><span class="p">,</span> <span class="n">KM</span><span class="p">,</span> <span class="n">NM</span><span class="p">,</span>
+    <span class="n">declination</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">range_bearing</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="test-cases">
+<h2>Test Cases<a class="headerlink" href="#test-cases" title="Permalink to this headline">¶</a></h2>
+<p>We need to be sure the core abstractions and functions work.</p>
+<div class="section" id="globe-angle-and-angle-classes">
+<h3>Globe Angle and Angle classes<a class="headerlink" href="#globe-angle-and-angle-classes" title="Permalink to this headline">¶</a></h3>
+<p>We&#8217;ll test the (older) <code class="xref py py-class docutils literal"><span class="pre">GlobeAngle</span></code> class, which will
+also test the <code class="xref py py-class docutils literal"><span class="pre">Angle</span></code> class.</p>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">Remove Tests for GlobeAngle and Angle.</p>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Test_GlobeAngle</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Also tends to test Angle.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">test_should_create_1</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">lat</span><span class="o">=</span><span class="n">GlobeAngle</span><span class="p">(</span><span class="s">&quot;50 21 50N&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="mf">50.36388888</span><span class="p">,</span> <span class="n">lat</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">,</span> <span class="s">&quot;N&quot;</span><span class="p">),</span> <span class="n">lat</span><span class="o">.</span><span class="n">dms</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_create_2</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">lon</span><span class="o">=</span><span class="n">GlobeAngle</span><span class="p">(</span><span class="s">&quot;004 09 25W&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="mf">4.1569444</span><span class="p">,</span> <span class="n">lon</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mf">25.0</span><span class="p">,</span> <span class="s">&quot;W&quot;</span><span class="p">),</span> <span class="n">lon</span><span class="o">.</span><span class="n">dms</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_create_3</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">lat</span><span class="o">=</span><span class="n">GlobeAngle</span><span class="p">(</span><span class="s">&quot;42 21 04N&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="mf">42.3511111</span><span class="p">,</span> <span class="n">lat</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="p">(</span><span class="mi">42</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mf">4.0</span><span class="p">,</span> <span class="s">&quot;N&quot;</span><span class="p">),</span> <span class="n">lat</span><span class="o">.</span><span class="n">dms</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_create_4</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">lon</span><span class="o">=</span><span class="n">GlobeAngle</span><span class="p">(</span><span class="s">&quot;071 02 27W&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="mf">71.0408333</span><span class="p">,</span> <span class="n">lon</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="p">(</span><span class="mi">71</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">27.0</span><span class="p">,</span> <span class="s">&quot;W&quot;</span><span class="p">),</span> <span class="n">lon</span><span class="o">.</span><span class="n">dms</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="angle2-class">
+<h3>Angle2 Class<a class="headerlink" href="#angle2-class" title="Permalink to this headline">¶</a></h3>
+<p>This is a replacement for Angle/GlobeAngle. The doctest cases will also cover this.
+See the <code class="xref py py-func docutils literal"><span class="pre">suite()</span></code> function, below.</p>
+</div>
+<div class="section" id="latlon-class">
+<h3>LatLon Class<a class="headerlink" href="#latlon-class" title="Permalink to this headline">¶</a></h3>
+<p>This is a pair of <code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code> objects.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Test_LatLon</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">=</span> <span class="n">LatLon</span><span class="p">(</span> <span class="n">lat</span><span class="o">=</span><span class="s">&quot;50 21 50N&quot;</span><span class="p">,</span> <span class="n">lon</span><span class="o">=</span><span class="s">&quot;004 09 25W&quot;</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_format_dms</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="p">(</span><span class="s">&quot;50 21 50.0N&quot;</span><span class="p">,</span><span class="s">&quot;004 09 25.0W&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">dms</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_format_dm</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="p">(</span><span class="s">&quot;50 21.833N&quot;</span><span class="p">,</span><span class="s">&quot;004 9.417W&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">dm</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_format_d</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="p">(</span><span class="s">&quot;50.364N&quot;</span><span class="p">,</span><span class="s">&quot;004.157W&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">d</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="range-bearing-function">
+<h3>range_bearing Function<a class="headerlink" href="#range-bearing-function" title="Permalink to this headline">¶</a></h3>
+<p>There are two parts to this, the haversine function, and the bearing
+function.</p>
+<p>We&#8217;ll use a single pair of points from the web to show that this works.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Test_Range_Bearing</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_should_compute</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">p1</span><span class="o">=</span> <span class="n">LatLon</span><span class="p">(</span> <span class="n">lat</span><span class="o">=</span><span class="n">Angle2</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="s">&quot;50 21 50N&quot;</span><span class="p">),</span> <span class="n">lon</span><span class="o">=</span><span class="n">Angle2</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="s">&quot;004 09 25W&quot;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">p2</span><span class="o">=</span> <span class="n">LatLon</span><span class="p">(</span> <span class="n">lat</span><span class="o">=</span><span class="n">Angle2</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="s">&quot;42 21 04N&quot;</span><span class="p">),</span> <span class="n">lon</span><span class="o">=</span><span class="n">Angle2</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="s">&quot;071 02 27W&quot;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="c">#print( &quot;p1 = {0}&quot;.format( p1.dms ) )</span>
+        <span class="c">#print( &quot;p2 = {0}&quot;.format( p2.dms ) )</span>
+        <span class="n">d</span><span class="p">,</span> <span class="n">brg</span> <span class="o">=</span> <span class="n">range_bearing</span><span class="p">(</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="n">KM</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mi">5196</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="p">(</span><span class="mi">260</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">38</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span><span class="nb">map</span><span class="p">(</span><span class="nb">round</span><span class="p">,</span><span class="n">brg</span><span class="o">.</span><span class="n">dms</span><span class="p">)))</span> <span class="p">)</span>
+        <span class="n">d</span><span class="p">,</span> <span class="n">brg</span> <span class="o">=</span> <span class="n">range_bearing</span><span class="p">(</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="n">NM</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mi">2805</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="p">(</span><span class="mi">260</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">38</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span><span class="nb">map</span><span class="p">(</span><span class="nb">round</span><span class="p">,</span><span class="n">brg</span><span class="o">.</span><span class="n">dms</span><span class="p">)))</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="destination-function">
+<h3>destination Function<a class="headerlink" href="#destination-function" title="Permalink to this headline">¶</a></h3>
+<p>This is the inverse of the haversine function. Again, we&#8217;ll use a single example</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Test_Destination</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_should_compute</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">p1</span><span class="o">=</span> <span class="n">LatLon</span><span class="p">(</span> <span class="n">lat</span><span class="o">=</span><span class="n">Angle2</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="s">&quot;51 07 32N&quot;</span><span class="p">),</span> <span class="n">lon</span><span class="o">=</span><span class="n">Angle2</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="s">&quot;001 20 17E&quot;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="c">#print( &quot;p1 = {0}&quot;.format( p1.dms ) )</span>
+        <span class="n">bearing</span><span class="o">=</span> <span class="n">Angle</span><span class="p">(</span> <span class="s">&quot;116 38 10&quot;</span> <span class="p">)</span>
+        <span class="c">#print( &quot;theta = {0}&quot;.format( bearing.dms ) )</span>
+        <span class="n">p2</span><span class="o">=</span> <span class="n">destination</span><span class="p">(</span> <span class="n">p1</span><span class="p">,</span> <span class="mf">40.23</span><span class="p">,</span> <span class="n">bearing</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="n">KM</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="p">(</span><span class="s">&quot;50 57 48.1N&quot;</span><span class="p">,</span> <span class="s">&quot;001 51 08.8E&quot;</span><span class="p">),</span> <span class="n">p2</span><span class="o">.</span><span class="n">dms</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="p">(</span><span class="s">&quot;50.963N&quot;</span><span class="p">,</span> <span class="s">&quot;001.852E&quot;</span><span class="p">),</span> <span class="n">p2</span><span class="o">.</span><span class="n">d</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="declination-function">
+<h3>declination Function<a class="headerlink" href="#declination-function" title="Permalink to this headline">¶</a></h3>
+<p>The magnetic declination is imported from the <strong>igrf11</strong> implementation.
+This has it&#8217;s own set of use cases. In this example, we&#8217;re really doing
+a kind of integration test to be sure that the <code class="xref py py-func docutils literal"><span class="pre">declination()</span></code> function
+properly reflects <strong>igrf11</strong>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Test_Declination</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Varies with current date; not easy to test with the API.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">test_should_compute_chesapeake</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;About 11d 0m W, (almost exactly -11) for 4/18/2012&quot;&quot;&quot;</span>
+        <span class="n">p1</span><span class="o">=</span> <span class="n">LatLon</span><span class="p">(</span> <span class="n">lat</span><span class="o">=</span><span class="n">Angle2</span><span class="o">.</span><span class="n">fromdegrees</span><span class="p">(</span><span class="mf">37.8311</span><span class="p">,</span> <span class="s">&quot;N&quot;</span><span class="p">),</span> <span class="n">lon</span><span class="o">=</span><span class="n">Angle2</span><span class="o">.</span><span class="n">fromdegrees</span><span class="p">(</span><span class="mf">76.2819</span><span class="p">,</span> <span class="s">&quot;W&quot;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="c">#print( &quot;p1 = {0}&quot;.format( p1.dms ) )</span>
+        <span class="n">d</span><span class="o">=</span> <span class="n">declination</span><span class="p">(</span> <span class="n">p1</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="mi">2012</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">18</span><span class="p">)</span> <span class="p">)</span>
+        <span class="c">#print( &quot;declination= {0}&quot;.format(d.dm) )</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="o">-</span><span class="mi">11</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">dm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_compute_equator</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;somewhere near -5d 50m for 4/18/2012&quot;&quot;&quot;</span>
+        <span class="n">p1</span><span class="o">=</span> <span class="n">LatLon</span><span class="p">(</span> <span class="n">lat</span><span class="o">=</span><span class="n">Angle2</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="s">&quot;0.0N&quot;</span><span class="p">),</span> <span class="n">lon</span><span class="o">=</span><span class="n">Angle2</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span> <span class="s">&quot;0.0E&quot;</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="c">#print( &quot;p1 = {0}&quot;.format( p1.dms ) )</span>
+        <span class="n">d</span><span class="o">=</span> <span class="n">declination</span><span class="p">(</span> <span class="n">p1</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="mi">2012</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">18</span><span class="p">)</span>  <span class="p">)</span>
+        <span class="c">#print( &quot;declination= {0}&quot;.format(d.dm) )</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="n">d</span><span class="o">.</span><span class="n">dm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span> <span class="mi">45</span> <span class="o">&lt;=</span> <span class="n">d</span><span class="o">.</span><span class="n">dm</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">55</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="suite-function">
+<h2>suite Function<a class="headerlink" href="#suite-function" title="Permalink to this headline">¶</a></h2>
+<p>Build a suite from the test classes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">suite</span><span class="p">():</span>
+    <span class="n">s</span><span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestSuite</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">Test_GlobeAngle</span><span class="p">,</span> <span class="n">Test_LatLon</span><span class="p">,</span> <span class="n">Test_Range_Bearing</span><span class="p">,</span> <span class="n">Test_Destination</span><span class="p">,</span> <span class="n">Test_Declination</span><span class="p">:</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">addTests</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">defaultTestLoader</span><span class="o">.</span><span class="n">loadTestsFromTestCase</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">addTests</span><span class="p">(</span><span class="n">doctest</span><span class="o">.</span><span class="n">DocTestSuite</span><span class="p">(</span><span class="n">navtools</span><span class="o">.</span><span class="n">navigation</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">s</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="main-script">
+<h2>Main Script<a class="headerlink" href="#main-script" title="Permalink to this headline">¶</a></h2>
+<p>Run the test suite from the test classes. We can use this for debugging purposes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="k">print</span><span class="p">(</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span> <span class="p">)</span>
+    <span class="n">result</span><span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TextTestRunner</span><span class="p">(</span><span class="n">verbosity</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">suite</span><span class="p">())</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">failures</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="test_planning.html" class="btn btn-neutral float-right" title="Test Planning" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="test_igrf11.html" class="btn btn-neutral" title="Test IGRF11" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2012, S.Lott.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'2.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

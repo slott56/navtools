@@ -1,0 +1,918 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Track Analysis Application &mdash; NavTools 2.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="NavTools 2.1 documentation" href="index.html"/>
+        <link rel="next" title="International Geomagnetic Reference Field Module" href="igrf11.html"/>
+        <link rel="prev" title="Route Planning Application" href="planning.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> NavTools
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#actors">Actors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#use-cases">Use Cases</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#execution-use-case">Execution Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#planning-use-case">Planning Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#float-plan-use-case">Float Plan Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#analysis-use-case">Analysis Use Case</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#solution-overview">Solution Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#data-interface">Data Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#user-interface">User Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#architecture">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#references">References</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="navigation.html">Navigation Calculations Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#navigation-module-design">Navigation Module Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#module-docstring">Module Docstring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#problem-domain-objects">Problem Domain Objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#angleparser">AngleParser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#angle2-class">Angle2 Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#lat-subclass-of-angle">Lat Subclass of Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#lon-subclass-of-angle">Lon Subclass of Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#latlon-class">LatLon Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#globals">Globals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#distance-bearing-calculation">Distance/Bearing Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#formula">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#range-bearing-implementation">range_bearing implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#destination-calculation">Destination Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#id1">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#id2">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#destination-implementation">destination implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#declination-function">declination Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#historical-archive">Historical Archive</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#deprecation">Deprecation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#angle-class">Angle Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#globeangle-class">GlobeAngle Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#references-and-notes">References and Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="planning.html">Route Planning Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#input-parsing">Input Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#application-processing">Application Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#main-function">Main Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Track Analysis Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#input-parsing">Input Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#application-processing">Application Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#main-function">Main Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="igrf11.html">International Geomagnetic Reference Field Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#module-docstring">Module Docstring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#igrf11-fortran-comments">IGRF11 Fortran Comments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#python-imports">Python Imports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#essential-class-definition">Essential Class Definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#igrf11syn-function">igrf11syn Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#helper-functions">Helper Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="navtools_init.html">navtools <code class="docutils literal"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="testing/index.html">Testing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="testing/main.html">Main Test Script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_igrf11.html">Test IGRF11</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#test-case">Test Case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_navigation.html">Test Navigation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#globe-angle-and-angle-classes">Globe Angle and Angle classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#angle2-class">Angle2 Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#latlon-class">LatLon Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#range-bearing-function">range_bearing Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#destination-function">destination Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#declination-function">declination Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_planning.html">Test Planning</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#csv-to-routepoint-function">csv_to_RoutePoint function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gpx-to-routepoint-function">gpx_to_RoutePoint function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gen-rhumb-function">gen_rhumb Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gen-mag-bearing-function">gen_mag_bearing Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gen-schedule-function">gen_schedule Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#write-csv-function">write_csv Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#plan-function">plan Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_analysis.html">Test Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#csv-to-logentry-function-with-gpsnavx-data">csv_to_LogEntry function with GPSNavX Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#csv-to-logentry-function-with-manual-data">csv_to_LogEntry function with Manual Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#gpx-to-logentry-function">gpx_to_LogEntry function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#gen-rhumb-function">gen_rhumb Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#utility-to-compare-csv-output">Utility to compare CSV output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#write-csv-function">write_csv Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#analyze-function">analyze Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_init.html">navtools test <code class="docutils literal"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="build.html">NavTools Build</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="build.html#build-procedure">Build Procedure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build.html#build-script-design">Build Script Design</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="build.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#sphinx-build">Sphinx Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#pylit-build">PyLit Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#make-directories">Make Directories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#run-the-test-script">Run the Test Script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#the-build-sequence">The Build Sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#main-program-switch">Main Program Switch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="build.html#additional-builds">Additional Builds</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation via <code class="docutils literal"><span class="pre">setup.py</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#the-setup-py-file">The <code class="docutils literal"><span class="pre">setup.py</span></code> File</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">NavTools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Track Analysis Application</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/analysis.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="module-analysis">
+<span id="track-analysis-application"></span><h1>Track Analysis Application<a class="headerlink" href="#module-analysis" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#module-analysis" title="analysis"><code class="xref py py-mod docutils literal"><span class="pre">analysis</span></code></a> application is used to do voyage analysis.
+This can make a more useful log from manually prepared log data or
+tracks dumped from GPSNavX.  It&#8217;s helpful to add the distance
+run between waypoints as well as the elapsed time between
+waypoints.</p>
+<p>This additional waypoint-to-waypoint time and distance allows
+for fine-grained analysis of sailing performance.</p>
+<p>This module includes three groups of components.
+The <a class="reference internal" href="#input-parsing">Input Parsing</a> group is the functions and a namedtuple that
+acquire input from the GPX or CSV file.</p>
+<p>The <a class="reference internal" href="#application-processing">Application Processing</a> functions and namedtuples
+compute range between waypoints.</p>
+<p>Finally, the <a class="reference internal" href="#command-line-interface">Command-Line Interface</a> components are used
+to build a proper command-line application.</p>
+<div class="section" id="overheads">
+<h2>Overheads<a class="headerlink" href="#overheads" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">navigation</span>
+
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span>
+<span class="kn">from</span> <span class="nn">xml.etree.ElementTree</span> <span class="kn">import</span> <span class="n">QName</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="input-parsing">
+<h2>Input Parsing<a class="headerlink" href="#input-parsing" title="Permalink to this headline">¶</a></h2>
+<p>The purpose of input parsing is to create <a class="reference internal" href="#analysis.LogEntry" title="analysis.LogEntry"><code class="xref py py-class docutils literal"><span class="pre">LogEntry</span></code></a> objects
+from input file sources.</p>
+<p>Manually prepared data will be a CSV in the following form</p>
+<div class="highlight-python"><div class="highlight"><pre>Time,Lat,Lon,COG,SOG,Rig,Engine,windAngle,windSpeed,Location
+9:21 AM,37 50.424N,076 16.385W,None,0,None,1200 RPM,,,Cockrell Creek
+10:06 AM,37 47.988N,076 16.056W,None,6.6,None,1500 RPM,315,7.0,
+</pre></div>
+</div>
+<p>This is essentially a deck log entry: time, lat, lon, course over ground,
+speed over ground, rig configuration, engine RPM, wind information, and any
+additional notes on the location.</p>
+<p>The times for the manual entry are generally local.</p>
+<p>GPSNavX track has the following format for CSV extract</p>
+<div class="highlight-python"><div class="highlight"><pre>2011-06-04 13:12:32 +0000,37.549225,-76.330536,219,3.6,,,,,,
+2011-06-04 13:12:43 +0000,37.549084,-76.330681,186,3.0,,,,,,
+</pre></div>
+</div>
+<p>The columns with data include date, latitude, longitude, cog, sog, heading, speed, depth, windAngle, windSpeed, comment.  Not all of these
+fields are populated unless GPSNavX gets an instrument feed.</p>
+<p>GPSNavX track has the following format for GPX extract</p>
+<div class="highlight-python"><div class="highlight"><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;gpx version=&quot;1.1&quot; creator=&quot;GPSNavX&quot;
+xmlns=&quot;http://www.topografix.com/GPX/1/1&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd&quot;&gt;
+&lt;trk&gt;
+&lt;name&gt;TRACK_041812&lt;/name&gt;
+&lt;trkseg&gt;
+&lt;trkpt lat=&quot;37.549225&quot; lon=&quot;-76.330536&quot;&gt;
+&lt;time&gt;2011-06-04T13:12:32Z&lt;/time&gt;
+&lt;/trkpt&gt;
+&lt;trkpt lat=&quot;37.549084&quot; lon=&quot;-76.330681&quot;&gt;
+&lt;time&gt;2011-06-04T13:12:43Z&lt;/time&gt;
+&lt;/trkpt&gt;
+&lt;/trkseg&gt;
+&lt;/trk&gt;
+&lt;/gpx&gt;
+</pre></div>
+</div>
+<p>The iPhone iNavX can save track information via
+<a class="reference external" href="http://x-traverse.com/">http://x-traverse.com/</a>.  These are standard GPX files, and are
+identical with the tracks created directly by GPSNavX.</p>
+<dl class="class">
+<dt id="analysis.UTC">
+<em class="property">class </em><code class="descclassname">analysis.</code><code class="descname">UTC</code><a class="headerlink" href="#analysis.UTC" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is used to parse UTC timestamps from GPS device track files.
+This is more-or-less copied from the <code class="docutils literal"><span class="pre">datetime</span></code> module
+documentation.</p>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="n">ZERO</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">UTC</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">tzinfo</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">utcoffset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ZERO</span>
+    <span class="k">def</span> <span class="nf">tzname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;UTC&quot;</span>
+    <span class="k">def</span> <span class="nf">dst</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">ZERO</span>
+
+<span class="n">utc</span> <span class="o">=</span> <span class="n">UTC</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="analysis.parse_date">
+<code class="descclassname">analysis.</code><code class="descname">parse_date</code><span class="sig-paren">(</span><em>date</em>, <em>default=None</em><span class="sig-paren">)</span><a class="headerlink" href="#analysis.parse_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a date string. We&#8217;ll try a fairly large number
+of date, time, and datetime formats.</p>
+<ul class="simple">
+<li>Time only: HHMM, HH:MM and HH:MM AM/PM</li>
+<li>More complete m/d/y hhmm, m/d/y hh:mm and m/d/y hh:mm AM/PM</li>
+<li>Also y-mon-d hhmm, y-mon-d hh:mm and y-mon-d hh:mm AM/PM</li>
+<li>Plus mon-d hhmm, mon-d hh:mm and mon-d hh:mm AM/PM</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>date</strong> &#8211; string to parse</li>
+<li><strong>default</strong> &#8211; default date to use; if nothing is specified
+this will use the current date and time.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><code class="xref py py-class docutils literal"><span class="pre">datetime.dateetime</span></code> object.
+If nothing can be parsed, this will raise a <code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code> exception.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Here are the formats that will be tried:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">default_date_formats</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&quot;%H%M&quot;</span><span class="p">,</span>
+    <span class="s">&quot;%H:%M&quot;</span><span class="p">,</span>
+    <span class="s">&quot;%I:%M %p&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">default_year_formats</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&quot;%m/</span><span class="si">%d</span><span class="s"> %H%M&quot;</span><span class="p">,</span> <span class="s">&quot;%m/</span><span class="si">%d</span><span class="s"> %H:%M&quot;</span><span class="p">,</span> <span class="s">&quot;%m/</span><span class="si">%d</span><span class="s"> %I:%M %p&quot;</span><span class="p">,</span>
+    <span class="s">&quot;%b </span><span class="si">%d</span><span class="s"> %H%M&quot;</span><span class="p">,</span> <span class="s">&quot;%b </span><span class="si">%d</span><span class="s"> %H:%M&quot;</span><span class="p">,</span> <span class="s">&quot;%b </span><span class="si">%d</span><span class="s"> %I:%M %p&quot;</span><span class="p">,</span>
+    <span class="s">&quot;</span><span class="si">%d</span><span class="s"> %b %H%M&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%d</span><span class="s"> %b %H:%M&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%d</span><span class="s"> %b %I:%M %p&quot;</span><span class="p">,</span>
+    <span class="s">&quot;%b-</span><span class="si">%d</span><span class="s"> %H%M&quot;</span><span class="p">,</span> <span class="s">&quot;%b-</span><span class="si">%d</span><span class="s"> %H:%M&quot;</span><span class="p">,</span> <span class="s">&quot;%b-</span><span class="si">%d</span><span class="s"> %I:%M %p&quot;</span><span class="p">,</span>
+    <span class="s">&quot;</span><span class="si">%d</span><span class="s">-%b %H%M&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%d</span><span class="s">-%b %H:%M&quot;</span><span class="p">,</span> <span class="s">&quot;</span><span class="si">%d</span><span class="s">-%b %I:%M %p&quot;</span><span class="p">,</span>
+    <span class="s">&quot;%B </span><span class="si">%d</span><span class="s"> %H%M&quot;</span><span class="p">,</span> <span class="s">&quot;%B </span><span class="si">%d</span><span class="s"> %H:%M&quot;</span><span class="p">,</span> <span class="s">&quot;%B </span><span class="si">%d</span><span class="s"> %I:%M %p&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">full_formats</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&quot;%m/</span><span class="si">%d</span><span class="s">/%Y %H%M&quot;</span><span class="p">,</span> <span class="s">&quot;%m/</span><span class="si">%d</span><span class="s">/%Y %H:%M&quot;</span><span class="p">,</span> <span class="s">&quot;%m/</span><span class="si">%d</span><span class="s">/%Y %I:%M %p&quot;</span><span class="p">,</span>
+    <span class="s">&quot;%m/</span><span class="si">%d</span><span class="s">/%y %H%M&quot;</span><span class="p">,</span> <span class="s">&quot;%m/</span><span class="si">%d</span><span class="s">/%y %H:%M&quot;</span><span class="p">,</span> <span class="s">&quot;%m/</span><span class="si">%d</span><span class="s">/%y %I:%M %p&quot;</span><span class="p">,</span>
+    <span class="s">&quot;%Y-%m-</span><span class="si">%d</span><span class="s"> %H%M&quot;</span><span class="p">,</span> <span class="s">&quot;%Y-%m-</span><span class="si">%d</span><span class="s"> %H:%M&quot;</span><span class="p">,</span> <span class="s">&quot;%Y-%m-</span><span class="si">%d</span><span class="s"> %I:%M %p&quot;</span><span class="p">,</span>
+    <span class="s">&quot;%y-%m-</span><span class="si">%d</span><span class="s"> %H%M&quot;</span><span class="p">,</span> <span class="s">&quot;%y-%m-</span><span class="si">%d</span><span class="s"> %H:%M&quot;</span><span class="p">,</span> <span class="s">&quot;%y-%m-</span><span class="si">%d</span><span class="s"> %I:%M %p&quot;</span><span class="p">,</span>
+    <span class="s">&quot;%m-</span><span class="si">%d</span><span class="s">-%Y %H%M&quot;</span><span class="p">,</span> <span class="s">&quot;%m-</span><span class="si">%d</span><span class="s">-%Y %H:%M&quot;</span><span class="p">,</span> <span class="s">&quot;%m-</span><span class="si">%d</span><span class="s">-%Y %I:%M %p&quot;</span><span class="p">,</span>
+    <span class="s">&quot;%m-</span><span class="si">%d</span><span class="s">-%y %H%M&quot;</span><span class="p">,</span> <span class="s">&quot;%m-</span><span class="si">%d</span><span class="s">-%y %H:%M&quot;</span><span class="p">,</span> <span class="s">&quot;%m-</span><span class="si">%d</span><span class="s">-%y %I:%M %p&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Here&#8217;s the algorithm for trying all of these date formats.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">parse_date</span><span class="p">(</span> <span class="n">date</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">default</span><span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">fmt</span> <span class="ow">in</span> <span class="n">default_date_formats</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dt</span><span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span> <span class="n">date</span><span class="p">,</span> <span class="n">fmt</span> <span class="p">)</span>
+            <span class="n">dt</span><span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span> <span class="n">year</span><span class="o">=</span><span class="n">default</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="o">=</span><span class="n">default</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="n">default</span><span class="o">.</span><span class="n">day</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="n">dt</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">for</span> <span class="n">fmt</span> <span class="ow">in</span> <span class="n">default_year_formats</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dt</span><span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span> <span class="n">date</span><span class="p">,</span> <span class="n">fmt</span> <span class="p">)</span>
+            <span class="n">dt</span><span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span> <span class="n">year</span><span class="o">=</span><span class="n">default</span><span class="o">.</span><span class="n">year</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="n">dt</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">for</span> <span class="n">fmt</span> <span class="ow">in</span> <span class="n">full_formats</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dt</span><span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span> <span class="n">date</span><span class="p">,</span> <span class="n">fmt</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="n">dt</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">pass</span>
+</pre></div>
+</div>
+<dl class="class">
+<dt id="analysis.LogEntry">
+<em class="property">class </em><code class="descclassname">analysis.</code><code class="descname">LogEntry</code><a class="headerlink" href="#analysis.LogEntry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>A <a class="reference internal" href="#analysis.LogEntry" title="analysis.LogEntry"><code class="xref py py-class docutils literal"><span class="pre">LogEntry</span></code></a> object contains a date-time stamp, latitude,
+longitude, a combined <a class="reference internal" href="navigation.html#navigation.LatLon" title="navigation.LatLon"><code class="xref py py-class docutils literal"><span class="pre">navigation.LatLon</span></code></a> object, and
+the &#8220;extra_dict&#8221; of the original row&#8217;s raw data as a dictionary.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">LogEntry</span><span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span> <span class="s">&#39;LogEntry&#39;</span><span class="p">,</span> <span class="s">&#39;time,lat,lon,point,extra_dict&#39;</span> <span class="p">)</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="analysis.csv_to_LogEntry">
+<code class="descclassname">analysis.</code><code class="descname">csv_to_LogEntry</code><span class="sig-paren">(</span><em>source</em>, <em>date=None</em><span class="sig-paren">)</span><a class="headerlink" href="#analysis.csv_to_LogEntry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses a CSV file to yield an iterable sequence
+of <a class="reference internal" href="#analysis.LogEntry" title="analysis.LogEntry"><code class="xref py py-class docutils literal"><span class="pre">LogEntry</span></code></a> objects.</p>
+<p>There are two formats:</p>
+<ul class="simple">
+<li>Standard (i.e., GPSNavX). These files have no header.</li>
+<li>Manual. These files <strong>must</strong> include a heading row for it to be processed.</li>
+</ul>
+<p>The heading row must use terms like the following:</p>
+<blockquote>
+<div>&#8220;date&#8221;, &#8220;latitude&#8221;, &#8220;longitude&#8221;, &#8220;cog&#8221;, &#8220;sog&#8221;, &#8220;heading&#8221;, &#8220;speed&#8221;,
+&#8220;depth&#8221;, &#8220;windAngle&#8221;, &#8220;windSpeed&#8221;, &#8220;comment&#8221;</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>source</strong> &#8211; Open file or file-like object that can be read.</li>
+<li><strong>date</strong> &#8211; <code class="xref py py-class docutils literal"><span class="pre">datetime.datetime</span></code> object used to fill in default
+values for incomplete dates. By default, it&#8217;s &#8220;now&#8221;.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">iterable sequence of <a class="reference internal" href="#analysis.LogEntry" title="analysis.LogEntry"><code class="xref py py-class docutils literal"><span class="pre">LogEntry</span></code></a> instances.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">csv_to_LogEntry</span><span class="p">(</span> <span class="n">source</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="bp">None</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate LogEntry from a CSV reader.</span>
+
+<span class="sd">    :param source: an open CSV file.</span>
+<span class="sd">    :param date: default date used for incomplete date formats.</span>
+
+<span class="sd">    :returns: An iterator over :py:class:`LogEntry` objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">date</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">date</span><span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+    <span class="n">hdr</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">Sniffer</span><span class="p">()</span><span class="o">.</span><span class="n">has_header</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">512</span><span class="p">))</span>
+    <span class="n">source</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">hdr</span><span class="p">:</span>
+        <span class="n">trk</span><span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span> <span class="n">source</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">trk</span><span class="o">.</span><span class="n">fieldnames</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">set</span><span class="p">(</span> <span class="s">&quot;Time,Lat,Lon,COG,SOG,Rig,Engine,windAngle,windSpeed,Location&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s">&quot;Column Headings aren&#39;t valid&quot;</span> <span class="p">)</span>
+        <span class="k">def</span> <span class="nf">extract</span><span class="p">(</span> <span class="n">row</span> <span class="p">):</span>
+            <span class="c"># Handle local time formats</span>
+            <span class="n">dt</span><span class="o">=</span> <span class="n">parse_date</span><span class="p">(</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;Time&#39;</span><span class="p">],</span> <span class="n">default</span><span class="o">=</span><span class="n">date</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="n">dt</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;Lat&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s">&#39;Lon&#39;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">trk</span><span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictReader</span><span class="p">(</span> <span class="n">source</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="p">[</span>
+        <span class="s">&quot;date&quot;</span><span class="p">,</span> <span class="s">&quot;latitude&quot;</span><span class="p">,</span> <span class="s">&quot;longitude&quot;</span><span class="p">,</span> <span class="s">&quot;cog&quot;</span><span class="p">,</span> <span class="s">&quot;sog&quot;</span><span class="p">,</span> <span class="s">&quot;heading&quot;</span><span class="p">,</span> <span class="s">&quot;speed&quot;</span><span class="p">,</span> <span class="s">&quot;depth&quot;</span><span class="p">,</span> <span class="s">&quot;windAngle&quot;</span><span class="p">,</span> <span class="s">&quot;windSpeed&quot;</span><span class="p">,</span> <span class="s">&quot;comment&quot;</span><span class="p">]</span> <span class="p">)</span>
+        <span class="k">def</span> <span class="nf">extract</span><span class="p">(</span> <span class="n">row</span> <span class="p">):</span>
+            <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s">&quot;latitude&quot;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s">&quot;longitude&quot;</span><span class="p">]</span>
+            <span class="c"># Typical time: 2011-06-04 13:12:32 +0000</span>
+            <span class="n">dt</span><span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s">&#39;date&#39;</span><span class="p">],</span><span class="s">&quot;%Y-%m-</span><span class="si">%d</span><span class="s"> %H:%M:%S +0000&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">utc</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">dt</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">trk</span><span class="p">:</span>
+        <span class="n">time</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span> <span class="n">row</span> <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">point</span><span class="o">=</span> <span class="n">navigation</span><span class="o">.</span><span class="n">LatLon</span><span class="p">(</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="p">)</span>
+            <span class="k">yield</span> <span class="n">LogEntry</span><span class="p">(</span> <span class="n">time</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">point</span><span class="p">,</span> <span class="n">row</span> <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span> <span class="n">row</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>For more complex situations (i.e., multi-day voyages with partial
+date-time stamps in the log) this function isn&#8217;t quite appropriate.
+The simplistic assumption behind <a class="reference internal" href="#analysis.parse_date" title="analysis.parse_date"><code class="xref py py-func docutils literal"><span class="pre">parse_date()</span></code></a> are that a single
+date is sufficient to fill in missing fields. In some cases, we might have
+timestamps that roll past midnight without an obvious indicator of date
+change. Or, we might have some notation like &#8220;d1, d2&#8221; or &#8220;+1d, +2d&#8221;.</p>
+<dl class="function">
+<dt id="analysis.gpx_to_LogEntry">
+<code class="descclassname">analysis.</code><code class="descname">gpx_to_LogEntry</code><span class="sig-paren">(</span><em>source</em><span class="sig-paren">)</span><a class="headerlink" href="#analysis.gpx_to_LogEntry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses a CSV file to yield an iterable sequence
+of <a class="reference internal" href="#analysis.LogEntry" title="analysis.LogEntry"><code class="xref py py-class docutils literal"><span class="pre">LogEntry</span></code></a> objects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>source</strong> &#8211; Open file or file-like object that can be read.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">iterable sequence of <a class="reference internal" href="#analysis.LogEntry" title="analysis.LogEntry"><code class="xref py py-class docutils literal"><span class="pre">LogEntry</span></code></a> instances.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Parsing the GPX is pretty easy.  However, transforming the
+&#8220;raw&#8221; XML int0 a CSV-compatible form is done with a helper function
+to turn XML into a sequence of 2-tuples.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">gpx_to_LogEntry</span><span class="p">(</span> <span class="n">source</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate LogEntry from an GPX doc.</span>
+
+<span class="sd">    :param source: an open XML file.</span>
+
+<span class="sd">    :returns: An iterator over :py:class:`LogEntry` objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">gpx_ns</span><span class="o">=</span> <span class="s">&quot;http://www.topografix.com/GPX/1/1&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">n</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="n">QName</span><span class="p">(</span><span class="n">gpx_ns</span><span class="p">,</span> <span class="s">&quot;trk&quot;</span><span class="p">),</span> <span class="n">QName</span><span class="p">(</span><span class="n">gpx_ns</span><span class="p">,</span> <span class="s">&quot;trkseg&quot;</span><span class="p">),</span> <span class="n">QName</span><span class="p">(</span><span class="n">gpx_ns</span><span class="p">,</span> <span class="s">&quot;trkpt&quot;</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+    <span class="n">time_tag</span> <span class="o">=</span> <span class="n">QName</span><span class="p">(</span><span class="n">gpx_ns</span><span class="p">,</span> <span class="s">&#39;time&#39;</span><span class="p">)</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">xml</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">ElementTree</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span> <span class="n">source</span> <span class="p">)</span>
+    <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span> <span class="n">path</span> <span class="p">):</span>
+        <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;lat&#39;</span><span class="p">),</span> <span class="n">pt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;lon&#39;</span><span class="p">)</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">navigation</span><span class="o">.</span><span class="n">Angle2</span><span class="o">.</span><span class="n">fromdegrees</span><span class="p">(</span> <span class="nb">float</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">lon</span> <span class="o">=</span> <span class="n">navigation</span><span class="o">.</span><span class="n">Angle2</span><span class="o">.</span><span class="n">fromdegrees</span><span class="p">(</span> <span class="nb">float</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">point</span><span class="o">=</span> <span class="n">navigation</span><span class="o">.</span><span class="n">LatLon</span><span class="p">(</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="p">)</span>
+        <span class="c"># Typical time: 2011-06-04T15:21:03Z</span>
+        <span class="n">raw_dt</span><span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="n">time_tag</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+        <span class="n">dt</span><span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">raw_dt</span><span class="p">,</span><span class="s">&quot;%Y-%m-</span><span class="si">%d</span><span class="s">T%H:%M:%SZ&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">utc</span><span class="p">)</span>
+        <span class="n">row_dict</span><span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="n">xml_to_pairs</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">yield</span> <span class="n">LogEntry</span><span class="p">(</span> <span class="n">dt</span><span class="p">,</span>
+            <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span>
+            <span class="n">point</span><span class="p">,</span>
+            <span class="n">row_dict</span><span class="p">,</span>
+            <span class="p">)</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="analysis.xml_to_pairs">
+<code class="descclassname">analysis.</code><code class="descname">xml_to_pairs</code><span class="sig-paren">(</span><em>pt</em><span class="sig-paren">)</span><a class="headerlink" href="#analysis.xml_to_pairs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms a sequence of XML <code class="docutils literal"><span class="pre">&lt;tag&gt;value&lt;/tag&gt;</span></code> into a Python <code class="docutils literal"><span class="pre">('tag',</span> <span class="pre">'value')</span></code>
+sequence. This can be used to build a dictionary with a <code class="docutils literal"><span class="pre">{'tag':</span> <span class="pre">'value'}</span></code>
+structure.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pt</strong> &#8211; an XML structure with a number of children to process.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">iterable over (tag, text) tuples.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">xml_to_pairs</span><span class="p">(</span><span class="n">pt</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">pt</span><span class="o">.</span><span class="n">iter</span><span class="p">():</span>
+        <span class="n">ns</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">tag</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">tag</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s">&#39;}&#39;</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">text</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">tag</span><span class="p">,</span> <span class="n">text</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">yield</span> <span class="n">attr</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="application-processing">
+<h2>Application Processing<a class="headerlink" href="#application-processing" title="Permalink to this headline">¶</a></h2>
+<p>The raw point has distance, bearing, and delta-time to the next waypoint computed.
+A final waypoint with no additional distacne, bearing, and delta-time is emitted.</p>
+<dl class="class">
+<dt id="analysis.LogEntry_Rhumb">
+<em class="property">class </em><code class="descclassname">analysis.</code><code class="descname">LogEntry_Rhumb</code><a class="headerlink" href="#analysis.LogEntry_Rhumb" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="n">LogEntry_Rhumb</span><span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span> <span class="s">&#39;LogEntry_Rhumb&#39;</span><span class="p">,</span> <span class="s">&#39;point,distance,bearing,delta_time&#39;</span> <span class="p">)</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="analysis.gen_rhumb">
+<code class="descclassname">analysis.</code><code class="descname">gen_rhumb</code><span class="sig-paren">(</span><em>log_entry_iter</em><span class="sig-paren">)</span><a class="headerlink" href="#analysis.gen_rhumb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms a sequence of <a class="reference internal" href="#analysis.LogEntry" title="analysis.LogEntry"><code class="xref py py-class docutils literal"><span class="pre">LogEntry</span></code></a> instances into
+<a class="reference internal" href="#analysis.LogEntry_Rhumb" title="analysis.LogEntry_Rhumb"><code class="xref py py-class docutils literal"><span class="pre">LogEntry_Rhumb</span></code></a> instances. The rhumb line distance, bearing, and
+delta-time are added to each entry.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>log_entry_iter</strong> &#8211; iterable sequence of <a class="reference internal" href="#analysis.LogEntry" title="analysis.LogEntry"><code class="xref py py-class docutils literal"><span class="pre">LogEntry</span></code></a> instances.
+This can be produced by <a class="reference internal" href="#analysis.gpx_to_LogEntry" title="analysis.gpx_to_LogEntry"><code class="xref py py-func docutils literal"><span class="pre">gpx_to_LogEntry()</span></code></a> or <a class="reference internal" href="#analysis.csv_to_LogEntry" title="analysis.csv_to_LogEntry"><code class="xref py py-func docutils literal"><span class="pre">csv_to_LogEntry()</span></code></a>.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">iterable sequence of  <a class="reference internal" href="#analysis.LogEntry_Rhumb" title="analysis.LogEntry_Rhumb"><code class="xref py py-class docutils literal"><span class="pre">LogEntry_Rhumb</span></code></a> instances.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">gen_rhumb</span><span class="p">(</span> <span class="n">log_entry_iter</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate LogEntry_Rhumb from LogEntry.</span>
+
+<span class="sd">    Each point has range and bearing to the next point.</span>
+<span class="sd">    The last point as no range and bearing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">p1</span><span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">log_entry_iter</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">p2</span> <span class="ow">in</span> <span class="n">log_entry_iter</span><span class="p">:</span>
+        <span class="c">#print( repr(p1), repr(p2) )</span>
+        <span class="n">r</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span> <span class="n">navigation</span><span class="o">.</span><span class="n">range_bearing</span><span class="p">(</span> <span class="n">p1</span><span class="o">.</span><span class="n">point</span><span class="p">,</span> <span class="n">p2</span><span class="o">.</span><span class="n">point</span> <span class="p">)</span>
+        <span class="k">yield</span> <span class="n">LogEntry_Rhumb</span><span class="p">(</span> <span class="n">p1</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">p2</span><span class="o">.</span><span class="n">time</span><span class="o">-</span><span class="n">p1</span><span class="o">.</span><span class="n">time</span> <span class="p">)</span>
+        <span class="n">p1</span><span class="o">=</span> <span class="n">p2</span>
+    <span class="k">yield</span> <span class="n">LogEntry_Rhumb</span><span class="p">(</span> <span class="n">p2</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="command-line-interface">
+<h2>Command-Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="analysis.write_csv">
+<code class="descclassname">analysis.</code><code class="descname">write_csv</code><span class="sig-paren">(</span><em>log_entry_rhumb_iter</em>, <em>target</em><span class="sig-paren">)</span><a class="headerlink" href="#analysis.write_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a sequence of <a class="reference internal" href="#analysis.LogEntry_Rhumb" title="analysis.LogEntry_Rhumb"><code class="xref py py-class docutils literal"><span class="pre">LogEntry_Rhumb</span></code></a>
+objects to a given target file.   The objects are usually built by the
+<a class="reference internal" href="#analysis.gen_rhumb" title="analysis.gen_rhumb"><code class="xref py py-func docutils literal"><span class="pre">gen_rhumb()</span></code></a> function.</p>
+<p>Since the source data has a poorly-defined set of columns,
+we emit just a few additional attributes joined onto the original,
+untouched row.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>log_entry_rhumb_iter</strong> &#8211; iterable sequence of  <a class="reference internal" href="#analysis.LogEntry_Rhumb" title="analysis.LogEntry_Rhumb"><code class="xref py py-class docutils literal"><span class="pre">LogEntry_Rhumb</span></code></a> instances.
+This is often the output of <a class="reference internal" href="#analysis.gen_rhumb" title="analysis.gen_rhumb"><code class="xref py py-func docutils literal"><span class="pre">gen_rhumb()</span></code></a>.</li>
+<li><strong>target</strong> &#8211; File to which to write the analyzed rows.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Note that we apply some rounding rules to these values before writing them
+to a CSV file. The distances are rounded to <img class="math" src="_images/math/1f1fffa6e434baa64e9e2c2bcd955a64d5bdeb53.png" alt="10^{-5}"/> which is about
+an inch, or 2 cm: more accurate than the GPS position.
+The bearing is rounded to an 0 places.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">nround</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">digits</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="nb">round</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">digits</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">write_csv</span><span class="p">(</span> <span class="n">log_entry_rhumb_iter</span><span class="p">,</span> <span class="n">target</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">build_row_dict</span><span class="p">(</span> <span class="n">log</span><span class="p">,</span> <span class="n">td</span><span class="p">,</span> <span class="n">tt</span> <span class="p">):</span>
+        <span class="n">row</span><span class="o">=</span> <span class="p">{</span> <span class="s">&#39;calc_distance&#39;</span> <span class="p">:</span> <span class="n">nround</span><span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">distance</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span>
+        <span class="s">&#39;calc_bearing&#39;</span> <span class="p">:</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">log</span><span class="o">.</span><span class="n">bearing</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">nround</span><span class="p">(</span><span class="n">log</span><span class="o">.</span><span class="n">bearing</span><span class="o">.</span><span class="n">degrees</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+        <span class="s">&#39;calc_time&#39;</span> <span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">time</span><span class="p">,</span>
+        <span class="s">&#39;calc_elapsed&#39;</span> <span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">delta_time</span><span class="p">,</span>
+        <span class="s">&#39;calc_total_dist&#39;</span> <span class="p">:</span> <span class="n">nround</span><span class="p">(</span><span class="n">td</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span>
+        <span class="s">&#39;calc_total_time&#39;</span> <span class="p">:</span> <span class="n">tt</span><span class="p">,</span> <span class="p">}</span>
+        <span class="n">row</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="n">log</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">extra_dict</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">row</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># Get the first LogEntry_Rhumb to get the original headings.</span>
+        <span class="n">first</span><span class="o">=</span> <span class="nb">next</span><span class="p">(</span> <span class="n">log_entry_rhumb_iter</span> <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+        <span class="k">return</span> <span class="c"># No data.</span>
+    <span class="n">headings</span><span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">first</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">extra_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">headings</span> <span class="o">+=</span> <span class="p">[</span> <span class="s">&#39;calc_distance&#39;</span><span class="p">,</span> <span class="s">&#39;calc_bearing&#39;</span><span class="p">,</span> <span class="s">&#39;calc_time&#39;</span><span class="p">,</span> <span class="s">&#39;calc_elapsed&#39;</span><span class="p">,</span> <span class="s">&#39;calc_total_dist&#39;</span><span class="p">,</span> <span class="s">&#39;calc_total_time&#39;</span> <span class="p">]</span>
+    <span class="n">rte_rhumb</span><span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">DictWriter</span><span class="p">(</span> <span class="n">target</span><span class="p">,</span> <span class="n">headings</span> <span class="p">)</span>
+    <span class="n">rte_rhumb</span><span class="o">.</span><span class="n">writeheader</span><span class="p">()</span>
+    <span class="n">td</span><span class="o">=</span> <span class="n">first</span><span class="o">.</span><span class="n">distance</span>
+    <span class="n">tt</span><span class="o">=</span> <span class="n">first</span><span class="o">.</span><span class="n">delta_time</span>
+    <span class="n">rte_rhumb</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span> <span class="n">build_row_dict</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">td</span><span class="p">,</span> <span class="n">tt</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">for</span> <span class="n">log</span> <span class="ow">in</span> <span class="n">log_entry_rhumb_iter</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">log</span><span class="o">.</span><span class="n">distance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">td</span> <span class="o">+=</span> <span class="n">log</span><span class="o">.</span><span class="n">distance</span>
+        <span class="k">if</span> <span class="n">log</span><span class="o">.</span><span class="n">delta_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">tt</span> <span class="o">+=</span> <span class="n">log</span><span class="o">.</span><span class="n">delta_time</span>
+        <span class="n">rte_rhumb</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span> <span class="n">build_row_dict</span><span class="p">(</span><span class="n">log</span><span class="p">,</span> <span class="n">td</span><span class="p">,</span> <span class="n">tt</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p><a class="reference internal" href="#analysis.write_csv" title="analysis.write_csv"><code class="xref py py-func docutils literal"><span class="pre">write_csv()</span></code></a> should not compute totals.</p>
+<p>Decompose this into two mapping functions:</p>
+<ul class="simple">
+<li>log_entry_rhumb_iter computes the rhumb from log entries</li>
+<li>log_entry_running_total_iter computes running totals.</li>
+</ul>
+<p class="last">The final write_csv can then use this composition to write rows.</p>
+</div>
+<dl class="function">
+<dt id="analysis.analyze">
+<code class="descclassname">analysis.</code><code class="descname">analyze</code><span class="sig-paren">(</span><em>log_filename</em>, <em>date=None</em><span class="sig-paren">)</span><a class="headerlink" href="#analysis.analyze" title="Permalink to this definition">¶</a></dt>
+<dd><p>Analyze a log file, writing a new log file with additional
+calculated values.</p>
+<p>The <a class="reference internal" href="#analysis.gen_rhumb" title="analysis.gen_rhumb"><code class="xref py py-func docutils literal"><span class="pre">gen_rhumb()</span></code></a> calculation is applied to each row.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>log_filename</strong> &#8211; name of a log file to analyze.
+If the input is <code class="samp docutils literal"><em><span class="pre">some_name</span></em><span class="pre">.csv</span></code> or <code class="samp docutils literal"><em><span class="pre">some_name</span></em><span class="pre">.gpx</span></code>
+the output will be <code class="samp docutils literal"><em><span class="pre">some_name</span></em> <span class="pre">Distance.csv</span></code>.</li>
+<li><strong>date</strong> &#8211; Default date to use when incomplete date-time fields
+are present in the input.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">analyze</span><span class="p">(</span> <span class="n">log_filename</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="bp">None</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transform a simple log into a log with distances figured in.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">date</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">date</span><span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+
+    <span class="n">log_path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">log_filename</span><span class="p">)</span>
+    <span class="n">ext</span><span class="o">=</span> <span class="n">log_path</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">distance_path</span><span class="o">=</span> <span class="n">log_path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="p">(</span><span class="n">log_path</span><span class="o">.</span><span class="n">stem</span> <span class="o">+</span> <span class="s">&quot; Distance&quot;</span> <span class="o">+</span> <span class="s">&quot;.csv&quot;</span><span class="p">)</span>
+
+    <span class="c">#print( distance_path )</span>
+    <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s">&#39;.csv&#39;</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">log_path</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">source</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">distance_path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s">&#39;w&#39;</span><span class="p">,</span><span class="n">newline</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">target</span><span class="p">:</span>
+                <span class="n">track</span><span class="o">=</span> <span class="n">gen_rhumb</span><span class="p">(</span> <span class="n">csv_to_LogEntry</span><span class="p">(</span> <span class="n">source</span><span class="p">,</span> <span class="n">date</span> <span class="p">)</span> <span class="p">)</span>
+                <span class="n">write_csv</span><span class="p">(</span> <span class="n">track</span><span class="p">,</span> <span class="n">target</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ext</span> <span class="o">==</span> <span class="s">&#39;.gpx&#39;</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">log_path</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">source</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">distance_path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s">&#39;w&#39;</span><span class="p">,</span><span class="n">newline</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">target</span><span class="p">:</span>
+                <span class="n">track</span><span class="o">=</span> <span class="n">gen_rhumb</span><span class="p">(</span> <span class="n">gpx_to_LogEntry</span><span class="p">(</span> <span class="n">source</span> <span class="p">)</span> <span class="p">)</span>
+                <span class="n">write_csv</span><span class="p">(</span> <span class="n">track</span><span class="p">,</span> <span class="n">target</span> <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span> <span class="s">&quot;Can&#39;t process {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">log_path</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="main-function">
+<h2>Main Function<a class="headerlink" href="#main-function" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">date_formats</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s">&quot;%m/</span><span class="si">%d</span><span class="s">/%Y&quot;</span><span class="p">,</span>
+    <span class="s">&quot;%m/</span><span class="si">%d</span><span class="s">/%y&quot;</span><span class="p">,</span>
+    <span class="s">&quot;%Y-%m-</span><span class="si">%d</span><span class="s">&quot;</span><span class="p">,</span>
+    <span class="s">&quot;%y-%m-</span><span class="si">%d</span><span class="s">&quot;</span><span class="p">,</span>
+    <span class="s">&quot;%Y-%b-</span><span class="si">%d</span><span class="s">&quot;</span><span class="p">,</span>
+    <span class="s">&quot;%y-%b-</span><span class="si">%d</span><span class="s">&quot;</span><span class="p">,</span>
+    <span class="s">&quot;%Y-%B-</span><span class="si">%d</span><span class="s">&quot;</span><span class="p">,</span>
+    <span class="s">&quot;%y-%B-</span><span class="si">%d</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="analysis.main">
+<code class="descclassname">analysis.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#analysis.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse command-line arguments to get the log file names and the default
+date to use for partial date strings.</p>
+<p>Then use <a class="reference internal" href="#analysis.analyze" title="analysis.analyze"><code class="xref py py-func docutils literal"><span class="pre">analyze()</span></code></a> to process each file, creating a <code class="file docutils literal"><em><span class="pre">name</span></em> <span class="pre">Distance.csv</span></code>
+output file with the detailed analysis.</p>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">parser</span><span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span> <span class="s">&#39;tracks&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s">&#39;*&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span> <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span> <span class="s">&#39;-d&#39;</span><span class="p">,</span> <span class="s">&#39;--date&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s">&#39;?&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">None</span> <span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="c"># Parse the assumed date for a time-only log in options.date</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">date_formats</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">dt</span><span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span> <span class="n">args</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">f</span> <span class="p">)</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
+                <span class="k">break</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dt</span><span class="o">=</span> <span class="bp">None</span>
+    <span class="c"># Process the track files.</span>
+    <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">tracks</span><span class="p">:</span>
+        <span class="n">analyze</span><span class="p">(</span> <span class="nb">file</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">dt</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="main-script">
+<h2>Main Script<a class="headerlink" href="#main-script" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Typical use cases for this module include the following:</p>
+<ul class="simple">
+<li>Command Line:</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre>python -m navtools.analysis &#39;../../Sailing/Cruise History/2011 Reedville/reedville.csv&#39;
+</pre></div>
+</div>
+<ul class="simple">
+<li>Within a Python Script:</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">navtools.analysis</span> <span class="kn">import</span> <span class="n">analyze</span>
+<span class="n">analyze</span><span class="p">(</span> <span class="s">&#39;../../Sailing/Cruise History/2011 Reedville/jackson.csv&#39;</span><span class="p">,</span> <span class="mf">5.0</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="igrf11.html" class="btn btn-neutral float-right" title="International Geomagnetic Reference Field Module" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="planning.html" class="btn btn-neutral" title="Route Planning Application" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2012, S.Lott.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

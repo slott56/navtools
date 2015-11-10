@@ -1,0 +1,560 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>NavTools Build &mdash; NavTools 2.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="NavTools 2.1 documentation" href="index.html"/>
+        <link rel="next" title="Installation via setup.py" href="installation.html"/>
+        <link rel="prev" title="navtools test __init__.py" href="testing/test_init.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> NavTools
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#actors">Actors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#use-cases">Use Cases</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#execution-use-case">Execution Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#planning-use-case">Planning Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#float-plan-use-case">Float Plan Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#analysis-use-case">Analysis Use Case</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#solution-overview">Solution Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#data-interface">Data Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#user-interface">User Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#architecture">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#references">References</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="navigation.html">Navigation Calculations Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#navigation-module-design">Navigation Module Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#module-docstring">Module Docstring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#problem-domain-objects">Problem Domain Objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#angleparser">AngleParser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#angle2-class">Angle2 Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#lat-subclass-of-angle">Lat Subclass of Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#lon-subclass-of-angle">Lon Subclass of Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#latlon-class">LatLon Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#globals">Globals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#distance-bearing-calculation">Distance/Bearing Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#formula">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#range-bearing-implementation">range_bearing implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#destination-calculation">Destination Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#id1">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#id2">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#destination-implementation">destination implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#declination-function">declination Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#historical-archive">Historical Archive</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#deprecation">Deprecation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#angle-class">Angle Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#globeangle-class">GlobeAngle Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#references-and-notes">References and Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="planning.html">Route Planning Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#input-parsing">Input Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#application-processing">Application Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#main-function">Main Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Track Analysis Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#input-parsing">Input Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#application-processing">Application Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#main-function">Main Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="igrf11.html">International Geomagnetic Reference Field Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#module-docstring">Module Docstring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#igrf11-fortran-comments">IGRF11 Fortran Comments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#python-imports">Python Imports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#essential-class-definition">Essential Class Definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#igrf11syn-function">igrf11syn Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#helper-functions">Helper Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="navtools_init.html">navtools <code class="docutils literal"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="testing/index.html">Testing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="testing/main.html">Main Test Script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_igrf11.html">Test IGRF11</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#test-case">Test Case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_navigation.html">Test Navigation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#globe-angle-and-angle-classes">Globe Angle and Angle classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#angle2-class">Angle2 Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#latlon-class">LatLon Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#range-bearing-function">range_bearing Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#destination-function">destination Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#declination-function">declination Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_planning.html">Test Planning</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#csv-to-routepoint-function">csv_to_RoutePoint function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gpx-to-routepoint-function">gpx_to_RoutePoint function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gen-rhumb-function">gen_rhumb Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gen-mag-bearing-function">gen_mag_bearing Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gen-schedule-function">gen_schedule Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#write-csv-function">write_csv Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#plan-function">plan Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_analysis.html">Test Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#csv-to-logentry-function-with-gpsnavx-data">csv_to_LogEntry function with GPSNavX Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#csv-to-logentry-function-with-manual-data">csv_to_LogEntry function with Manual Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#gpx-to-logentry-function">gpx_to_LogEntry function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#gen-rhumb-function">gen_rhumb Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#utility-to-compare-csv-output">Utility to compare CSV output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#write-csv-function">write_csv Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#analyze-function">analyze Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_init.html">navtools test <code class="docutils literal"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+</li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">NavTools Build</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#build-procedure">Build Procedure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#build-script-design">Build Script Design</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sphinx-build">Sphinx Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pylit-build">PyLit Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#make-directories">Make Directories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#run-the-test-script">Run the Test Script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-build-sequence">The Build Sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#main-program-switch">Main Program Switch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#additional-builds">Additional Builds</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation via <code class="docutils literal"><span class="pre">setup.py</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#the-setup-py-file">The <code class="docutils literal"><span class="pre">setup.py</span></code> File</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">NavTools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>NavTools Build</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/build.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="navtools-build">
+<span id="build"></span><h1>NavTools Build<a class="headerlink" href="#navtools-build" title="Permalink to this headline">¶</a></h1>
+<p>The source for <code class="xref py py-mod docutils literal"><span class="pre">navtools</span></code> is a Sphinx project that depends on PyLit.
+Yes.  The documentation spawns the code.</p>
+<p>In addition to Python 3.4, there are two other projects required to build.</p>
+<ul class="simple">
+<li>PyLit3.  <a class="reference external" href="https://github.com/slott56/PyLit-3">https://github.com/slott56/PyLit-3</a></li>
+<li>Sphinx.  <a class="reference external" href="http://sphinx.pocoo.org/">http://sphinx.pocoo.org/</a></li>
+</ul>
+<p>The PyLit3 install is little more than a download and move the <code class="file docutils literal"><span class="pre">src/pylit.py</span></code> file to
+the Python <code class="file docutils literal"><span class="pre">site-packages</span></code> directory.</p>
+<p>Sphinx should be
+installed with <code class="docutils literal"><span class="pre">pip</span></code> or <code class="docutils literal"><span class="pre">easy_install</span></code>, both of which are part of the Python3.4 distribution.</p>
+<div class="highlight-bash"><div class="highlight"><pre>pip3.4 install sphinx
+</pre></div>
+</div>
+<div class="section" id="build-procedure">
+<h2>Build Procedure<a class="headerlink" href="#build-procedure" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p class="first">Bootstrap the <code class="file docutils literal"><span class="pre">build.py</span></code> script by running PyLit.</p>
+<div class="highlight-bash"><div class="highlight"><pre>python3 -m pylit -t <span class="nb">source</span>/build.rst build.py
+</pre></div>
+</div>
+<p>This reports that an extract was written to <code class="file docutils literal"><span class="pre">build.py</span></code>.</p>
+</li>
+<li><p class="first">Use the <code class="file docutils literal"><span class="pre">build.py</span></code> script to create the <code class="docutils literal"><span class="pre">navtools</span></code> source, unit
+tests, demonstration applications.
+Build the Sphinx documentation.
+And run the unit test, too.</p>
+<div class="highlight-bash"><div class="highlight"><pre>python3 build.py
+</pre></div>
+</div>
+<p>At the end of this step, the directory tree will include the following.</p>
+<ul class="simple">
+<li><code class="file docutils literal"><span class="pre">build</span></code>.  The documentation.  In HTML.</li>
+<li><code class="file docutils literal"><span class="pre">navtools</span></code>.  The Python package, ready for installation.</li>
+<li><code class="file docutils literal"><span class="pre">test</span></code>.  The unit test script.</li>
+</ul>
+<p>This reports, also, that 44 tests were run.</p>
+</li>
+</ol>
+<p>An alternative to step 2 is the following:</p>
+<div class="highlight-bash"><div class="highlight"><pre>chmod +x build.py
+./build.py
+</pre></div>
+</div>
+</div>
+<div class="section" id="build-script-design">
+<h2>Build Script Design<a class="headerlink" href="#build-script-design" title="Permalink to this headline">¶</a></h2>
+<p>The issue is to remain DRY: we hate to repeat the list of PyLit steps
+for multiple OS with slightly different path definitions.</p>
+<p>There are three common choices:</p>
+<ul class="simple">
+<li>Make both <code class="file docutils literal"><span class="pre">build.sh</span></code> and <code class="file docutils literal"><span class="pre">build.bat</span></code> from a common source.
+This would, potentially, lead to some real complication with
+PyLit trying to build both files (in different resulting syntax)
+from some kind of common source material.</li>
+<li>Depend on <code class="docutils literal"><span class="pre">make</span></code>, which is quite common.</li>
+<li>Use a platform-independent <code class="file docutils literal"><span class="pre">build.py</span></code> file for the build script.
+This can use <code class="docutils literal"><span class="pre">from</span> <span class="pre">sphinx.application</span> <span class="pre">import</span> <span class="pre">Sphinx</span></code>
+and <code class="docutils literal"><span class="pre">import</span> <span class="pre">pylit</span></code> to access these modules from within Python
+instead of using command-line scripts.</li>
+</ul>
+<p>We&#8217;ll create a Python script.</p>
+<div class="section" id="overheads">
+<h3>Overheads<a class="headerlink" href="#overheads" title="Permalink to this headline">¶</a></h3>
+<p>We&#8217;re going to make use of three &#8220;applications&#8221; to build navtools.</p>
+<ul class="simple">
+<li>Sphinx top-level application.</li>
+<li>PyLit top-level application.</li>
+<li>Unittest top-level test runner.</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;Platform-independent build script for NavTools 2.1&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">errno</span>
+<span class="kn">from</span> <span class="nn">sphinx.application</span> <span class="kn">import</span> <span class="n">Sphinx</span>
+<span class="kn">import</span> <span class="nn">pylit</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="sphinx-build">
+<h3>Sphinx Build<a class="headerlink" href="#sphinx-build" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="sphinx_build">
+<code class="descname">sphinx_build</code><span class="sig-paren">(</span><em>srcdir</em>, <em>outdir</em>, <em>buildername='html'</em><span class="sig-paren">)</span><a class="headerlink" href="#sphinx_build" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This function handles the simple use case for the <code class="docutils literal"><span class="pre">sphinx-build</span></code> script.
+The destination directory is &#8211; often &#8211; build/html or some place like
+that.</p>
+<p>When working with GitHub and a <code class="docutils literal"><span class="pre">gh-pages</span></code> branch, it can work
+well when the html is generated in the top-level directory. However.
+For this project, we&#8217;ll create a separate <code class="docutils literal"><span class="pre">gh-pages</span></code> branch which
+is a peer to this directory.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">sphinx_build</span><span class="p">(</span> <span class="n">srcdir</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">buildername</span><span class="o">=</span><span class="s">&#39;html&#39;</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Essentially: ``sphinx-build $* -b html source .``&quot;&quot;&quot;</span>
+    <span class="n">confdir</span><span class="o">=</span> <span class="n">srcdir</span><span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span> <span class="n">srcdir</span> <span class="p">)</span>
+    <span class="n">outdir</span><span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span> <span class="n">outdir</span> <span class="p">)</span>
+    <span class="n">doctreedir</span> <span class="o">=</span> <span class="n">outdir</span> <span class="o">/</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s">&#39;.doctrees&#39;</span><span class="p">)</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">Sphinx</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">srcdir</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">confdir</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">outdir</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">doctreedir</span><span class="p">),</span> <span class="n">buildername</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">force_all</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">filenames</span><span class="o">=</span><span class="p">[])</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">statuscode</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pylit-build">
+<h3>PyLit Build<a class="headerlink" href="#pylit-build" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pylit_build">
+<code class="descname">pylit_build</code><span class="sig-paren">(</span><em>infile</em>, <em>outfile</em><span class="sig-paren">)</span><a class="headerlink" href="#pylit_build" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This function handles the simple use case for PyLit. We force an overwrite because
+PyLit exits when there&#8217;s a problem. A bad design.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">pylit_build</span><span class="p">(</span> <span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Essentially: ``python3 -m pylit -t source/{document}.rst demo/{module}.py``</span>
+
+<span class="sd">    The issue here is that we need to provide platform-specific paths.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">pylit</span><span class="o">.</span><span class="n">main</span><span class="p">(</span> <span class="n">txt2code</span><span class="o">=</span> <span class="bp">True</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span> <span class="s">&quot;yes&quot;</span><span class="p">,</span> <span class="n">infile</span><span class="o">=</span> <span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span> <span class="n">outfile</span> <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">SystemExit</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Failed to transform {0} to {1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">))</span>
+        <span class="k">raise</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="make-directories">
+<h3>Make Directories<a class="headerlink" href="#make-directories" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="mkdir">
+<code class="descname">mkdir</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#mkdir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This function handles the simple use case for assuring that the directory
+tree exists.</p>
+<p>This also handles a rewrite to modify standard paths to Windows paths.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">mkdir</span><span class="p">(</span> <span class="n">path</span> <span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span> <span class="n">path</span> <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">==</span> <span class="n">errno</span><span class="o">.</span><span class="n">EEXIST</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="run-the-test-script">
+<h3>Run the Test Script<a class="headerlink" href="#run-the-test-script" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="run_test">
+<code class="descname">run_test</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#run_test" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>In effect, this does <code class="docutils literal"><span class="pre">python3</span> <span class="pre">test/main.py</span></code></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">run_test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">test.main</span>
+    <span class="n">result</span><span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-build-sequence">
+<h3>The Build Sequence<a class="headerlink" href="#the-build-sequence" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">build</span><span class="p">():</span>
+    <span class="n">sphinx_build</span><span class="p">(</span> <span class="s">&#39;source&#39;</span><span class="p">,</span> <span class="s">&#39;../navtools-gh-pages&#39;</span><span class="p">,</span> <span class="s">&#39;html&#39;</span> <span class="p">)</span>
+
+    <span class="n">mkdir</span><span class="p">(</span> <span class="s">&#39;navtools&#39;</span> <span class="p">)</span>
+
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s">&#39;source/navtools_init.rst&#39;</span><span class="p">,</span> <span class="s">&#39;navtools/__init__.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s">&#39;source/igrf11.rst&#39;</span><span class="p">,</span> <span class="s">&#39;navtools/igrf11.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s">&#39;source/navigation.rst&#39;</span><span class="p">,</span> <span class="s">&#39;navtools/navigation.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s">&#39;source/planning.rst&#39;</span><span class="p">,</span> <span class="s">&#39;navtools/planning.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s">&#39;source/analysis.rst&#39;</span><span class="p">,</span> <span class="s">&#39;navtools/analysis.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s">&#39;source/installation.rst&#39;</span><span class="p">,</span> <span class="s">&#39;setup.py&#39;</span> <span class="p">)</span>
+
+    <span class="n">mkdir</span><span class="p">(</span> <span class="s">&#39;test&#39;</span> <span class="p">)</span>
+
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s">&#39;source/testing/test_init.rst&#39;</span><span class="p">,</span> <span class="s">&#39;test/__init__.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s">&#39;source/testing/main.rst&#39;</span><span class="p">,</span> <span class="s">&#39;test/main.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s">&#39;source/testing/test_igrf11.rst&#39;</span><span class="p">,</span> <span class="s">&#39;test/test_igrf11.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s">&#39;source/testing/test_navigation.rst&#39;</span><span class="p">,</span> <span class="s">&#39;test/test_navigation.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s">&#39;source/testing/test_planning.rst&#39;</span><span class="p">,</span> <span class="s">&#39;test/test_planning.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s">&#39;source/testing/test_analysis.rst&#39;</span><span class="p">,</span> <span class="s">&#39;test/test_analysis.py&#39;</span> <span class="p">)</span>
+
+    <span class="n">run_test</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="main-program-switch">
+<h3>Main Program Switch<a class="headerlink" href="#main-program-switch" title="Permalink to this headline">¶</a></h3>
+<p>When the <code class="file docutils literal"><span class="pre">build.py</span></code> script is run from the command line,
+it will execute the <code class="xref py py-func docutils literal"><span class="pre">build()</span></code> function.  When it is imported,
+however, it will do nothing special.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">build</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="additional-builds">
+<h2>Additional Builds<a class="headerlink" href="#additional-builds" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes it&#8217;s desriable to refresh the documentation.</p>
+<p>The HTML pages are built with this command.</p>
+<div class="highlight-bash"><div class="highlight"><pre>sphinx-build <span class="nv">$*</span> -b html <span class="nb">source</span> ../navtools-gh-pages
+</pre></div>
+</div>
+<p>A LaTeX document can be built with this command.
+This can build a great-looking PDF.</p>
+<div class="highlight-bash"><div class="highlight"><pre>sphinx-build <span class="nv">$*</span> -b latex <span class="nb">source</span> ../navtools-gh-pages
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation via setup.py" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="testing/test_init.html" class="btn btn-neutral" title="navtools test __init__.py" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2012, S.Lott.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

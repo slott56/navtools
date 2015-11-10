@@ -1,0 +1,791 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Route Planning Application &mdash; NavTools 2.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="NavTools 2.1 documentation" href="index.html"/>
+        <link rel="next" title="Track Analysis Application" href="analysis.html"/>
+        <link rel="prev" title="Navigation Calculations Module" href="navigation.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> NavTools
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#actors">Actors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#use-cases">Use Cases</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#execution-use-case">Execution Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#planning-use-case">Planning Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#float-plan-use-case">Float Plan Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#analysis-use-case">Analysis Use Case</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#solution-overview">Solution Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#data-interface">Data Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#user-interface">User Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#architecture">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#references">References</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="navigation.html">Navigation Calculations Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#navigation-module-design">Navigation Module Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#module-docstring">Module Docstring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#problem-domain-objects">Problem Domain Objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#angleparser">AngleParser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#angle2-class">Angle2 Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#lat-subclass-of-angle">Lat Subclass of Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#lon-subclass-of-angle">Lon Subclass of Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#latlon-class">LatLon Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#globals">Globals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#distance-bearing-calculation">Distance/Bearing Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#formula">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#range-bearing-implementation">range_bearing implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#destination-calculation">Destination Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#id1">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#id2">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#destination-implementation">destination implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#declination-function">declination Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#historical-archive">Historical Archive</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#deprecation">Deprecation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#angle-class">Angle Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="navigation.html#globeangle-class">GlobeAngle Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="navigation.html#references-and-notes">References and Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Route Planning Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#input-parsing">Input Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#application-processing">Application Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#main-function">Main Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Track Analysis Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#input-parsing">Input Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#application-processing">Application Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#main-function">Main Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="igrf11.html">International Geomagnetic Reference Field Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#module-docstring">Module Docstring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#igrf11-fortran-comments">IGRF11 Fortran Comments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#python-imports">Python Imports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#essential-class-definition">Essential Class Definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#igrf11syn-function">igrf11syn Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#helper-functions">Helper Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="navtools_init.html">navtools <code class="docutils literal"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="testing/index.html">Testing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="testing/main.html">Main Test Script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_igrf11.html">Test IGRF11</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#test-case">Test Case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_navigation.html">Test Navigation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#globe-angle-and-angle-classes">Globe Angle and Angle classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#angle2-class">Angle2 Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#latlon-class">LatLon Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#range-bearing-function">range_bearing Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#destination-function">destination Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#declination-function">declination Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_planning.html">Test Planning</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#csv-to-routepoint-function">csv_to_RoutePoint function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gpx-to-routepoint-function">gpx_to_RoutePoint function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gen-rhumb-function">gen_rhumb Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gen-mag-bearing-function">gen_mag_bearing Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gen-schedule-function">gen_schedule Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#write-csv-function">write_csv Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#plan-function">plan Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_analysis.html">Test Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#csv-to-logentry-function-with-gpsnavx-data">csv_to_LogEntry function with GPSNavX Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#csv-to-logentry-function-with-manual-data">csv_to_LogEntry function with Manual Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#gpx-to-logentry-function">gpx_to_LogEntry function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#gen-rhumb-function">gen_rhumb Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#utility-to-compare-csv-output">Utility to compare CSV output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#write-csv-function">write_csv Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#analyze-function">analyze Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_init.html">navtools test <code class="docutils literal"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="build.html">NavTools Build</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="build.html#build-procedure">Build Procedure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build.html#build-script-design">Build Script Design</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="build.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#sphinx-build">Sphinx Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#pylit-build">PyLit Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#make-directories">Make Directories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#run-the-test-script">Run the Test Script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#the-build-sequence">The Build Sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#main-program-switch">Main Program Switch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="build.html#additional-builds">Additional Builds</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation via <code class="docutils literal"><span class="pre">setup.py</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#the-setup-py-file">The <code class="docutils literal"><span class="pre">setup.py</span></code> File</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">NavTools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Route Planning Application</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/planning.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="module-planning">
+<span id="route-planning-application"></span><h1>Route Planning Application<a class="headerlink" href="#module-planning" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#module-planning" title="planning"><code class="xref py py-mod docutils literal"><span class="pre">planning</span></code></a> application is used to do voyage planning.
+It computes range, bearing and elapsed time for points along a route.</p>
+<p>The input parsing supports two formats: CSV and GPX.  Each source format has
+a different kind of parser.  The CSV parser uses the <code class="xref py py-mod docutils literal"><span class="pre">csv</span></code> module.  The GPX parser uses
+<code class="xref py py-mod docutils literal"><span class="pre">xml.etree</span></code>; it uses the <code class="docutils literal"><span class="pre">findall()</span></code> method to iterate
+through all of the rows.</p>
+<p>The various navigation calculations use an immutable object (or functional
+programming) style.  A series of functions create new, richer objects
+from the initial <a class="reference internal" href="#planning.RoutePoint" title="planning.RoutePoint"><code class="xref py py-class docutils literal"><span class="pre">RoutePoint</span></code></a> objects.</p>
+<p>Specifically, we use the following kind of function composition.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">gen_schedule</span><span class="p">(</span>
+    <span class="n">gen_mag_bearing</span><span class="p">(</span>
+        <span class="n">gen_rhumb</span><span class="p">(</span> <span class="n">point_iter</span> <span class="p">),</span>
+        <span class="n">variance</span><span class="p">),</span>
+    <span class="n">speed</span> <span class="p">):</span>
+</pre></div>
+</div>
+<p>This module includes three groups of components.
+The <a class="reference internal" href="#input-parsing">Input Parsing</a> group is the functions and a namedtuple that
+acquire input from the GPX or CSV file.</p>
+<p>The <a class="reference internal" href="#application-processing">Application Processing</a> functions and namedtuples
+compute range and true bearing, magnetic bearing, total distance run,
+elapsed time in minutes and hours.</p>
+<p>Finally, the <a class="reference internal" href="#command-line-interface">Command-Line Interface</a> components are used
+to build a proper command-line application.</p>
+<div class="section" id="overheads">
+<h2>Overheads<a class="headerlink" href="#overheads" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">navigation</span>
+
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span>
+<span class="kn">from</span> <span class="nn">xml.etree.ElementTree</span> <span class="kn">import</span> <span class="n">QName</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="input-parsing">
+<h2>Input Parsing<a class="headerlink" href="#input-parsing" title="Permalink to this headline">¶</a></h2>
+<p>The purpose of input parsing is to create <a class="reference internal" href="#planning.RoutePoint" title="planning.RoutePoint"><code class="xref py py-class docutils literal"><span class="pre">RoutePoint</span></code></a> objects
+from input file sources.</p>
+<dl class="class">
+<dt id="planning.RoutePoint">
+<em class="property">class </em><code class="descclassname">planning.</code><code class="descname">RoutePoint</code><a class="headerlink" href="#planning.RoutePoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>A <a class="reference internal" href="#planning.RoutePoint" title="planning.RoutePoint"><code class="xref py py-class docutils literal"><span class="pre">RoutePoint</span></code></a> is a 5-tuple of name, latitude, longitude, description
+and &#8220;point&#8221; information.   The &#8220;point&#8221; information is a
+<a class="reference internal" href="navigation.html#navigation.LatLon" title="navigation.LatLon"><code class="xref py py-class docutils literal"><span class="pre">navigation.LatLon</span></code></a> instance that combines the source lat and lon
+values.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">RoutePoint</span><span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span> <span class="s">&#39;RoutePoint&#39;</span><span class="p">,</span> <span class="s">&#39;name,lat,lon,desc,point&#39;</span> <span class="p">)</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="planning.csv_to_RoutePoint">
+<code class="descclassname">planning.</code><code class="descname">csv_to_RoutePoint</code><span class="sig-paren">(</span><em>source</em><span class="sig-paren">)</span><a class="headerlink" href="#planning.csv_to_RoutePoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the CSV files produced by GPSNavX to yield an iterable sequence
+of <a class="reference internal" href="#planning.RoutePoint" title="planning.RoutePoint"><code class="xref py py-class docutils literal"><span class="pre">RoutePoint</span></code></a> objects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>source</strong> &#8211; Open file or file-like object that can be read</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">iterable sequence of <a class="reference internal" href="#planning.RoutePoint" title="planning.RoutePoint"><code class="xref py py-class docutils literal"><span class="pre">RoutePoint</span></code></a> instances.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Note that the GPSNavX output is encoded in <code class="docutils literal"><span class="pre">Western</span> <span class="pre">(Mac</span> <span class="pre">OS</span> <span class="pre">Roman)</span></code>.
+This can make CSV parsing a bit more complex because there will be
+Unicode characters that the CSV module doesn&#8217;t always handle gracefully.
+However, the patterns used for parsing tolerate the extraneous bytes
+that appear in the midst of degree-minute values.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">csv_to_RoutePoint</span><span class="p">(</span> <span class="n">source</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate RoutePoint from a CSV reader.  The assumed column</span>
+<span class="sd">    order is &quot;name&quot;, &quot;lat&quot;, &quot;lon&quot; followed by any additional attributes.</span>
+
+<span class="sd">    :param source: an open CSV file.</span>
+
+<span class="sd">    :returns: An iterator over :py:class:`RoutePoint` objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rte</span><span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span><span class="n">lat</span><span class="p">,</span><span class="n">lon</span><span class="p">,</span><span class="n">desc</span> <span class="ow">in</span> <span class="n">rte</span><span class="p">:</span>
+        <span class="n">point</span><span class="o">=</span> <span class="n">navigation</span><span class="o">.</span><span class="n">LatLon</span><span class="p">(</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="p">)</span>
+        <span class="k">yield</span> <span class="n">RoutePoint</span><span class="p">(</span> <span class="n">name</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">desc</span><span class="p">,</span> <span class="n">point</span> <span class="p">)</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="planning.gpx_to_RoutePoint">
+<code class="descclassname">planning.</code><code class="descname">gpx_to_RoutePoint</code><span class="sig-paren">(</span><em>source</em><span class="sig-paren">)</span><a class="headerlink" href="#planning.gpx_to_RoutePoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses the GPX files
+produced by GPSNavX to yield an iterable sequence of <a class="reference internal" href="#planning.RoutePoint" title="planning.RoutePoint"><code class="xref py py-class docutils literal"><span class="pre">RoutePoint</span></code></a> objects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>source</strong> &#8211; Open file or file-like object that can be read</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">iterable sequence of <a class="reference internal" href="#planning.RoutePoint" title="planning.RoutePoint"><code class="xref py py-class docutils literal"><span class="pre">RoutePoint</span></code></a> instances.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">gpx_to_RoutePoint</span><span class="p">(</span> <span class="n">source</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate RoutePoint from an XML doc.</span>
+
+<span class="sd">    :param source: an open XML file.</span>
+
+<span class="sd">    :returns: An iterator over :py:class:`RoutePoint` objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">gpx_ns</span><span class="o">=</span> <span class="s">&quot;http://www.topografix.com/GPX/1/1&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">n</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="n">QName</span><span class="p">(</span><span class="n">gpx_ns</span><span class="p">,</span> <span class="s">&quot;rte&quot;</span><span class="p">),</span> <span class="n">QName</span><span class="p">(</span><span class="n">gpx_ns</span><span class="p">,</span> <span class="s">&quot;rtept&quot;</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+    <span class="n">name_tag</span><span class="o">=</span> <span class="n">QName</span><span class="p">(</span><span class="n">gpx_ns</span><span class="p">,</span> <span class="s">&quot;name&quot;</span><span class="p">)</span>
+    <span class="n">desc_tag</span><span class="o">=</span> <span class="n">QName</span><span class="p">(</span><span class="n">gpx_ns</span><span class="p">,</span> <span class="s">&quot;desc&quot;</span><span class="p">)</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">xml</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">ElementTree</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span> <span class="n">source</span> <span class="p">)</span>
+    <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">doc</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span> <span class="n">path</span> <span class="p">):</span>
+        <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;lat&#39;</span><span class="p">),</span> <span class="n">pt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;lon&#39;</span><span class="p">)</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">navigation</span><span class="o">.</span><span class="n">Angle2</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span> <span class="n">lat</span> <span class="p">)</span>
+        <span class="n">lon</span> <span class="o">=</span> <span class="n">navigation</span><span class="o">.</span><span class="n">Angle2</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span> <span class="n">lon</span> <span class="p">)</span>
+        <span class="n">point</span><span class="o">=</span> <span class="n">navigation</span><span class="o">.</span><span class="n">LatLon</span><span class="p">(</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="p">)</span>
+        <span class="k">yield</span> <span class="n">RoutePoint</span><span class="p">(</span> <span class="n">pt</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="n">name_tag</span><span class="o">.</span><span class="n">text</span><span class="p">),</span>
+            <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span>
+            <span class="n">pt</span><span class="o">.</span><span class="n">findtext</span><span class="p">(</span><span class="n">desc_tag</span><span class="o">.</span><span class="n">text</span><span class="p">),</span>
+            <span class="n">point</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="application-processing">
+<h2>Application Processing<a class="headerlink" href="#application-processing" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="planning.RoutePoint_Rhumb">
+<em class="property">class </em><code class="descclassname">planning.</code><code class="descname">RoutePoint_Rhumb</code><a class="headerlink" href="#planning.RoutePoint_Rhumb" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This is a three-tuple with the original <a class="reference internal" href="#planning.RoutePoint" title="planning.RoutePoint"><code class="xref py py-class docutils literal"><span class="pre">RoutePoint</span></code></a>,
+the computed distance and computed (true) bearing to the next waypoint.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">RoutePoint_Rhumb</span><span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span> <span class="s">&#39;RoutePoint_Rhumb&#39;</span><span class="p">,</span> <span class="s">&#39;point,distance,bearing&#39;</span> <span class="p">)</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="planning.gen_rhumb">
+<code class="descclassname">planning.</code><code class="descname">gen_rhumb</code><span class="sig-paren">(</span><em>route_points_iter</em><span class="sig-paren">)</span><a class="headerlink" href="#planning.gen_rhumb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the simple, true bearing
+and distance between points.  Since this is for navigating forward
+along a route, each point is decorated with range and bearing to the
+next mark.  The last point is included, but has <code class="samp docutils literal"><span class="pre">None</span></code> for
+range and bearing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>route_points_iter</strong> &#8211; Iterator over individual <a class="reference internal" href="#planning.RoutePoint" title="planning.RoutePoint"><code class="xref py py-class docutils literal"><span class="pre">RoutePoint</span></code></a> instances.
+For example, the results of the <a class="reference internal" href="#planning.csv_to_RoutePoint" title="planning.csv_to_RoutePoint"><code class="xref py py-func docutils literal"><span class="pre">csv_to_RoutePoint()</span></code></a> or <a class="reference internal" href="#planning.gpx_to_RoutePoint" title="planning.gpx_to_RoutePoint"><code class="xref py py-func docutils literal"><span class="pre">gpx_to_RoutePoint()</span></code></a>
+function.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">iterator over <a class="reference internal" href="#planning.RoutePoint_Rhumb" title="planning.RoutePoint_Rhumb"><code class="xref py py-class docutils literal"><span class="pre">RoutePoint_Rhumb</span></code></a> instances.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">gen_rhumb</span><span class="p">(</span> <span class="n">route_points_iter</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate RoutePoint_Rhumb from RoutePoint.&quot;&quot;&quot;</span>
+    <span class="n">p1</span><span class="o">=</span> <span class="nb">next</span><span class="p">(</span> <span class="n">route_points_iter</span> <span class="p">)</span>
+    <span class="k">for</span> <span class="n">p2</span> <span class="ow">in</span> <span class="n">route_points_iter</span><span class="p">:</span>
+        <span class="n">r</span><span class="p">,</span> <span class="n">theta</span><span class="o">=</span> <span class="n">navigation</span><span class="o">.</span><span class="n">range_bearing</span><span class="p">(</span> <span class="n">p1</span><span class="o">.</span><span class="n">point</span><span class="p">,</span> <span class="n">p2</span><span class="o">.</span><span class="n">point</span> <span class="p">)</span>
+        <span class="k">yield</span> <span class="n">RoutePoint_Rhumb</span><span class="p">(</span> <span class="n">p1</span><span class="p">,</span> <span class="n">r</span><span class="p">,</span> <span class="n">theta</span> <span class="p">)</span>
+        <span class="n">p1</span><span class="o">=</span> <span class="n">p2</span>
+    <span class="k">yield</span> <span class="n">RoutePoint_Rhumb</span><span class="p">(</span> <span class="n">p2</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span> <span class="p">)</span>
+</pre></div>
+</div>
+<dl class="class">
+<dt id="planning.RoutePoint_Rhumb_Magnetic">
+<em class="property">class </em><code class="descclassname">planning.</code><code class="descname">RoutePoint_Rhumb_Magnetic</code><a class="headerlink" href="#planning.RoutePoint_Rhumb_Magnetic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This is a 4-tuple with the original <a class="reference internal" href="#planning.RoutePoint_Rhumb" title="planning.RoutePoint_Rhumb"><code class="xref py py-class docutils literal"><span class="pre">RoutePoint_Rhumb</span></code></a>,
+the computed distance, the true bearing and the bearing offset with
+the magnetic variance.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">RoutePoint_Rhumb_Magnetic</span><span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span> <span class="s">&#39;RoutePoint_Rhumb_Magnetic&#39;</span><span class="p">,</span>
+    <span class="s">&#39;point,distance,true_bearing,magnetic&#39;</span> <span class="p">)</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="planning.gen_mag_bearing">
+<code class="descclassname">planning.</code><code class="descname">gen_mag_bearing</code><span class="sig-paren">(</span><em>rhumb_iter</em>, <em>declination</em>, <em>date=None</em><span class="sig-paren">)</span><a class="headerlink" href="#planning.gen_mag_bearing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the given <code class="docutils literal"><span class="pre">declination</span></code> function to each point to
+compute the compass bearing value from the true bearing at each waypoint in a route.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rhumb_iter</strong> &#8211; iterator over <a class="reference internal" href="#planning.RoutePoint_Rhumb" title="planning.RoutePoint_Rhumb"><code class="xref py py-class docutils literal"><span class="pre">RoutePoint_Rhumb</span></code></a> instances.
+For example, the <a class="reference internal" href="#planning.gen_rhumb" title="planning.gen_rhumb"><code class="xref py py-func docutils literal"><span class="pre">gen_rhumb()</span></code></a> function.</li>
+<li><strong>declination</strong> &#8211; function to compute declination.
+We often use <a class="reference internal" href="navigation.html#navigation.declination" title="navigation.declination"><code class="xref py py-func docutils literal"><span class="pre">navigation.declination()</span></code></a> for this.</li>
+<li><strong>date</strong> &#8211; Optional <code class="xref py py-class docutils literal"><span class="pre">datetime.datetime</span></code> for which to compute
+the declination. If omitted, today&#8217;s date is used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Iterator over <a class="reference internal" href="#planning.RoutePoint_Rhumb_Magnetic" title="planning.RoutePoint_Rhumb_Magnetic"><code class="xref py py-class docutils literal"><span class="pre">RoutePoint_Rhumb_Magnetic</span></code></a> objects.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">gen_mag_bearing</span><span class="p">(</span> <span class="n">rhumb_iter</span><span class="p">,</span> <span class="n">declination</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="bp">None</span> <span class="p">):</span> <span class="c"># A/k/a Variation</span>
+    <span class="sd">&quot;&quot;&quot;Generate RoutePoint_Rhumb_Magnetic from RoutePoint_Rhumb iterator.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">rp_rhumb</span> <span class="ow">in</span> <span class="n">rhumb_iter</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">rp_rhumb</span><span class="o">.</span><span class="n">bearing</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">RoutePoint_Rhumb_Magnetic</span><span class="p">(</span><span class="n">rp_rhumb</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">magnetic</span><span class="o">=</span> <span class="n">rp_rhumb</span><span class="o">.</span><span class="n">bearing</span><span class="o">+</span><span class="n">declination</span><span class="p">(</span><span class="n">rp_rhumb</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">point</span><span class="p">,</span><span class="n">date</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">RoutePoint_Rhumb_Magnetic</span><span class="p">(</span>
+                <span class="n">rp_rhumb</span><span class="p">,</span> <span class="n">rp_rhumb</span><span class="o">.</span><span class="n">distance</span><span class="p">,</span> <span class="n">rp_rhumb</span><span class="o">.</span><span class="n">bearing</span><span class="p">,</span> <span class="n">magnetic</span> <span class="p">)</span>
+</pre></div>
+</div>
+<dl class="class">
+<dt id="planning.SchedulePoint">
+<em class="property">class </em><code class="descclassname">planning.</code><code class="descname">SchedulePoint</code><a class="headerlink" href="#planning.SchedulePoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This is a 7-tuple with the <a class="reference internal" href="#planning.RoutePoint_Rhumb" title="planning.RoutePoint_Rhumb"><code class="xref py py-class docutils literal"><span class="pre">RoutePoint_Rhumb</span></code></a>, plus
+the various computed values: distance, true bearing, magnetic bearing, running distance, elapsed time in minutes, and elapsed time as a string with
+hours and minutes formatted nicely.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">SchedulePoint</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span> <span class="s">&#39;SchedulePoint&#39;</span><span class="p">,</span>
+    <span class="s">&#39;point,distance,true_bearing,magnetic,running,elapsed_min,elapsed_hm&#39;</span> <span class="p">)</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="planning.gen_schedule">
+<code class="descclassname">planning.</code><code class="descname">gen_schedule</code><span class="sig-paren">(</span><em>rhumb_mag_iter</em>, <em>speed= 5.0</em><span class="sig-paren">)</span><a class="headerlink" href="#planning.gen_schedule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the elapsed
+distance and elapsed time (in two formats) for each waypoint.
+This is (technically) the time to the <strong>next</strong> waypoint.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>rhumb_mag_iter</strong> &#8211; Iterator over <a class="reference internal" href="#planning.RoutePoint_Rhumb_Magnetic" title="planning.RoutePoint_Rhumb_Magnetic"><code class="xref py py-class docutils literal"><span class="pre">RoutePoint_Rhumb_Magnetic</span></code></a> objects.</li>
+<li><strong>speed</strong> &#8211; Default speed assumption to use; default is 5.0 knots.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">iterator over <a class="reference internal" href="#planning.SchedulePoint" title="planning.SchedulePoint"><code class="xref py py-class docutils literal"><span class="pre">SchedulePoint</span></code></a> instances.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>An input bearing of <code class="samp docutils literal"><span class="pre">None</span></code> in a <a class="reference internal" href="#planning.RoutePoint_Rhumb_Magnetic" title="planning.RoutePoint_Rhumb_Magnetic"><code class="xref py py-class docutils literal"><span class="pre">RoutePoint_Rhumb_Magnetic</span></code></a> object
+indicates the trailing waypoint which is the final destination.</p>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">gen_schedule</span><span class="p">(</span> <span class="n">rhumb_mag_iter</span><span class="p">,</span> <span class="n">speed</span><span class="o">=</span> <span class="mf">5.0</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create the schedule from an iterator over RoutePoint_Rhumb_Magnetic values.&quot;&quot;&quot;</span>
+    <span class="n">distance</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">rp</span> <span class="ow">in</span> <span class="n">rhumb_mag_iter</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">rp</span><span class="o">.</span><span class="n">true_bearing</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">SchedulePoint</span><span class="p">(</span> <span class="n">rp</span><span class="o">.</span><span class="n">point</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">distance</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">true_bearing</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">magnetic</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">distance</span> <span class="o">+=</span> <span class="n">rp</span><span class="o">.</span><span class="n">distance</span>
+            <span class="n">elapsed_min</span><span class="o">=</span> <span class="mf">60.</span><span class="o">*</span><span class="n">distance</span><span class="o">/</span><span class="n">speed</span>
+            <span class="n">h</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span> <span class="nb">int</span><span class="p">(</span><span class="n">elapsed_min</span><span class="p">),</span> <span class="mi">60</span> <span class="p">)</span>
+            <span class="n">elapsed_hm</span> <span class="o">=</span> <span class="s">&quot;{0:02d}h {1:02d}m&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">h</span><span class="p">,</span> <span class="n">m</span> <span class="p">)</span>
+            <span class="k">yield</span> <span class="n">SchedulePoint</span><span class="p">(</span> <span class="n">rp</span><span class="o">.</span><span class="n">point</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">distance</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">true_bearing</span><span class="p">,</span> <span class="n">rp</span><span class="o">.</span><span class="n">magnetic</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">elapsed_min</span><span class="p">,</span> <span class="n">elapsed_hm</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="command-line-interface">
+<h2>Command-Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="planning.write_csv">
+<code class="descclassname">planning.</code><code class="descname">write_csv</code><span class="sig-paren">(</span><em>sched_iter</em>, <em>target</em><span class="sig-paren">)</span><a class="headerlink" href="#planning.write_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a sequence of <code class="xref py py-class docutils literal"><span class="pre">Schedule</span></code> objects to a given target file.</p>
+<p>The file will have the following columns:</p>
+<blockquote>
+<div>&#8220;Name&#8221;, &#8220;Lat&#8221;, &#8220;Lon&#8221;, &#8220;Desc&#8221;,
+&#8220;Distance (nm)&#8221;, &#8220;True Bearing&#8221;, &#8220;Magnetic Bearing&#8221;,
+&#8220;Distance Run&#8221;, &#8220;Elapsed HH:MM&#8221;</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sched_iter</strong> &#8211; iterator over <a class="reference internal" href="#planning.SchedulePoint" title="planning.SchedulePoint"><code class="xref py py-class docutils literal"><span class="pre">SchedulePoint</span></code></a> instances.
+For example, the output from the <a class="reference internal" href="#planning.gen_schedule" title="planning.gen_schedule"><code class="xref py py-func docutils literal"><span class="pre">gen_schedule()</span></code></a> function.</li>
+<li><strong>target</strong> &#8211; Open file (or file-like object) to which csv data will be
+written.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>Note that we apply some rounding rules to these values before writing them
+to a CSV file. The distances are rounded to <img class="math" src="_images/math/1f1fffa6e434baa64e9e2c2bcd955a64d5bdeb53.png" alt="10^{-5}"/> which is about
+an inch, or 2 cm: more accurate than the GPS position.
+The bearing is rounded to zero places.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">It&#8217;s hard to steer to a given degree,
+much less a fraction of a degree. Classically, the mariner&#8217;s compass divides
+the circle into 32 points; about 10 degrees each point.</p>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">nround</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">digits</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="nb">round</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">digits</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">write_csv</span><span class="p">(</span> <span class="n">sched_iter</span><span class="p">,</span> <span class="n">target</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;sched_iter is an iterable of Schedule objects.&quot;&quot;&quot;</span>
+    <span class="n">rte_rhumb</span><span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span> <span class="n">target</span> <span class="p">)</span>
+    <span class="n">rte_rhumb</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span>
+        <span class="p">[</span><span class="s">&quot;Name&quot;</span><span class="p">,</span> <span class="s">&quot;Lat&quot;</span><span class="p">,</span> <span class="s">&quot;Lon&quot;</span><span class="p">,</span> <span class="s">&quot;Desc&quot;</span><span class="p">,</span>
+        <span class="s">&quot;Distance (nm)&quot;</span><span class="p">,</span> <span class="s">&quot;True Bearing&quot;</span><span class="p">,</span> <span class="s">&quot;Magnetic Bearing&quot;</span><span class="p">,</span>
+        <span class="s">&quot;Distance Run&quot;</span><span class="p">,</span> <span class="s">&quot;Elapsed HH:MM&quot;</span><span class="p">,</span> <span class="p">]</span>
+        <span class="p">)</span>
+    <span class="k">for</span> <span class="n">sched</span> <span class="ow">in</span> <span class="n">sched_iter</span><span class="p">:</span>
+        <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="o">=</span> <span class="n">sched</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">dm</span>
+        <span class="n">rte_rhumb</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">sched</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span><span class="p">,</span> <span class="n">sched</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">desc</span><span class="p">,</span>
+            <span class="n">nround</span><span class="p">(</span><span class="n">sched</span><span class="o">.</span><span class="n">distance</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span>
+            <span class="bp">None</span> <span class="k">if</span> <span class="n">sched</span><span class="o">.</span><span class="n">true_bearing</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">nround</span><span class="p">(</span><span class="n">sched</span><span class="o">.</span><span class="n">true_bearing</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+            <span class="bp">None</span> <span class="k">if</span> <span class="n">sched</span><span class="o">.</span><span class="n">magnetic</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">nround</span><span class="p">(</span><span class="n">sched</span><span class="o">.</span><span class="n">magnetic</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+            <span class="n">nround</span><span class="p">(</span><span class="n">sched</span><span class="o">.</span><span class="n">running</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span>
+            <span class="n">sched</span><span class="o">.</span><span class="n">elapsed_hm</span><span class="p">,</span> <span class="p">]</span>
+            <span class="p">)</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="planning.plan">
+<code class="descclassname">planning.</code><code class="descname">plan</code><span class="sig-paren">(</span><em>route_file</em>, <em>speed=5.0</em>, <em>date=None</em>, <em>variance=None</em><span class="sig-paren">)</span><a class="headerlink" href="#planning.plan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform a simple route file into a route with a detailed schedule. This
+will read the a <code class="file docutils literal"><span class="pre">.csv</span></code> or <code class="file docutils literal"><span class="pre">.gpx</span></code> file and produce a file
+with the schedule data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>route_file</strong> &#8211; Source route, extracted from GPSNavX in CSV or GPX notation.
+For a file named <code class="samp docutils literal"><em><span class="pre">somename</span></em><span class="pre">.csv</span></code> or <code class="samp docutils literal"><em><span class="pre">somename</span></em><span class="pre">.gpx</span></code>
+the output will be <code class="samp docutils literal"><em><span class="pre">somename</span></em> <span class="pre">Schedule.csv</span></code>.</li>
+<li><strong>speed</strong> &#8211; Assumed speed; default is 5.0kn.</li>
+<li><strong>date</strong> &#8211; The <code class="xref py py-class docutils literal"><span class="pre">datetime.datetime</span></code> for magnetic declination calculation;
+default is today.</li>
+<li><strong>variance</strong> &#8211; Declination function to use.  Default is <a class="reference internal" href="navigation.html#navigation.declination" title="navigation.declination"><code class="xref py py-func docutils literal"><span class="pre">navigation.declination()</span></code></a>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">plan</span><span class="p">(</span> <span class="n">route_filename</span><span class="p">,</span> <span class="n">speed</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">variance</span><span class="o">=</span><span class="bp">None</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Transform a simple route into a route with a detailed schedule.</span>
+
+<span class="sd">    :param route_filename: Source route, extracted from GPSNavX in CSV.</span>
+
+<span class="sd">    :param speed: Assumed speed; default is 5.0kn.</span>
+
+<span class="sd">    :param date: Assumed date for magnetic declination; default is today.</span>
+
+<span class="sd">    :param variance: Declination function to use.  Default is :py:func:`navigation.declination`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">variance</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="n">variance</span><span class="o">=</span> <span class="n">navigation</span><span class="o">.</span><span class="n">declination</span>
+
+    <span class="k">def</span> <span class="nf">schedule</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">speed</span> <span class="p">):</span>
+        <span class="n">sched</span><span class="o">=</span> <span class="n">gen_schedule</span><span class="p">(</span>
+            <span class="n">gen_mag_bearing</span><span class="p">(</span>
+                <span class="n">gen_rhumb</span><span class="p">(</span> <span class="n">route</span> <span class="p">),</span> <span class="n">variance</span><span class="p">,</span> <span class="n">date</span><span class="p">),</span> <span class="n">speed</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">sched</span>
+
+    <span class="n">route_path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">route_filename</span><span class="p">)</span>
+    <span class="n">ext</span><span class="o">=</span> <span class="n">route_path</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">schedule_path</span><span class="o">=</span> <span class="n">route_path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="p">(</span><span class="n">route_path</span><span class="o">.</span><span class="n">stem</span> <span class="o">+</span> <span class="s">&quot; Schedule&quot;</span> <span class="o">+</span> <span class="s">&quot;.csv&quot;</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">schedule_path</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s">&#39;w&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">target</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s">&#39;.csv&#39;</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">route_path</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">source</span><span class="p">:</span>
+                <span class="n">route</span><span class="o">=</span> <span class="n">csv_to_RoutePoint</span><span class="p">(</span> <span class="n">source</span> <span class="p">)</span>
+                <span class="n">sched</span><span class="o">=</span> <span class="n">schedule</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">speed</span><span class="p">)</span>
+                <span class="n">write_csv</span><span class="p">(</span> <span class="n">sched</span><span class="p">,</span> <span class="n">target</span> <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">ext</span> <span class="o">==</span> <span class="s">&#39;.gpx&#39;</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">route_path</span><span class="o">.</span><span class="n">open</span><span class="p">()</span> <span class="k">as</span> <span class="n">source</span><span class="p">:</span>
+                <span class="n">route</span><span class="o">=</span> <span class="n">gpx_to_RoutePoint</span><span class="p">(</span> <span class="n">source</span> <span class="p">)</span>
+                <span class="n">sched</span><span class="o">=</span> <span class="n">schedule</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">speed</span><span class="p">)</span>
+                <span class="n">write_csv</span><span class="p">(</span> <span class="n">sched</span><span class="p">,</span> <span class="n">target</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span> <span class="s">&quot;Can&#39;t process {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">route_filename</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="main-function">
+<h2>Main Function<a class="headerlink" href="#main-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="planning.main">
+<code class="descclassname">planning.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#planning.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse command-line arguments to get the routes file names, and the default speed
+to use.</p>
+<p>Then use <a class="reference internal" href="#planning.plan" title="planning.plan"><code class="xref py py-func docutils literal"><span class="pre">plan()</span></code></a> to process each file, creating a <code class="file docutils literal"><em><span class="pre">name</span></em> <span class="pre">Schedule.csv</span></code>
+output file with the detailed schedule.</p>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">parser</span><span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span> <span class="s">&#39;routes&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s">&#39;*&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span> <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span> <span class="s">&#39;-s&#39;</span><span class="p">,</span> <span class="s">&#39;--speed&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">&#39;store&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s">&#39;?&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mf">5.0</span> <span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="k">for</span> <span class="nb">file</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">routes</span><span class="p">:</span>
+        <span class="n">plan</span><span class="p">(</span> <span class="nb">file</span><span class="p">,</span> <span class="n">speed</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">speed</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="main-script">
+<h2>Main Script<a class="headerlink" href="#main-script" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Typical use cases for this module include the following.</p>
+<ul class="simple">
+<li>Run from the command line:</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre>python -m navtools.planning -s 5.0 &#39;../../Sailing/Cruising Plans/Lewes 2011/Jackson Creek to Cape Henlopen -- Offshore.gpx&#39;
+</pre></div>
+</div>
+<ul class="simple">
+<li>Run within a Python script:</li>
+</ul>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">navtools.planning</span> <span class="kn">import</span> <span class="n">plan</span>
+<span class="n">plan</span><span class="p">(</span> <span class="s">&#39;../../Sailing/Cruising Plans/Routes/Whitby Rendezvous.csv&#39;</span><span class="p">,</span> <span class="mf">5.0</span> <span class="p">)</span>
+<span class="n">plan</span><span class="p">(</span> <span class="s">&#39;../../Sailing/Cruising Plans/Routes/Whitby Rendezvous.gpx&#39;</span><span class="p">,</span> <span class="mf">5.0</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="analysis.html" class="btn btn-neutral float-right" title="Track Analysis Application" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="navigation.html" class="btn btn-neutral" title="Navigation Calculations Module" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2012, S.Lott.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

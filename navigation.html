@@ -1,0 +1,1832 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Navigation Calculations Module &mdash; NavTools 2.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="NavTools 2.1 documentation" href="index.html"/>
+        <link rel="next" title="Route Planning Application" href="planning.html"/>
+        <link rel="prev" title="Overview" href="introduction.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> NavTools
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#actors">Actors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#use-cases">Use Cases</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#execution-use-case">Execution Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#planning-use-case">Planning Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#float-plan-use-case">Float Plan Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#analysis-use-case">Analysis Use Case</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#solution-overview">Solution Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#data-interface">Data Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#user-interface">User Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#architecture">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#references">References</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Navigation Calculations Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#navigation-module-design">Navigation Module Design</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-docstring">Module Docstring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#problem-domain-objects">Problem Domain Objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#angleparser">AngleParser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#angle2-class">Angle2 Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lat-subclass-of-angle">Lat Subclass of Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#lon-subclass-of-angle">Lon Subclass of Angle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#latlon-class">LatLon Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#globals">Globals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#distance-bearing-calculation">Distance/Bearing Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#formula">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#range-bearing-implementation">range_bearing implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#destination-calculation">Destination Calculation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#destination-implementation">destination implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#declination-function">declination Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#historical-archive">Historical Archive</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#deprecation">Deprecation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#angle-class">Angle Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#globeangle-class">GlobeAngle Class</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#references-and-notes">References and Notes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="planning.html">Route Planning Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#input-parsing">Input Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#application-processing">Application Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#main-function">Main Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="planning.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Track Analysis Application</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#overheads">Overheads</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#input-parsing">Input Parsing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#application-processing">Application Processing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#command-line-interface">Command-Line Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#main-function">Main Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="analysis.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="igrf11.html">International Geomagnetic Reference Field Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#module-docstring">Module Docstring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#igrf11-fortran-comments">IGRF11 Fortran Comments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#python-imports">Python Imports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#essential-class-definition">Essential Class Definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#igrf11syn-function">igrf11syn Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="igrf11.html#helper-functions">Helper Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="navtools_init.html">navtools <code class="docutils literal"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="testing/index.html">Testing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="testing/main.html">Main Test Script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_igrf11.html">Test IGRF11</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#test-case">Test Case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_igrf11.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_navigation.html">Test Navigation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#globe-angle-and-angle-classes">Globe Angle and Angle classes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#angle2-class">Angle2 Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#latlon-class">LatLon Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#range-bearing-function">range_bearing Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#destination-function">destination Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_navigation.html#declination-function">declination Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_navigation.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_planning.html">Test Planning</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#csv-to-routepoint-function">csv_to_RoutePoint function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gpx-to-routepoint-function">gpx_to_RoutePoint function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gen-rhumb-function">gen_rhumb Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gen-mag-bearing-function">gen_mag_bearing Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#gen-schedule-function">gen_schedule Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#write-csv-function">write_csv Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_planning.html#plan-function">plan Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_planning.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_analysis.html">Test Analysis</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#test-cases">Test Cases</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#csv-to-logentry-function-with-gpsnavx-data">csv_to_LogEntry function with GPSNavX Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#csv-to-logentry-function-with-manual-data">csv_to_LogEntry function with Manual Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#gpx-to-logentry-function">gpx_to_LogEntry function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#gen-rhumb-function">gen_rhumb Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#utility-to-compare-csv-output">Utility to compare CSV output</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#write-csv-function">write_csv Function</a></li>
+<li class="toctree-l4"><a class="reference internal" href="testing/test_analysis.html#analyze-function">analyze Function</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#suite-function">suite Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="testing/test_analysis.html#main-script">Main Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="testing/test_init.html">navtools test <code class="docutils literal"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="build.html">NavTools Build</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="build.html#build-procedure">Build Procedure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build.html#build-script-design">Build Script Design</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="build.html#overheads">Overheads</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#sphinx-build">Sphinx Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#pylit-build">PyLit Build</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#make-directories">Make Directories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#run-the-test-script">Run the Test Script</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#the-build-sequence">The Build Sequence</a></li>
+<li class="toctree-l3"><a class="reference internal" href="build.html#main-program-switch">Main Program Switch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="build.html#additional-builds">Additional Builds</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation via <code class="docutils literal"><span class="pre">setup.py</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#the-setup-py-file">The <code class="docutils literal"><span class="pre">setup.py</span></code> File</a></li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">NavTools</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Navigation Calculations Module</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/navigation.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="navigation-calculations-module">
+<h1>Navigation Calculations Module<a class="headerlink" href="#navigation-calculations-module" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#module-navigation" title="navigation"><code class="xref py py-mod docutils literal"><span class="pre">navigation</span></code></a> module computes range and bearing between two points.
+It leverages the <a class="reference internal" href="igrf11.html#module-igrf11" title="igrf11"><code class="xref py py-mod docutils literal"><span class="pre">igrf11</span></code></a> module to compute compass bearing from
+true bearing.</p>
+<span class="target" id="module-navigation"></span><p>A &#8220;rhumb line&#8221; (or loxodrome) is a path of constant bearing, which
+crosses all meridians at the same angle.</p>
+<p>Sailors navigate along rhumb lines because
+it is easier to follow a constant compass bearing than to be continually
+adjusting the bearing to follow a great circle. Rhumb
+lines are straight lines on a chart that uses the Mercator projection.</p>
+<p>Rhumb lines are generally longer than great-circle (orthodrome) routes.
+For instance, London to New York is 4% longer along a rhumb line than
+along a great circle &#8211; important for aviation fuel, but not
+particularly to sailing vessels.</p>
+<div class="section" id="navigation-module-design">
+<h2>Navigation Module Design<a class="headerlink" href="#navigation-module-design" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="#module-navigation" title="navigation"><code class="xref py py-mod docutils literal"><span class="pre">navigation</span></code></a> module contains domain objects and calculations.
+The domain objects include the following:</p>
+<ul class="simple">
+<li>A coordinate point (<a class="reference internal" href="#navigation.LatLon" title="navigation.LatLon"><code class="xref py py-class docutils literal"><span class="pre">LatLon</span></code></a>) is a pair of angles,
+<img class="math" src="_images/math/db1deceac9056a6c640e94143f790f62e556e6c3.png" alt="(lat, lon)"/>.  Each of these values is an <a class="reference internal" href="#navigation.Angle" title="navigation.Angle"><code class="xref py py-class docutils literal"><span class="pre">Angle</span></code></a>.</li>
+<li>The angle definition (<a class="reference internal" href="#navigation.Angle" title="navigation.Angle"><code class="xref py py-class docutils literal"><span class="pre">Angle</span></code></a>, <a class="reference internal" href="#navigation.Lat" title="navigation.Lat"><code class="xref py py-class docutils literal"><span class="pre">Lat</span></code></a>, and <a class="reference internal" href="#navigation.Lon" title="navigation.Lon"><code class="xref py py-class docutils literal"><span class="pre">Lon</span></code></a>)
+includes the various format conversions from human
+friendly notations in degrees, minutes, seconds with hemisphere.
+It also includes formatting into these human-friendly notations.</li>
+</ul>
+<p>A central design question is the packaging of the calculations
+themselves.  There are two choices:</p>
+<ul class="simple">
+<li>Stand-alone functions.</li>
+<li>Methods of the <a class="reference internal" href="#navigation.LatLon" title="navigation.LatLon"><code class="xref py py-class docutils literal"><span class="pre">LatLon</span></code></a> class.</li>
+</ul>
+<p>We have a handy range-bearing function, <img class="math" src="_images/math/ecc3e64b3a6783c231f64497befa8b749630ce09.png" alt="R( p_1, p_2 )"/>, which offers two
+parts, one of which is the haversine function:</p>
+<div class="math">
+<p><img src="_images/math/6fd32e7233e5ebd7cebffbe320e5c15409c142df.png" alt="d( p_1, p_2 ), &amp;\text{ distance from $p_1$ to $p_2$}\\
+\theta( p_1, p_2 ), &amp;\text{ bearing from $p_1$ to $p_2$}
+
+R( p_1, p_2 ) = \Bigl( d( p_1, p_2 ), \theta( p_1, p_2 ) \Bigr)"/></p>
+</div><p>The destination function, <img class="math" src="_images/math/48707448668f473d53e09302089d2eddf07b0021.png" alt="D( p_1, d, \theta )"/>, has (almost) two parts, also.
+It can also be seen as a single object, which is a coordinate pair.</p>
+<div class="math">
+<p><img src="_images/math/59d5c44985a549c70b364dc4bd6128a96cfe78ba.png" alt="lat( p_1, d, \theta ), &amp;\text{ latitude at distance $d$, angle $\theta$ from $p_1$}\\
+lon( p_1, d, \theta ), &amp;\text{ longitude at distance $d$, angle $\theta$ from $p_1$}
+
+D( p_1, d, \theta ) = \Bigl( lat( p_1, d, \theta ), lon( p_1, d, \theta ) \Bigr)"/></p>
+</div><p>Stand-alone functions like these fit the mathematical definitions in a simple
+and precise way.  The code would look like the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">d</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">distance_bearing</span><span class="p">(</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>This is preferred.</p>
+<p>The alternative, method functions of the <a class="reference internal" href="#navigation.LatLon" title="navigation.LatLon"><code class="xref py py-class docutils literal"><span class="pre">LatLon</span></code></a> class, have a
+problem in clarity.  The arguments to the function are textually
+separated by the method name, like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">d</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">p1</span><span class="o">.</span><span class="n">distance_bearing</span><span class="p">(</span> <span class="n">p2</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>With this syntax, the coordinates <code class="docutils literal"><span class="pre">p1</span></code> and <code class="docutils literal"><span class="pre">p2</span></code> lose the obvious &#8220;peer&#8221; relationship
+For this reason, the various calculations are implemented as
+stand-alone functions, not method functions of the <a class="reference internal" href="#navigation.LatLon" title="navigation.LatLon"><code class="xref py py-class docutils literal"><span class="pre">LatLon</span></code></a> class.</p>
+</div>
+<div class="section" id="module-docstring">
+<h2>Module Docstring<a class="headerlink" href="#module-docstring" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="sd">&quot;&quot;&quot;Navigation Calculations.</span>
+
+<span class="sd">Definition of LatLon, Lat, Lon, and Angle.</span>
+
+<span class="sd">Functions range_bearing, destination, and declination.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="overheads">
+<h2>Overheads<a class="headerlink" href="#overheads" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">igrf11</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">numbers</span>
+<span class="kn">import</span> <span class="nn">string</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="problem-domain-objects">
+<h2>Problem Domain Objects<a class="headerlink" href="#problem-domain-objects" title="Permalink to this headline">¶</a></h2>
+<p>An essential feature of the navigation calculations is that Latitude
+and Longitude are actually angles.  They appear (on a Mercator chart) to be
+planar Cartesian coordinates, but they&#8217;re actually a pair of angles measured
+from the center of the earth.</p>
+<p>A point on the surface has two angles: latitude is the angle
+normal to the equator and longitude is the angle normal to the
+Greenwich meridian.</p>
+<div class="section" id="angleparser">
+<h3>AngleParser<a class="headerlink" href="#angleparser" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="navigation.AngleParser">
+<em class="property">class </em><code class="descclassname">navigation.</code><code class="descname">AngleParser</code><a class="headerlink" href="#navigation.AngleParser" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This is used to parse a input string values. We try four
+distinct formats. The value returned, ultimately, is a signed degree value.</p>
+<p>This is used by <a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a> to parse a string.
+See <code class="xref py py-meth docutils literal"><span class="pre">Angle2.fromstring()</span></code>.</p>
+<p>The <code class="xref py py-meth docutils literal"><span class="pre">sign()</span></code> method converts the signs from &#8220;N&#8221;, &#8220;S&#8221;, &#8220;E&#8221;, and &#8220;W&#8221;
+to +1 or -1.</p>
+<p>The <a class="reference internal" href="#navigation.parse" title="navigation.parse"><code class="xref py py-meth docutils literal"><span class="pre">parse()</span></code></a> method attempts a sequence of conversions ranked
+in order from simple to complex.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">AngleParser</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Parse a sting representation of a latitude or longitude.</span>
+
+<span class="sd">    &gt;&gt;&gt; AngleParser.parse(&quot;76.123N&quot;)</span>
+<span class="sd">    76.123</span>
+<span class="sd">    &gt;&gt;&gt; AngleParser.parse(&quot;76.123S&quot;)</span>
+<span class="sd">    -76.123</span>
+<span class="sd">    &gt;&gt;&gt; AngleParser.parse(&quot;Due North&quot;) # doctest: +ELLIPSIS</span>
+<span class="sd">    Traceback (most recent call last):</span>
+<span class="sd">    ...</span>
+<span class="sd">    ValueError: Cannot parse &#39;Due North&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Parsing patterns.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dms_pat</span><span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span> <span class="s">r&quot;(\d+)\D+(\d+)\D+(\d+)[^NEWSnews]*([NEWSnews]?)&quot;</span> <span class="p">)</span>
+<span class="n">dm_pat</span><span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span> <span class="s">r&quot;(\d+)\D+(\d+\.\d+)[^NEWSnews]*([NEWSnews]?)&quot;</span> <span class="p">)</span>
+<span class="n">d_pat</span><span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span> <span class="s">r&quot;(\d+\.\d+)[^NEWSnews]*([NEWSnews]?)&quot;</span> <span class="p">)</span>
+<span class="n">navx_dmh_pat</span><span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span> <span class="s">r&quot;(\d+)\D+(\d+\.\d+)[^NEWSnews]*([NEWSnews]?)&quot;</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Sign conversion.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">sign</span><span class="p">(</span><span class="n">txt</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s">&quot;N&quot;</span><span class="p">:</span> <span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;S&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;E&quot;</span><span class="p">:</span> <span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="s">&quot;W&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">txt</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="navigation.parse">
+<code class="descclassname">navigation.</code><code class="descname">parse</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#navigation.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Static method to parse a text value, returning signed degrees
+as a float value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> &#8211; text to parse</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">float degrees or a <code class="xref py py-exc docutils literal"><span class="pre">ValueError</span></code> exception.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@staticmethod</span>
+<span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+    <span class="n">d</span><span class="o">=</span> <span class="n">AngleParser</span><span class="o">.</span><span class="n">d_pat</span><span class="o">.</span><span class="n">match</span><span class="p">(</span> <span class="n">value</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="n">d</span><span class="p">:</span>
+        <span class="n">deg</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">AngleParser</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span><span class="o">*</span><span class="n">deg</span>
+    <span class="n">dm</span><span class="o">=</span> <span class="n">AngleParser</span><span class="o">.</span><span class="n">dm_pat</span><span class="o">.</span><span class="n">match</span><span class="p">(</span> <span class="n">value</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="n">dm</span><span class="p">:</span>
+        <span class="n">d</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dm</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span> <span class="nb">float</span><span class="p">(</span><span class="n">dm</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">AngleParser</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">dm</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="n">d</span> <span class="o">+</span> <span class="n">m</span><span class="o">/</span><span class="mi">60</span><span class="p">)</span>
+    <span class="n">dms</span><span class="o">=</span> <span class="n">AngleParser</span><span class="o">.</span><span class="n">dms_pat</span><span class="o">.</span><span class="n">match</span><span class="p">(</span> <span class="n">value</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="n">dms</span><span class="p">:</span>
+        <span class="n">d</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dms</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="n">dms</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span> <span class="nb">float</span><span class="p">(</span><span class="n">dms</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">AngleParser</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">dms</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="n">d</span> <span class="o">+</span> <span class="n">m</span><span class="o">/</span><span class="mi">60</span> <span class="o">+</span> <span class="n">s</span><span class="o">/</span><span class="mi">3600</span><span class="p">)</span>
+    <span class="n">navx</span><span class="o">=</span> <span class="n">AngleParser</span><span class="o">.</span><span class="n">navx_dmh_pat</span><span class="o">.</span><span class="n">match</span><span class="p">(</span> <span class="n">value</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="n">navx</span><span class="p">:</span>
+        <span class="n">d</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">navx</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span> <span class="nb">float</span><span class="p">(</span><span class="n">navx</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">AngleParser</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">navx</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="n">d</span> <span class="o">+</span> <span class="n">m</span><span class="o">/</span><span class="mi">60</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s">&quot;Cannot parse {0!r}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>It&#8217;s possible to create a slight generalization to the parsing
+approach. If we use <code class="docutils literal"><span class="pre">r&quot;(?P&lt;d&gt;...)(?P&lt;m&gt;...)...&quot;</span></code> then a pattern will
+have some combination of groups named &#8216;d&#8217;, &#8216;m&#8217; and &#8216;s&#8217;.  We can then
+use code like <code class="docutils literal"><span class="pre">float(m.groupdict('0').get('m'))</span></code> to get a value, or supply &#8216;0&#8217;
+as a default.</p>
+<p>Doing this would allow us to step through a sequence of regular expressions
+looking for a match.</p>
+</div>
+<div class="section" id="angle2-class">
+<h3>Angle2 Class<a class="headerlink" href="#angle2-class" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="navigation.Angle2">
+<em class="property">class </em><code class="descclassname">navigation.</code><code class="descname">Angle2</code><a class="headerlink" href="#navigation.Angle2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>Fundamentally, the calculations we&#8217;re interested in,
+<a class="reference internal" href="#navigation.range_bearing" title="navigation.range_bearing"><code class="xref py py-func docutils literal"><span class="pre">range_bearing()</span></code></a> and <a class="reference internal" href="#navigation.destination" title="navigation.destination"><code class="xref py py-func docutils literal"><span class="pre">destination()</span></code></a>, work
+with radians.  An <a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a> is a signed radians number,
+an extension to built-in <code class="xref py py-class docutils literal"><span class="pre">float</span></code>.</p>
+<p>Our source and target presentations
+are various kinds of Degree-Minute-Second values.
+The <a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a> class includes a number of conversion and parsing
+features.</p>
+<p>Generally, we create an <a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a> from one of these sources:</p>
+<ul>
+<li><p class="first"><code class="xref py py-class docutils literal"><span class="pre">float</span></code>: create an <a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a> from a floating-point value in degrees.
+The <a class="reference internal" href="#navigation.fromdegrees" title="navigation.fromdegrees"><code class="xref py py-meth docutils literal"><span class="pre">fromdegrees()</span></code></a> static method does this.</p>
+</li>
+<li><p class="first"><code class="xref py py-class docutils literal"><span class="pre">string</span></code>: attempts a number of DMS conversions.
+The <code class="xref py py-meth docutils literal"><span class="pre">fromstring()</span></code> static method does this.</p>
+<p>This is implemented via the separate <a class="reference internal" href="#navigation.AngleParser" title="navigation.AngleParser"><code class="xref py py-class docutils literal"><span class="pre">AngleParser</span></code></a> object.
+We can extend the parsing without actually changing the base <a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a> class.
+Formats include <code class="docutils literal"><span class="pre">dd</span> <span class="pre">mm</span> <span class="pre">ss.sss</span></code>, <code class="docutils literal"><span class="pre">dd</span> <span class="pre">mm.mmm</span></code>, <code class="docutils literal"><span class="pre">dd.dddd</span></code>, and
+<code class="docutils literal"><span class="pre">dd\\xbcdd.ddd</span></code> from GPX files.</p>
+</li>
+<li><p class="first"><a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a>: This is the ordinary <code class="docutils literal"><span class="pre">Angle2(someangle)</span></code> which will
+use a value which is expressed in radians.</p>
+</li>
+</ul>
+<p>There are two subclasses of representations for those angles:</p>
+<ul class="simple">
+<li><a class="reference internal" href="#navigation.Lat" title="navigation.Lat"><code class="xref py py-class docutils literal"><span class="pre">Lat</span></code></a> &#8211; Latitude &#8211; with a 0°-90° range and a sign expressed as &#8220;N&#8221; or &#8220;S&#8221;.</li>
+<li><a class="reference internal" href="#navigation.Lon" title="navigation.Lon"><code class="xref py py-class docutils literal"><span class="pre">Lon</span></code></a> &#8211; Longitude &#8211; with a 0°-180° range and a sign expressed as &#8220;E&#8221; or &#8220;W&#8221;.</li>
+</ul>
+<p>This works nicely because the complex features are related to formatting and parsing.
+The rest of the life of a <a class="reference internal" href="#navigation.Lat" title="navigation.Lat"><code class="xref py py-class docutils literal"><span class="pre">Lat</span></code></a> or <a class="reference internal" href="#navigation.Lon" title="navigation.Lon"><code class="xref py py-class docutils literal"><span class="pre">Lon</span></code></a> is merely as a float value of signed radians.</p>
+<p>Here&#8217;s the class and docstring, which shows the features of this class.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Angle2</span><span class="p">(</span><span class="nb">float</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A signed angle in radians. Lots of conversions to DMS.</span>
+<span class="sd">    A subclass can treat the sign (&quot;h&quot;) as the hemisphere,</span>
+<span class="sd">    using &quot;N&quot;, &quot;S&quot;, &quot;E&quot;, or &quot;W&quot;.</span>
+
+<span class="sd">    Note that we have to &quot;prettify&quot; some values to</span>
+<span class="sd">    remove annoying 10E-16 noise bits that arise sometimes.</span>
+
+<span class="sd">    &gt;&gt;&gt; import math</span>
+<span class="sd">    &gt;&gt;&gt; a = Angle2(-math.pi/6)</span>
+<span class="sd">    &gt;&gt;&gt; round(a,3)</span>
+<span class="sd">    -0.524</span>
+<span class="sd">    &gt;&gt;&gt; round(a.radians,3)</span>
+<span class="sd">    -0.524</span>
+<span class="sd">    &gt;&gt;&gt; round(a.degrees,3)</span>
+<span class="sd">    -30.0</span>
+<span class="sd">    &gt;&gt;&gt; round(a.sdeg,3)</span>
+<span class="sd">    -30.0</span>
+<span class="sd">    &gt;&gt;&gt; round(a.deg,3)</span>
+<span class="sd">    -30.0</span>
+<span class="sd">    &gt;&gt;&gt; a.dm</span>
+<span class="sd">    (-30, 0.0)</span>
+<span class="sd">    &gt;&gt;&gt; a.dms</span>
+<span class="sd">    (-30, 0, 0.0)</span>
+<span class="sd">    &gt;&gt;&gt; a.h</span>
+<span class="sd">    -1</span>
+<span class="sd">    &gt;&gt;&gt; round(a.r,3)</span>
+<span class="sd">    -0.524</span>
+
+<span class="sd">    # Formmatter.</span>
+<span class="sd">    &gt;&gt;&gt; fmt, prop = Angle2._rewrite(&quot;%02.0d° %2.5m&#39;&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; fmt</span>
+<span class="sd">    &quot;{d:02.0f}° {m:2.5f}&#39;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; sorted(prop)</span>
+<span class="sd">    [&#39;d&#39;, &#39;m&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; &quot;Lat: {0:%02.0d° %6.3m&#39;}&quot;.format(a)</span>
+<span class="sd">    &quot;Lat: 30°  0.000&#39;&quot;</span>
+
+<span class="sd">    # Another round-off test.</span>
+<span class="sd">    &gt;&gt;&gt; a2 = Angle2(math.pi/12)</span>
+<span class="sd">    &gt;&gt;&gt; a2.dms</span>
+<span class="sd">    (15, 0, 0.0)</span>
+
+<span class="sd">    # Math.</span>
+<span class="sd">    &gt;&gt;&gt; round( a+a2, 5 )</span>
+<span class="sd">    -0.2618</span>
+<span class="sd">    &gt;&gt;&gt; round( (a+a2).degrees, 3 )</span>
+<span class="sd">    -15.0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>We&#8217;ve included the essential unit test cases here as a summary
+of the implemented feature set.</p>
+<dl class="method">
+<dt id="navigation.fromdegrees">
+<code class="descclassname">navigation.</code><code class="descname">fromdegrees</code><span class="sig-paren">(</span><em>deg</em>, <em>hemisphere=None</em><span class="sig-paren">)</span><a class="headerlink" href="#navigation.fromdegrees" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an <a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a> from a numeric value,
+which must be degrees.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>deg</strong> &#8211; numeric degrees value.</li>
+<li><strong>hemisphere</strong> &#8211; sign value, which can be encoded as
+&#8220;N&#8221;, &#8220;S&#8221;, &#8220;E&#8221;, or &#8220;W&#8221;. If omitted, it&#8217;s positive.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a> object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">fromdegrees</span><span class="p">(</span> <span class="n">cls</span><span class="p">,</span> <span class="n">deg</span><span class="p">,</span> <span class="n">hemisphere</span><span class="o">=</span><span class="bp">None</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &gt;&gt;&gt; a = Angle2.fromdegrees(45)</span>
+<span class="sd">    &gt;&gt;&gt; round(a,4)</span>
+<span class="sd">    0.7854</span>
+<span class="sd">    &gt;&gt;&gt; b = Angle2.fromdegrees(23.456, &quot;N&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; round(b,4)</span>
+<span class="sd">    0.4094</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">hemisphere</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;N&quot;</span><span class="p">,</span> <span class="s">&quot;E&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span> <span class="n">sign</span><span class="o">=+</span><span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">hemisphere</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;S&quot;</span><span class="p">,</span> <span class="s">&quot;W&quot;</span><span class="p">):</span> <span class="n">sign</span><span class="o">=-</span><span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Can&#39;t convert {0},{1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">hemisphere</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">cls</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">sign</span><span class="o">*</span><span class="n">deg</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt>
+<code class="descclassname">navigation.</code><code class="descname">fromdegrees</code><span class="sig-paren">(</span><em>deg</em>, <em>hemisphere=None</em><span class="sig-paren">)</span></dt>
+<dd><p>Creates an <a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a> from a string value,
+which must be represent degrees, either as a simple
+string value, or as a more complex value recognized by
+the <a class="reference internal" href="#navigation.AngleParser" title="navigation.AngleParser"><code class="xref py py-class docutils literal"><span class="pre">AngleParser</span></code></a> class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>deg</strong> &#8211; string degrees value.</li>
+<li><strong>hemisphere</strong> &#8211; sign value, which can be encoded as
+&#8220;N&#8221;, &#8220;S&#8221;, &#8220;E&#8221;, or &#8220;W&#8221;. If omitted, it&#8217;s positive.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a> object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>We start by assuming the text value is simply
+a string representation of a float.
+If it isn&#8217;t, we use the <a class="reference internal" href="#navigation.AngleParser" title="navigation.AngleParser"><code class="xref py py-class docutils literal"><span class="pre">AngleParser</span></code></a> class to parse the string.</p>
+<p>A subclass might change the <code class="xref py py-data docutils literal"><span class="pre">parser</span></code> reference to use a different parser.</p>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="n">parser</span> <span class="o">=</span> <span class="n">AngleParser</span>
+
+<span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">fromstring</span><span class="p">(</span> <span class="n">cls</span><span class="p">,</span> <span class="n">value</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a string value of degrees.</span>
+<span class="sd">    Some sources provide a simple signed number.</span>
+<span class="sd">    Other sources include more complex formatting.</span>
+
+<span class="sd">    &gt;&gt;&gt; a0 = Angle2.fromstring(&quot;-77.4325&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; round(a0.degrees,4)</span>
+<span class="sd">    -77.4325</span>
+<span class="sd">    &gt;&gt;&gt; a1 = Angle2.fromstring(&quot;37°28&#39;8\\&quot;N&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; round(a1.degrees,4)</span>
+<span class="sd">    37.4689</span>
+<span class="sd">    &gt;&gt;&gt; a2 = Angle2.fromstring(&quot;77°25′57″W&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; round(a2.degrees,4)</span>
+<span class="sd">    -77.4325</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">deg</span><span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">deg</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">deg</span><span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cls</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">deg</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s">&quot;Cannot parse {0!r}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Here are the essential output conversions of an <a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a>.
+There&#8217;s a bit of redundancy in some methods which could be carefully parsed
+out. But we haven&#8217;t done this refactoring.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">radians</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span>
+<span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">r</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span>
+<span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">degrees</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+<span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">sdeg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+<span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">deg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+<span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">dm</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the angle as (D, M).</span>
+
+<span class="sd">    :returns: (d, m) tuple of signed values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sign</span><span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">+</span><span class="mi">1</span>
+    <span class="n">ad</span><span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
+    <span class="n">d</span><span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ad</span><span class="p">)</span>
+    <span class="n">ms</span><span class="o">=</span> <span class="mi">60</span><span class="o">*</span><span class="p">(</span><span class="n">ad</span><span class="o">-</span><span class="n">d</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">ms</span><span class="o">-</span><span class="mi">60</span><span class="p">)</span><span class="o">/</span><span class="mi">60</span> <span class="o">&lt;</span> <span class="mf">1E-5</span><span class="p">:</span>
+        <span class="n">ms</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">d</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">d</span><span class="o">*</span><span class="n">sign</span><span class="p">,</span> <span class="n">ms</span><span class="o">*</span><span class="p">(</span><span class="n">sign</span> <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+<span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">dms</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the angle as (D, M, S).</span>
+
+<span class="sd">    :returns: (d, m, s) tuple of signed values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sign</span><span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">+</span><span class="mi">1</span>
+    <span class="n">ad</span><span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
+    <span class="n">d</span><span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ad</span><span class="p">)</span>
+    <span class="n">ms</span><span class="o">=</span> <span class="mi">60</span><span class="o">*</span><span class="p">(</span><span class="n">ad</span><span class="o">-</span><span class="n">d</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">ms</span><span class="o">-</span><span class="mi">60</span><span class="p">)</span><span class="o">/</span><span class="mi">60</span> <span class="o">&lt;</span> <span class="mf">1E-5</span><span class="p">:</span>
+        <span class="n">ms</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">d</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">m</span><span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ms</span><span class="p">)</span>
+    <span class="n">s</span><span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">ms</span><span class="o">-</span><span class="n">m</span><span class="p">)</span><span class="o">*</span><span class="mi">60</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">d</span><span class="o">*</span><span class="n">sign</span><span class="p">,</span> <span class="n">m</span><span class="o">*</span><span class="p">(</span><span class="n">sign</span> <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span><span class="p">),</span> <span class="n">s</span><span class="o">*</span><span class="p">(</span><span class="n">sign</span> <span class="k">if</span> <span class="n">d</span><span class="o">==</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">m</span><span class="o">==</span><span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <code class="xref py py-meth docutils literal"><span class="pre">h()</span></code> property is the sign; the &#8220;hemisphere&#8221;.
+A subclass like <a class="reference internal" href="#navigation.Lat" title="navigation.Lat"><code class="xref py py-class docutils literal"><span class="pre">Lat</span></code></a> and <a class="reference internal" href="#navigation.Lon" title="navigation.Lon"><code class="xref py py-class docutils literal"><span class="pre">Lon</span></code></a> will
+override this to provide a string instead of an int value.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">h</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">+</span><span class="mi">1</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="navigation.__format__">
+<code class="descclassname">navigation.</code><code class="descname">__format__</code><span class="sig-paren">(</span><em>spec</em><span class="sig-paren">)</span><a class="headerlink" href="#navigation.__format__" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Class spec:</th><td class="field-body">format specification for this value.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">text representation of this <a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a>.</td>
+</tr>
+</tbody>
+</table>
+<p>The specification uses a number of <code class="docutils literal"><span class="pre">%{fmt}{prop}</span></code> items. The <code class="docutils literal"><span class="pre">{fmt}</span></code> is a floating-point
+style specification, for example <code class="docutils literal"><span class="pre">03.0</span></code>.  The <code class="docutils literal"><span class="pre">{prop}</span></code> is the
+property name:  <code class="docutils literal"><span class="pre">%d</span></code>, <code class="docutils literal"><span class="pre">%m</span></code> and <code class="docutils literal"><span class="pre">%s</span></code> to show
+degrees, minutes, and seconds. Additional properties include <code class="docutils literal"><span class="pre">%r</span></code>
+to show radians and <code class="docutils literal"><span class="pre">%h</span></code> to show the hemisphere (&#8220;N&#8221;, &#8220;S&#8221;, &#8220;E&#8221;, or &#8220;W&#8221; are
+representations of the sign).</p>
+<p>This can lead to a fairly complex format specifications.
+A format request can look like this: <code class="docutils literal"><span class="pre">&quot;Lat:</span> <span class="pre">{0:%02d°</span> <span class="pre">%06.3m'}&quot;.format(lat)</span></code>
+Or perhaps this: <code class="docutils literal"><span class="pre">&quot;({0:%.5d},</span> <span class="pre">{1:%.5d})&quot;.format(lat,</span> <span class="pre">lon)</span></code></p>
+</dd></dl>
+
+<p>We have an internal function, <code class="xref py py-meth docutils literal"><span class="pre">_rewrite()</span></code>, which will parse a format specification
+and then rebuild the format spec into something a bit more useful.
+Once the format has been rewritten we can use the <code class="xref py py-class docutils literal"><span class="pre">string.Formatter</span></code>
+to build the resulting output.</p>
+<p>Here&#8217;s an intertesting complexity to this. There are several variant cases where we want
+different kinds of display values:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">%d</span> <span class="pre">%m</span> <span class="pre">%s</span></code> means that degrees and minutes are integer values.</li>
+<li><code class="docutils literal"><span class="pre">%d</span> <span class="pre">%m</span></code> means that degrees is an int and m is a float.</li>
+<li><code class="docutils literal"><span class="pre">%d</span></code> means that degrees is a float.</li>
+</ul>
+<p>To make this work, we note the pattern of  <code class="docutils literal"><span class="pre">{'d',</span> <span class="pre">'m',</span> <span class="pre">'s'}</span></code>, or <code class="docutils literal"><span class="pre">{'d',</span> <span class="pre">'m'}</span></code>, or <code class="docutils literal"><span class="pre">{'d'}</span></code>
+and determine the appropriate mix of int or float values to include.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">spec_pat</span><span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">r&quot;%([0-9\.#\+ -]*)([dmshr])&quot;</span><span class="p">)</span>
+<span class="n">formatter</span><span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">Formatter</span><span class="p">()</span>
+
+<span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">_rewrite</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">spec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Rewrite a &quot;%x&quot; spec into a &quot;{x:fmt}&quot; format.</span>
+<span class="sd">    Returns the revised format at the set of properties</span>
+<span class="sd">    used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">spec</span> <span class="o">==</span> <span class="s">&quot;&quot;</span> <span class="ow">or</span> <span class="n">spec</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s">&quot;{d:f}&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;d&#39;</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">used</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">m</span><span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">spec_pat</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+        <span class="c"># pattern group 0 is the detailed spec</span>
+        <span class="c"># pattern group 1 is the 1-letter property (d, m, s, h, or r)</span>
+        <span class="k">while</span> <span class="n">m</span><span class="p">:</span>
+            <span class="c"># Rewrite this item in the spec.</span>
+            <span class="n">fmt</span><span class="p">,</span> <span class="n">prop</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+            <span class="n">spec</span><span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">spec_pat</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&quot;{{{prop}:{fmt}{tp}}}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">prop</span><span class="o">=</span><span class="n">prop</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="n">fmt</span><span class="p">,</span> <span class="n">tp</span><span class="o">=</span><span class="s">&quot;s&quot;</span> <span class="k">if</span> <span class="n">prop</span> <span class="o">==</span> <span class="s">&quot;h&quot;</span> <span class="k">else</span> <span class="s">&quot;f&quot;</span><span class="p">),</span> <span class="n">spec</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span> <span class="n">prop</span> <span class="p">)</span>
+            <span class="c"># &quot;Recursively&quot; check for more items.</span>
+            <span class="n">m</span><span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">spec_pat</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">spec</span><span class="p">,</span> <span class="n">used</span>
+
+<span class="k">def</span> <span class="nf">__format__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="s">&quot;&quot;</span><span class="p">):</span>
+    <span class="n">fmt_str</span><span class="p">,</span> <span class="n">prop_set</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rewrite</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="n">h</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radians</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="p">{</span><span class="s">&#39;d&#39;</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="s">&#39;s&#39;</span><span class="p">}</span> <span class="o">&lt;=</span> <span class="n">prop_set</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;d&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;m&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;s&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Angle2</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span><span class="o">.</span><span class="n">dms</span>
+    <span class="k">elif</span> <span class="p">{</span><span class="s">&#39;d&#39;</span><span class="p">,</span> <span class="s">&#39;m&#39;</span><span class="p">}</span> <span class="o">&lt;=</span> <span class="n">prop_set</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">{</span><span class="s">&#39;s&#39;</span><span class="p">}</span> <span class="o">&lt;=</span> <span class="n">prop_set</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;d&#39;</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;m&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Angle2</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span><span class="o">.</span><span class="n">dm</span>
+    <span class="k">elif</span> <span class="p">{</span><span class="s">&#39;d&#39;</span><span class="p">}</span> <span class="o">&lt;=</span> <span class="n">prop_set</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">{</span><span class="s">&#39;m&#39;</span><span class="p">,</span> <span class="s">&#39;s&#39;</span><span class="p">}</span> <span class="o">&lt;=</span> <span class="n">prop_set</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s">&#39;d&#39;</span><span class="p">]</span><span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">degrees</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fmt_str</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This class doesn&#8217;t override <code class="xref py py-meth docutils literal"><span class="pre">__repr__()</span></code> or <code class="xref py py-meth docutils literal"><span class="pre">__str__()</span></code>. Those methods
+are features of <code class="xref py py-class docutils literal"><span class="pre">float</span></code> and do not need to be changed.</p>
+<p>These are the core numeric object special methods, all of which simply appeal to the superclass
+methods for the implementation. The results create new <a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a> objects,
+otherwise, we behave just like a <code class="xref py py-class docutils literal"><span class="pre">float</span></code>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__add__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__sub__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__sub__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__mul__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__div__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__truediv__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">__truediv__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__truediv__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__floordiv__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__floordiv__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__mod__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__mod__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Reversed methods.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__radd__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__rsub__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__rsub__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__rmul__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__rmul__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__rdiv__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__rtruediv__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">__rtruediv__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__rtruediv__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__rfloordiv__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__rfloordiv__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__rmod__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__rmod__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Unary methods.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__abs__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__abs__</span><span class="p">()</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__float__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span>
+<span class="k">def</span> <span class="nf">__round__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">ndigits</span><span class="o">=</span><span class="mi">0</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__round__</span><span class="p">(</span><span class="n">ndigits</span><span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__neg__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__neg__</span><span class="p">()</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__pos__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span>
+</pre></div>
+</div>
+<p>Comparison methods.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__ne__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">__le__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__le__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__lt__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">__ge__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__ge__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">__gt__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__gt__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Additional special methods, not actually used within this application.
+But included for completeness.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__trunc__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__trunc__</span><span class="p">()</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__ceil__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span> <span class="bp">self</span> <span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__floor__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span> <span class="bp">self</span> <span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__pow__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__pow__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__rpow__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__rpow__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="lat-subclass-of-angle">
+<h3>Lat Subclass of Angle<a class="headerlink" href="#lat-subclass-of-angle" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="navigation.Lat">
+<em class="property">class </em><code class="descclassname">navigation.</code><code class="descname">Lat</code><a class="headerlink" href="#navigation.Lat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>The <a class="reference internal" href="#navigation.Lat" title="navigation.Lat"><code class="xref py py-class docutils literal"><span class="pre">Lat</span></code></a> subclass introduces the hemisphere text of &#8220;N&#8221; and &#8220;S&#8221;
+to represent the sign.
+It will also use 2 digits as the default format for degrees.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Lat</span><span class="p">(</span><span class="n">Angle2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Latitude.</span>
+
+<span class="sd">    &gt;&gt;&gt; a = Lat.fromdegrees(37.1234)</span>
+<span class="sd">    &gt;&gt;&gt; repr(a)</span>
+<span class="sd">    &#39;37°07.404′N&#39;</span>
+<span class="sd">    &gt;&gt;&gt; b = Lat.fromstring(&#39;37°07.404′N&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; round(b.degrees,4)</span>
+<span class="sd">    37.1234</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">h</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;S&quot;</span> <span class="k">if</span> <span class="bp">self</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s">&quot;N&quot;</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;{0:</span><span class="si">%02.0d</span><span class="s">°%06.3m′%h}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">north</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;North latitude, positive &quot;co-latitude&quot;.</span>
+
+<span class="sd">        Range is 0 to pi instead of -pi/2 to +pi/2.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">+</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="lon-subclass-of-angle">
+<h3>Lon Subclass of Angle<a class="headerlink" href="#lon-subclass-of-angle" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="navigation.Lon">
+<em class="property">class </em><code class="descclassname">navigation.</code><code class="descname">Lon</code><a class="headerlink" href="#navigation.Lon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>The <a class="reference internal" href="#navigation.Lon" title="navigation.Lon"><code class="xref py py-class docutils literal"><span class="pre">Lon</span></code></a> subclass introduces the hemisphere text of &#8220;E&#8221; and &#8220;W&#8221;
+to represent the sign.
+It will also use 3 digits as the default format for degrees.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Lon</span><span class="p">(</span><span class="n">Angle2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Longitude.</span>
+
+<span class="sd">    &gt;&gt;&gt; a = Lon.fromdegrees(-76.5678)</span>
+<span class="sd">    &gt;&gt;&gt; repr(a)</span>
+<span class="sd">    &#39;076°34.068′W&#39;</span>
+<span class="sd">    &gt;&gt;&gt; b = Lon.fromstring(&#39;076°34.068′W&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; round(b.degrees,4)</span>
+<span class="sd">    -76.5678</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">d</span><span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">h</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;W&quot;</span> <span class="k">if</span> <span class="bp">self</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s">&quot;E&quot;</span>
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;{0:</span><span class="si">%03.0d</span><span class="s">°%06.3m′%h}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">east</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;East longitude. Positive only.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">+</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="latlon-class">
+<h3>LatLon Class<a class="headerlink" href="#latlon-class" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="navigation.LatLon">
+<em class="property">class </em><code class="descclassname">navigation.</code><code class="descname">LatLon</code><a class="headerlink" href="#navigation.LatLon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>The essential problem-domain object is the &#8220;point&#8221;: a (lat, lon)
+pair of <a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a> objects. The various functions work
+with these objects. The main applications
+will create these from input sources.</p>
+<p>Once we have <a class="reference internal" href="#navigation.LatLon" title="navigation.LatLon"><code class="xref py py-class docutils literal"><span class="pre">LatLon</span></code></a> objects, we can apply calculations
+to determine range and bearing. We can sum the ranges to compute
+distance traveled and do other useful things.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">LatLon</span><span class="p">(</span> <span class="nb">object</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A latitude/longitude coordinate pair.</span>
+<span class="sd">    This is a glorified namedtuple with additional properties to</span>
+<span class="sd">    provide nicely-formatted results.</span>
+
+<span class="sd">    :ivar lat: The latitude :py:class:`lat`.</span>
+<span class="sd">    :ivar lon: The longitude :py:class:`Lon`.</span>
+<span class="sd">    :ivar dms: A pair of DMS strings.</span>
+<span class="sd">    :ivar dm: A pair of DM strings.</span>
+<span class="sd">    :ivar d: A pair of D strings.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Build a <code class="docutils literal"><span class="pre">LatLon</span></code> from a pair of values in degrees.
+This tolerates a large number of variant input classes and string
+formats because <a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a> can parse a number of formats.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">lon</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Build a LatLon from two values.</span>
+
+<span class="sd">    :param lat: the latitude, used to build an Angle2</span>
+<span class="sd">    :param lon: the longitude, used to build an Angle2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">Lat</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="o">=</span> <span class="n">lat</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="n">Angle2</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="o">=</span> <span class="n">Lat</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="o">=</span> <span class="n">Lat</span><span class="o">.</span><span class="n">fromdegrees</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="o">=</span> <span class="n">Lat</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Can&#39;t convert {0!r}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lon</span><span class="p">,</span> <span class="n">Lon</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="o">=</span> <span class="n">lon</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lon</span><span class="p">,</span> <span class="n">Angle2</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="o">=</span> <span class="n">Lon</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lon</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="o">=</span> <span class="n">Lon</span><span class="o">.</span><span class="n">fromdegrees</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lon</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="o">=</span> <span class="n">Lon</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Can&#39;t convert {0!r}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Candidate output formats used to build string representations of a
+<a class="reference internal" href="#navigation.LatLon" title="navigation.LatLon"><code class="xref py py-class docutils literal"><span class="pre">LatLon</span></code></a> instance.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">lat_dms_format</span> <span class="o">=</span> <span class="s">&quot;{0:</span><span class="si">%02.0d</span><span class="s"> %02.0m </span><span class="si">%04.1s</span><span class="s">%h}&quot;</span>
+<span class="n">lon_dms_format</span> <span class="o">=</span> <span class="s">&quot;{0:</span><span class="si">%03.0d</span><span class="s"> %02.0m </span><span class="si">%04.1s</span><span class="s">%h}&quot;</span>
+<span class="n">lat_dm_format</span> <span class="o">=</span> <span class="s">&quot;{0:</span><span class="si">%02.0d</span><span class="s"> %.3m%h}&quot;</span>
+<span class="n">lon_dm_format</span> <span class="o">=</span> <span class="s">&quot;{0:</span><span class="si">%03.0d</span><span class="s"> %.3m%h}&quot;</span>
+<span class="n">lat_d_format</span> <span class="o">=</span> <span class="s">&quot;{0:</span><span class="si">%06.3d</span><span class="s">%h}&quot;</span>
+<span class="n">lon_d_format</span> <span class="o">=</span> <span class="s">&quot;{0:</span><span class="si">%07.3d</span><span class="s">%h}&quot;</span>
+</pre></div>
+</div>
+<p>Output conversions as degree-minute-second, degree-minute, and degree.
+We return a tuple of two strings so that the application can use
+these values to populate separate spreadsheet columns.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">dms</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Long Degree Minute Second format.</span>
+
+<span class="sd">    :returns: A pair of strings of the form :samp:`{ddd} {mm} {s.s}{h}`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lat</span><span class="o">=</span> <span class="n">LatLon</span><span class="o">.</span><span class="n">lat_dms_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span> <span class="p">)</span>
+    <span class="n">lon</span><span class="o">=</span> <span class="n">LatLon</span><span class="o">.</span><span class="n">lon_dms_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">lat</span><span class="p">,</span><span class="n">lon</span><span class="p">)</span>
+<span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">dm</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;GPS-friendly Degree Minute format.</span>
+
+<span class="sd">    :returns: A pair of strings of the form :samp:`{ddd} {m.mmm}{h}`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lat</span><span class="o">=</span> <span class="n">LatLon</span><span class="o">.</span><span class="n">lat_dm_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span> <span class="p">)</span>
+    <span class="n">lon</span><span class="o">=</span> <span class="n">LatLon</span><span class="o">.</span><span class="n">lon_dm_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">lat</span><span class="p">,</span><span class="n">lon</span><span class="p">)</span>
+<span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">d</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;GPS-friendly Degree format.</span>
+
+<span class="sd">    :returns: A pair of strings of the form :samp:`{ddd.ddd}{h}`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lat</span><span class="o">=</span> <span class="n">LatLon</span><span class="o">.</span><span class="n">lat_d_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span> <span class="p">)</span>
+    <span class="n">lon</span><span class="o">=</span> <span class="n">LatLon</span><span class="o">.</span><span class="n">lon_d_format</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">lat</span><span class="p">,</span><span class="n">lon</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="globals">
+<h2>Globals<a class="headerlink" href="#globals" title="Permalink to this headline">¶</a></h2>
+<p>We have several global values that are used to determine the units
+for range calculations.</p>
+<dl class="data">
+<dt id="navigation.NM">
+<code class="descclassname">navigation.</code><code class="descname">NM</code><a class="headerlink" href="#navigation.NM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mean radius of the earth in nautical miles.
+This is the default;  ranges and bearings are in nautical miles.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="navigation.MI">
+<code class="descclassname">navigation.</code><code class="descname">MI</code><a class="headerlink" href="#navigation.MI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mean radius of the earth in statute miles.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="navigation.KM">
+<code class="descclassname">navigation.</code><code class="descname">KM</code><a class="headerlink" href="#navigation.KM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mean radius of the earth in kilometers.</p>
+</dd></dl>
+
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># The International Union of Geodesy and Geophysics (IUGG) defined mean radius values</span>
+<span class="n">KM</span><span class="o">=</span> <span class="mf">6371.009</span> <span class="c"># R_1 in km</span>
+<span class="n">MI</span><span class="o">=</span> <span class="mf">3958.761</span> <span class="c"># R_1 in mi</span>
+<span class="n">NM</span><span class="o">=</span> <span class="mf">3440.069</span> <span class="c"># R_1 in nm</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="distance-bearing-calculation">
+<span id="calc-range-bearing"></span><h2>Distance/Bearing Calculation<a class="headerlink" href="#distance-bearing-calculation" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="navigation.range_bearing">
+<code class="descclassname">navigation.</code><code class="descname">range_bearing</code><span class="sig-paren">(</span><em>p1</em>, <em>p2</em>, <em>R=NM</em><span class="sig-paren">)</span><a class="headerlink" href="#navigation.range_bearing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Distance and (constant) bearing between two points.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>p1</strong> &#8211; <a class="reference internal" href="#navigation.LatLon" title="navigation.LatLon"><code class="xref py py-class docutils literal"><span class="pre">LatLon</span></code></a> for starting point.</li>
+<li><strong>p2</strong> &#8211; <a class="reference internal" href="#navigation.LatLon" title="navigation.LatLon"><code class="xref py py-class docutils literal"><span class="pre">LatLon</span></code></a> for ending point.</li>
+<li><strong>R</strong> &#8211; radius value used to compute units,
+default is NM for nautical miles.
+Use MI or KM for statute miles or kilometers.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">tuple with float range and <a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a> bearing object.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>These are based on the essential haversine formula for distance.</p>
+<div class="section" id="formula">
+<h3>Formula<a class="headerlink" href="#formula" title="Permalink to this headline">¶</a></h3>
+<p><strong>Version 1.</strong></p>
+<div class="math">
+<p><img src="_images/math/0522df30fbc70908a8251f56225a284b31f2d7c1.png" alt="d=\arccos \bigl[ \sin(lat_1) \sin(lat_2) + \cos(lat_1) \cos(lat_2) \cos(lon_1-lon_2) \bigr]"/></p>
+</div><p>A mathematically equivalent formula, which is less subject to rounding error for short distances is:</p>
+<div class="math">
+<p><img src="_images/math/020144d3fd320f5b23caa8c19a960f4ebacb600b.png" alt="d = 2 \arcsin \Biggl[ \sqrt{ \sin(\frac{lat_1-lat_2}{2})^2 +
+             \cos(lat_1) \cos(lat_2) \sin(\frac{lon_1-lon_2}{2})^2 } \Biggr]"/></p>
+</div><p>We obtain the initial course, <img class="math" src="_images/math/a9cfbeb8ebee1f365919e147a79e242dcb67ee5d.png" alt="\theta"/>, from point 1 to point 2 by the following.
+The formula fails if the initial point is a pole.</p>
+<p>For starting points other than the poles:</p>
+<div class="math">
+<p><img src="_images/math/3679220be2db72b3c5a697c069b6f96a244cdfa6.png" alt="\theta = \begin{cases}
+&amp;\arccos \Bigl[ \frac{ \sin(lat_2)-\sin(lat_1) \cos(d) }{ \sin(d)\cos(lat_1)} \Bigr] \text{  if $\sin(lon_2-lon_1)&lt;0$}, \\
+&amp;2 \pi - \arccos \Bigl[ \frac{\sin(lat_2)-\sin(lat_1)\cos(d)}{\sin(d)\cos(lat_1)} \Bigr] \text{  if $\sin(lon_2-lon_1) \geq 0$}.
+\end{cases}"/></p>
+</div><p>An alternative formula, not requiring the pre-computation of <img class="math" src="_images/math/425d86ba2f2979d75b7535c2bcf92c33ed6b285a.png" alt="d"/>, the distance between the points, is:</p>
+<div class="math">
+<p><img src="_images/math/23b63882823e0b55dc342ef21001bcdb620359b3.png" alt="\theta = \arctan \Bigl[ \frac{\sin(lon_1-lon_2)\cos(lat_2)}{
+        \cos(lat_1)\sin(lat_2)-\sin(lat_1)\cos(lat_2)\cos(lon_1-lon_2)} \Bigr] \pmod {2 \pi}"/></p>
+</div><p><strong>Version 2.</strong></p>
+<div class="math">
+<p><img src="_images/math/74ea3ee3e868bc43b7ab4e2b6eca93a1d9d7ee9a.png" alt="\Delta\varphi = \ln \left[ \frac{\tan( lat_2 / 2 + \pi / 4 )}{\tan( lat_1 / 2 + \pi / 4 )} \right]"/></p>
+</div><div class="math">
+<p><img src="_images/math/af83daebacffcfca8681bcaeeff280a32064a0f0.png" alt="q = \begin{cases}
+\cos( lat_1 ) \text{  if $\Delta \varphi = 0$ (this is an E:W line)}, \\
+{\Delta lat} / {\Delta \varphi} \text {  otherwise}.
+\end{cases}"/></p>
+</div><p>If this is an E:W line (i.e., <img class="math" src="_images/math/f0ad463ae1f179ae962245704869d26181577730.png" alt="\Delta \varphi = 0"/>), the latitude doesn&#8217;t change.
+Otherwise, we&#8217;ll calculate the change.</p>
+<p>Distance, <img class="math" src="_images/math/425d86ba2f2979d75b7535c2bcf92c33ed6b285a.png" alt="d"/>:</p>
+<div class="math">
+<p><img src="_images/math/3c14fd3f09e5a61e2adebdb538a6e3389e6a5409.png" alt="d = R \times \sqrt{ {\Delta lat}^2 + q^2 \times {\Delta lon}^2 }"/></p>
+</div><p>Bearing, <img class="math" src="_images/math/a9cfbeb8ebee1f365919e147a79e242dcb67ee5d.png" alt="\theta"/>:</p>
+<div class="math">
+<p><img src="_images/math/0d6fa7bbcbba0aff68485f1d637fa674ccdbf902.png" alt="\theta = \arctan{ \Delta\varphi / {\Delta lon}}"/></p>
+</div><p>where <img class="math" src="_images/math/a2a746d31e9304559c4bf873124bf49cd6d0234e.png" alt="\ln"/> is natural log,
+<img class="math" src="_images/math/4737de71e9a0097f08e47fd36100611bfe66d319.png" alt="\Delta lon"/> is taking shortest route (<img class="math" src="_images/math/57188d6528f09a4bc876703e6b74451dd38c2084.png" alt="&lt; 180 \textdegree"/>).</p>
+<p><img class="math" src="_images/math/9d86170e7de539c0ff999de09621ee0c7b6c8ed0.png" alt="R"/> is the earth&#8217;s mean radius: 6,371.009 km (3,958.761 mi; 3,440.069 nm).</p>
+</div>
+<div class="section" id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h3>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Lat/Lon 1:</th><td class="field-body">50 21 50N, 004 09 25W</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Lat/Lon 2:</th><td class="field-body">42 21 04N, 071 02 27W</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Distance:</th><td class="field-body">5196 km</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Bearing:</th><td class="field-body">260 07 38</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="range-bearing-implementation">
+<h3>range_bearing implementation<a class="headerlink" href="#range-bearing-implementation" title="Permalink to this headline">¶</a></h3>
+<p>This is the core function which computes the range and bearing
+from one point on the voyage track to the next point.  The
+range information, coupled with a target speed, provides ETA.
+The sum of ranges provides total distance for the voyage.</p>
+<p>The main application will create <a class="reference internal" href="#navigation.LatLon" title="navigation.LatLon"><code class="xref py py-class docutils literal"><span class="pre">LatLon</span></code></a> objects,
+and then apply the <a class="reference internal" href="#navigation.range_bearing" title="navigation.range_bearing"><code class="xref py py-func docutils literal"><span class="pre">range_bearing()</span></code></a> function to those
+objects.  Finally, it will do some additional calculations
+and write the resulting <a class="reference internal" href="#navigation.LatLon" title="navigation.LatLon"><code class="xref py py-class docutils literal"><span class="pre">LatLon</span></code></a> objects.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">range_bearing</span><span class="p">(</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="n">NM</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Rhumb-line course from :py:data:`p1` to :py:data:`p2`.</span>
+
+<span class="sd">    See :ref:`calc.range_bearing`.</span>
+
+<span class="sd">    :param p1: a :py:class:`LatLon` starting point</span>
+<span class="sd">    :param p2: a :py:class:`LatLon` ending point</span>
+<span class="sd">    :param R: radius of the earth in appropriate units;</span>
+<span class="sd">        default is nautical miles.</span>
+<span class="sd">        Values include :py:data:`KM` for kilometers,</span>
+<span class="sd">        :py:data:`MI` for statute miles and :py:data:`NM` for nautical miles.</span>
+<span class="sd">    :returns: 2-tuple of range and bearing from p1 to p2.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lat1</span><span class="o">=</span> <span class="n">p1</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">radians</span>
+    <span class="n">lat2</span><span class="o">=</span> <span class="n">p2</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">radians</span>
+    <span class="n">dLat</span><span class="o">=</span> <span class="n">lat2</span> <span class="o">-</span> <span class="n">lat1</span>
+    <span class="n">dPhi</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">lat2</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span><span class="o">/</span><span class="n">math</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">lat1</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dPhi</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1.0E-6</span><span class="p">:</span>
+        <span class="n">q</span><span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">q</span><span class="o">=</span> <span class="n">dLat</span><span class="o">/</span><span class="n">dPhi</span>
+    <span class="n">lon1</span><span class="o">=</span> <span class="n">p1</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">radians</span>
+    <span class="n">lon2</span><span class="o">=</span> <span class="n">p2</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">radians</span>
+    <span class="n">dLon</span> <span class="o">=</span> <span class="n">lon2</span> <span class="o">-</span> <span class="n">lon1</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dLon</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">:</span>
+        <span class="n">dLon</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">-</span><span class="n">dLon</span><span class="p">)</span> <span class="k">if</span> <span class="n">dLon</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">+</span><span class="n">dLon</span><span class="p">)</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">dLat</span><span class="o">*</span><span class="n">dLat</span> <span class="o">+</span> <span class="n">q</span><span class="o">*</span><span class="n">q</span><span class="o">*</span><span class="n">dLon</span><span class="o">*</span><span class="n">dLon</span><span class="p">)</span> <span class="o">*</span> <span class="n">R</span>
+    <span class="n">brng</span><span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">dLon</span><span class="p">,</span> <span class="n">dPhi</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">brng</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">brng</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">+</span><span class="n">brng</span>
+    <span class="n">theta</span><span class="o">=</span> <span class="n">Angle2</span><span class="p">(</span><span class="n">brng</span><span class="p">)</span>
+    <span class="c">#print( &quot;dPhi={0!r} brng={0!r} theta={1!r}&quot;.format( dPhi, brng, theta ) )</span>
+    <span class="k">return</span> <span class="n">d</span><span class="p">,</span> <span class="n">theta</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="destination-calculation">
+<span id="calc-destination"></span><h2>Destination Calculation<a class="headerlink" href="#destination-calculation" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="navigation.destination">
+<code class="descclassname">navigation.</code><code class="descname">destination</code><span class="sig-paren">(</span><em>p1</em>, <em>range</em>, <em>bearing</em>, <em>R=NM</em><span class="sig-paren">)</span><a class="headerlink" href="#navigation.destination" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a start point and a distance <img class="math" src="_images/math/425d86ba2f2979d75b7535c2bcf92c33ed6b285a.png" alt="d"/> along constant bearing <img class="math" src="_images/math/a9cfbeb8ebee1f365919e147a79e242dcb67ee5d.png" alt="\theta"/>,
+return the destination point.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>p1</strong> &#8211; <a class="reference internal" href="#navigation.LatLon" title="navigation.LatLon"><code class="xref py py-class docutils literal"><span class="pre">LatLon</span></code></a> for starting point.</li>
+<li><strong>range</strong> &#8211; float range to travel.</li>
+<li><strong>bearing</strong> &#8211; <a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a> bearing to travel.</li>
+<li><strong>R</strong> &#8211; radius value used to compute units,
+default is NM for nautical miles.
+Use MI or KM for statute miles or kilometers.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#navigation.LatLon" title="navigation.LatLon"><code class="xref py py-class docutils literal"><span class="pre">LatLon</span></code></a> object with destination.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<div class="section" id="id1">
+<h3>Formula<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p><strong>Version 1.</strong></p>
+<p>A point <img class="math" src="_images/math/d2c022ad6f6a678b9eb82ecc36b38ffd1d7aa7b4.png" alt="{lat_d,lon_d}"/> is a distance <img class="math" src="_images/math/425d86ba2f2979d75b7535c2bcf92c33ed6b285a.png" alt="d"/> out on the <img class="math" src="_images/math/a9cfbeb8ebee1f365919e147a79e242dcb67ee5d.png" alt="\theta"/> radial from point <img class="math" src="_images/math/90d35df31cc64cd6cdd3a3a5893f52a7248bf721.png" alt="{lat_1,lon_1}"/>.</p>
+<p>The latitude:</p>
+<div class="math">
+<p><img src="_images/math/af17c025bb7b22d0c4af58a5a225122fcf6577c2.png" alt="lat_d = \arcsin \Bigl[ \sin(lat_1)\cos(d)+\cos(lat_1)\sin(d)\cos(\theta) \Bigr]"/></p>
+</div><p>The Longitude:</p>
+<div class="math">
+<p><img src="_images/math/0d8a7518ca25b92ac393f9d62dc46a91d4904b17.png" alt="lon_d = \begin{cases}
+&amp;lon_1 \text{  if $\cos(lat_d) = 0$ (the endpoint is a pole)}, \\
+&amp;\Bigl[ lon_1-\arcsin \bigl( \frac{\sin(\theta)\sin(d)}{\cos(lat_d)} \bigr) +\pi \pmod {2\pi} \Bigr] -\pi \text{ otherwise}.
+\end{cases}"/></p>
+</div><p>This algorithm is limited to distances such that <img class="math" src="_images/math/a9e7e20e649c38c15098b7fe07e40781bf7f1925.png" alt="lon_d &lt; \frac{\pi}{2}"/>, i.e those that extend around less than one quarter of the circumference of the earth in longitude. A completely general, but more complicated algorithm is necessary if greater distances are allowed:</p>
+<div class="math">
+<p><img src="_images/math/8afa0935ee105da77c3a5dc4efde8e7a70b0f103.png" alt="lat_d = \arcsin \bigl[ \sin(lat_1)\cos(d)+\cos(lat_1)\sin(d)\cos(\theta) \bigr]"/></p>
+</div><div class="math">
+<p><img src="_images/math/ed3d801c3aedeb8c05d83ac1cac0ff3005b00806.png" alt="\delta_{lon} = \arctan \frac{\sin(\theta)\sin(d)\cos(lat_1)}{\cos(d)-\sin(lat_1)\sin(lat_d)}"/></p>
+</div><div class="math">
+<p><img src="_images/math/576c45d5c5e341f831874281b656631e1e6abdab.png" alt="lon_d = (lon_1-\delta_{lon} + \pi) \pmod {2\pi} - \pi"/></p>
+</div><p><strong>Version 2.</strong></p>
+<p>Angular Distance, <img class="math" src="_images/math/ad59b6e24a4a00ac621801f8d7513d68be654ab5.png" alt="\alpha"/>.</p>
+<div class="math">
+<p><img src="_images/math/fd21a9165eccfeb824b5c38074240388157b5c34.png" alt="\alpha = d / R"/></p>
+</div><p>Latitude</p>
+<div class="math">
+<p><img src="_images/math/fa704bfabe4dbfdd5045a369aac67c6046abca5d.png" alt="lat_2 = lat_1 + \alpha \cos(\theta)"/></p>
+</div><p>Longitude</p>
+<div class="math">
+<p><img src="_images/math/74ea3ee3e868bc43b7ab4e2b6eca93a1d9d7ee9a.png" alt="\Delta\varphi = \ln \left[ \frac{\tan( lat_2 / 2 + \pi / 4 )}{\tan( lat_1 / 2 + \pi / 4 )} \right]"/></p>
+</div><div class="math">
+<p><img src="_images/math/5de72bdbf2eb4d7febda7cf2e6597c835a8632bb.png" alt="q = \begin{cases}
+&amp;\cos( lat_1 ) \text{  if $\Delta \varphi = 0$ (this is an E:W line)}, \\
+&amp;\frac{\Delta lat}{\Delta \varphi} \text {  otherwise}.
+\end{cases}"/></p>
+</div><div class="math">
+<p><img src="_images/math/8ec61909ab65329fe5db53cf383e8f108c59f71d.png" alt="\Delta lon = \alpha \sin{\theta}/q"/></p>
+</div><div class="math">
+<p><img src="_images/math/8cec4270a40d40873f1776a9da0a9cfb6b8a59bd.png" alt="lon_2 = (lon_1+\Delta lon+\pi) \pmod {2 \pi} - \pi"/></p>
+</div><p>where <img class="math" src="_images/math/a2a746d31e9304559c4bf873124bf49cd6d0234e.png" alt="\ln"/> is natural log
+<img class="math" src="_images/math/4737de71e9a0097f08e47fd36100611bfe66d319.png" alt="\Delta lon"/> is taking shortest route (<img class="math" src="_images/math/57188d6528f09a4bc876703e6b74451dd38c2084.png" alt="&lt; 180 \textdegree"/>).</p>
+<p><img class="math" src="_images/math/9d86170e7de539c0ff999de09621ee0c7b6c8ed0.png" alt="R"/> is the earth&#8217;s mean radius: 6,371.009 km (3,958.761 mi; 3,440.069 nm).</p>
+</div>
+<div class="section" id="id2">
+<h3>Example<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Lat/Lon 1:</th><td class="field-body">51 07 32N, 001 20 17E</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Bearing:</th><td class="field-body">116 38 10</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Distance:</th><td class="field-body">40.23</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Destination point:</th></tr>
+<tr class="field-even field"><td>&nbsp;</td><td class="field-body">50 57 48N, 001 51 09E</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="destination-implementation">
+<h3>destination implementation<a class="headerlink" href="#destination-implementation" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">destination</span><span class="p">(</span> <span class="n">p1</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">bearing</span><span class="p">,</span> <span class="n">R</span><span class="o">=</span><span class="n">NM</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Rhumb line destination given point, range and bearing.</span>
+
+<span class="sd">    See :ref:`calc.destination`.</span>
+
+<span class="sd">    :param p1: a :py:class:`LatLon` starting point</span>
+<span class="sd">    :param range: the distiance to travel.</span>
+<span class="sd">    :param bearing: the direction of travel.</span>
+<span class="sd">    :param R: radius of the earth in appropriate units;</span>
+<span class="sd">        default is nautical miles.</span>
+<span class="sd">        Values include :py:data:`KM` for kilometers,</span>
+<span class="sd">        :py:data:`MI` for statute miles and :py:data:`NM` for nautical miles.</span>
+<span class="sd">    :returns: a :py:class:`LatLon` with the ending point.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">d</span><span class="o">=</span> <span class="nb">range</span><span class="o">/</span><span class="n">R</span>
+    <span class="n">theta</span><span class="o">=</span> <span class="n">bearing</span><span class="o">.</span><span class="n">radians</span>
+    <span class="n">lat1</span><span class="o">=</span> <span class="n">p1</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">radians</span>
+    <span class="n">lon1</span><span class="o">=</span> <span class="n">p1</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">radians</span>
+    <span class="n">lat2</span> <span class="o">=</span> <span class="n">lat1</span> <span class="o">+</span> <span class="n">d</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+    <span class="n">dLat</span><span class="o">=</span> <span class="n">lat2</span> <span class="o">-</span> <span class="n">lat1</span>
+    <span class="n">dPhi</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">lat2</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">)</span><span class="o">/</span><span class="n">math</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">lat1</span><span class="o">/</span><span class="mi">2</span><span class="o">+</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">))</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dPhi</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1.0E-6</span><span class="p">:</span>
+        <span class="n">q</span><span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">lat1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">q</span><span class="o">=</span> <span class="n">dLat</span><span class="o">/</span><span class="n">dPhi</span>
+
+    <span class="n">dLon</span> <span class="o">=</span> <span class="n">d</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span><span class="o">/</span><span class="n">q</span>
+    <span class="c"># check for some daft bugger going past the pole, normalize latitude if so</span>
+    <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">lat2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">:</span>
+        <span class="n">lat2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">-</span><span class="n">lat2</span> <span class="k">if</span> <span class="n">lat2</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">-</span><span class="n">lat2</span><span class="p">)</span>
+    <span class="n">lon2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">fmod</span><span class="p">(</span> <span class="p">(</span><span class="n">lon1</span><span class="o">+</span><span class="n">dLon</span><span class="o">+</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="p">)</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span>
+
+    <span class="k">return</span> <span class="n">LatLon</span><span class="p">(</span><span class="n">Lat</span><span class="p">(</span><span class="n">lat2</span><span class="p">),</span> <span class="n">Lon</span><span class="p">(</span><span class="n">lon2</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="declination-function">
+<h2>declination Function<a class="headerlink" href="#declination-function" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="navigation.declination">
+<code class="descclassname">navigation.</code><code class="descname">declination</code><span class="sig-paren">(</span><em>point</em>, <em>date=None</em><span class="sig-paren">)</span><a class="headerlink" href="#navigation.declination" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the compass variance (or declination) at
+a given lat-lon point.  It is based on the IGRF 11 model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>point</strong> &#8211; <a class="reference internal" href="#navigation.LatLon" title="navigation.LatLon"><code class="xref py py-class docutils literal"><span class="pre">LatLon</span></code></a> point to compute the declination.</li>
+<li><strong>date</strong> &#8211; <code class="xref py py-class docutils literal"><span class="pre">datetime.datetime</span></code> object with the date
+to use. If omitted, the current date is used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a> object with the declination.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>See <a class="reference internal" href="igrf11.html#igrf11"><span>International Geomagnetic Reference Field Module</span></a> for details.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">declination</span><span class="p">(</span> <span class="n">point</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="bp">None</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Computes standard declination for a given :py:class:`LatLon`</span>
+<span class="sd">    point.</span>
+
+<span class="sd">    http://www.ngdc.noaa.gov/geomag/models.shtml</span>
+
+<span class="sd">    http://www.ngdc.noaa.gov/IAGA/vmod/igrf.html</span>
+
+<span class="sd">    :param point: LatLon point</span>
+<span class="sd">    :param date: :py:class:`datetime.date` in question, default is today.</span>
+<span class="sd">    :returns: declination as Angle2 object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># print( &quot;declination: {0!r} {1!r}&quot;.format(point.lat, point.lon) )</span>
+
+    <span class="k">if</span> <span class="n">date</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+    <span class="n">first_of_year</span><span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span> <span class="n">month</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="mi">1</span> <span class="p">)</span>
+    <span class="n">astro_dt_tm</span><span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">year</span> <span class="o">+</span> <span class="p">(</span><span class="n">date</span><span class="o">.</span><span class="n">toordinal</span><span class="p">()</span> <span class="o">-</span> <span class="n">first_of_year</span><span class="o">.</span><span class="n">toordinal</span><span class="p">())</span><span class="o">/</span><span class="mf">365.242</span>
+
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">igrf11</span><span class="o">.</span><span class="n">igrf11syn</span><span class="p">(</span> <span class="n">astro_dt_tm</span><span class="p">,</span> <span class="n">point</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span> <span class="n">point</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">east</span> <span class="p">)</span>
+    <span class="n">decl</span> <span class="o">=</span>  <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="c"># Declination</span>
+    <span class="k">return</span> <span class="n">Angle2</span><span class="p">(</span><span class="n">decl</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="historical-archive">
+<h2>Historical Archive<a class="headerlink" href="#historical-archive" title="Permalink to this headline">¶</a></h2>
+<p>The original <a class="reference internal" href="#navigation.Angle" title="navigation.Angle"><code class="xref py py-class docutils literal"><span class="pre">Angle</span></code></a> and <a class="reference internal" href="#navigation.GlobeAngle" title="navigation.GlobeAngle"><code class="xref py py-class docutils literal"><span class="pre">GlobeAngle</span></code></a> classes do things which are close
+to correct. They included some needless complexity, however. They work
+in degrees (not radians) and implement a lot of operations that could
+have been inherited from <code class="docutils literal"><span class="pre">float</span></code>.</p>
+<p>See <a class="reference internal" href="#navigation.Angle2" title="navigation.Angle2"><code class="xref py py-class docutils literal"><span class="pre">Angle2</span></code></a> for a better implementation.</p>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">Remove GlobeAngle and Angle.</p>
+</div>
+<div class="section" id="deprecation">
+<h3>Deprecation<a class="headerlink" href="#deprecation" title="Permalink to this headline">¶</a></h3>
+<p>Here is how we will gracefully handle deprecation of <a class="reference internal" href="#navigation.GlobeAngle" title="navigation.GlobeAngle"><code class="xref py py-class docutils literal"><span class="pre">GlobeAngle</span></code></a>
+and <a class="reference internal" href="#navigation.Angle" title="navigation.Angle"><code class="xref py py-class docutils literal"><span class="pre">Angle</span></code></a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="k">def</span> <span class="nf">deprecated</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Mark a function or method as deprecated.&quot;&quot;&quot;</span>
+    <span class="c"># print( &quot;Deprecating &quot;, func )</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">deprecated_func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s">&quot;Deprecated {}.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">__name__</span><span class="p">),</span>
+            <span class="n">category</span><span class="o">=</span><span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">deprecated_func</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="angle-class">
+<h3>Angle Class<a class="headerlink" href="#angle-class" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="navigation.Angle">
+<em class="property">class </em><code class="descclassname">navigation.</code><code class="descname">Angle</code><a class="headerlink" href="#navigation.Angle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>An <a class="reference internal" href="#navigation.Angle" title="navigation.Angle"><code class="xref py py-class docutils literal"><span class="pre">Angle</span></code></a> is a signed radians number, essentially equivalent
+to <code class="docutils literal"><span class="pre">float</span></code>. The operators are include the flexibility to work with
+<code class="docutils literal"><span class="pre">float</span></code> values, doing coercion to <a class="reference internal" href="#navigation.Angle" title="navigation.Angle"><code class="xref py py-class docutils literal"><span class="pre">Angle</span></code></a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">Angle</span><span class="p">(</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Real</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An Angle, with conversion from several DMS notations,</span>
+<span class="sd">    as well as from radians.  The angle can be reported as</span>
+<span class="sd">    degrees, a (D, M, S) tuple or as a value in radians.</span>
+
+<span class="sd">    :ivar deg: The angle in degrees.</span>
+
+<span class="sd">    :ivar radians: The angle in radians</span>
+
+<span class="sd">    :ivar dm: The angle as a (D, M) tuple</span>
+
+<span class="sd">    :ivar dms: The angle as a (D, M, S) tuple</span>
+
+<span class="sd">    :ivar tail: Any additional text found after parsing a string value.</span>
+<span class="sd">            This may be a hemisphere indication that a subclass might want to use.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>Allowed input formats</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">dms_pat</span><span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span> <span class="s">r&quot;(\d+)\s+(\d+)\s+(\d+)(.*)&quot;</span> <span class="p">)</span>
+<span class="n">dm_pat</span><span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span> <span class="s">r&quot;(\d+)\s+(\d+\.\d+)(.*)&quot;</span> <span class="p">)</span>
+<span class="n">d_pat</span><span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span> <span class="s">r&quot;(\d+\.\d+)(.*)&quot;</span> <span class="p">)</span>
+<span class="n">navx_dmh_pat</span><span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span> <span class="s">&quot;(</span><span class="se">\\</span><span class="s">d+)</span><span class="se">\\</span><span class="s">D+(</span><span class="se">\\</span><span class="s">d+</span><span class="se">\\</span><span class="s">.</span><span class="se">\\</span><span class="s">d+)&#39;([NEWS])&quot;</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Build an <code class="docutils literal"><span class="pre">Angle</span></code> from a value in radians.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@staticmethod</span>
+<span class="nd">@deprecated</span>
+<span class="k">def</span> <span class="nf">from_radians</span><span class="p">(</span> <span class="n">value</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create an Angle from radians.</span>
+
+<span class="sd">    :param value: Angle in radians.</span>
+
+<span class="sd">    Generally used like this::</span>
+
+<span class="sd">        a = Angle.from_radians( float )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="mi">180</span> <span class="o">*</span> <span class="n">value</span> <span class="o">/</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Build an <code class="docutils literal"><span class="pre">Angle</span></code> from a value in degrees in any one of
+a large number of variant formats.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@deprecated</span>
+<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">value</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create an Angle from an Angle, float or string degrees.</span>
+
+<span class="sd">    :param value: Angle in degrees as Angle, float or string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tail</span><span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">Angle</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deg</span><span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">deg</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="nb">float</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deg</span><span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span>
+    <span class="n">dms</span><span class="o">=</span> <span class="n">Angle</span><span class="o">.</span><span class="n">dms_pat</span><span class="o">.</span><span class="n">match</span><span class="p">(</span> <span class="n">value</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="n">dms</span><span class="p">:</span>
+        <span class="n">d</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dms</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="n">dms</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span> <span class="nb">float</span><span class="p">(</span><span class="n">dms</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deg</span><span class="o">=</span> <span class="n">d</span> <span class="o">+</span> <span class="n">m</span><span class="o">/</span><span class="mi">60</span> <span class="o">+</span> <span class="n">s</span><span class="o">/</span><span class="mi">3600</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tail</span><span class="o">=</span> <span class="n">dms</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">dm</span><span class="o">=</span> <span class="n">Angle</span><span class="o">.</span><span class="n">dm_pat</span><span class="o">.</span><span class="n">match</span><span class="p">(</span> <span class="n">value</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="n">dm</span><span class="p">:</span>
+        <span class="n">d</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dm</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span> <span class="nb">float</span><span class="p">(</span><span class="n">dm</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deg</span><span class="o">=</span> <span class="n">d</span> <span class="o">+</span> <span class="n">m</span><span class="o">/</span><span class="mi">60</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tail</span><span class="o">=</span> <span class="n">dm</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">d</span><span class="o">=</span> <span class="n">Angle</span><span class="o">.</span><span class="n">d_pat</span><span class="o">.</span><span class="n">match</span><span class="p">(</span> <span class="n">value</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="n">d</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tail</span><span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="n">navx</span><span class="o">=</span> <span class="n">Angle</span><span class="o">.</span><span class="n">navx_dmh_pat</span><span class="o">.</span><span class="n">match</span><span class="p">(</span> <span class="n">value</span> <span class="p">)</span>
+    <span class="k">if</span> <span class="n">navx</span><span class="p">:</span>
+        <span class="n">d</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">navx</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span> <span class="nb">float</span><span class="p">(</span><span class="n">navx</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deg</span><span class="o">=</span> <span class="n">d</span> <span class="o">+</span> <span class="n">m</span><span class="o">/</span><span class="mi">60</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tail</span><span class="o">=</span> <span class="n">navx</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s">&quot;Cannot parse Angle {0!r}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Output conversions</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">radians</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the angle in radians.</span>
+
+<span class="sd">    :returns: angle in radians.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">/</span> <span class="mi">180</span>
+<span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">dm</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the angle as (D, M).</span>
+
+<span class="sd">    :returns: (d, m) tuple</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sign</span><span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">+</span><span class="mi">1</span>
+    <span class="n">ad</span><span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
+    <span class="n">d</span><span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ad</span><span class="p">)</span>
+    <span class="n">ms</span><span class="o">=</span> <span class="n">ad</span><span class="o">-</span><span class="n">d</span>
+    <span class="k">return</span> <span class="n">d</span><span class="o">*</span><span class="n">sign</span><span class="p">,</span> <span class="mi">60</span><span class="o">*</span><span class="n">ms</span><span class="o">*</span><span class="p">(</span><span class="n">sign</span> <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+<span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">dms</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the angle as (D, M, S).</span>
+
+<span class="sd">    :returns: (d, m, s) tuple</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sign</span><span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">+</span><span class="mi">1</span>
+    <span class="n">ad</span><span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span>
+    <span class="n">d</span><span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ad</span><span class="p">)</span>
+    <span class="n">ms</span><span class="o">=</span> <span class="mi">60</span><span class="o">*</span><span class="p">(</span><span class="n">ad</span><span class="o">-</span><span class="n">d</span><span class="p">)</span>
+    <span class="n">m</span><span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ms</span><span class="p">)</span>
+    <span class="n">s</span><span class="o">=</span> <span class="nb">round</span><span class="p">((</span><span class="n">ms</span><span class="o">-</span><span class="n">m</span><span class="p">)</span><span class="o">*</span><span class="mi">60</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">d</span><span class="o">*</span><span class="n">sign</span><span class="p">,</span> <span class="n">m</span><span class="o">*</span><span class="p">(</span><span class="n">sign</span> <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span><span class="p">),</span> <span class="n">s</span><span class="o">*</span><span class="p">(</span><span class="n">sign</span> <span class="k">if</span> <span class="n">d</span><span class="o">==</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">m</span><span class="o">==</span><span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="s">&quot;Angle( {0.deg!r} )&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="bp">self</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="s">&quot;{0.deg:7.3f}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="bp">self</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Core numeric object methods.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span><span class="n">Angle</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span><span class="nb">float</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">+</span> <span class="n">other</span> <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+<span class="k">def</span> <span class="nf">__sub__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span><span class="n">Angle</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">-</span> <span class="n">other</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span><span class="nb">float</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">-</span> <span class="n">other</span> <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+<span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span><span class="n">Angle</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">*</span> <span class="n">other</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span><span class="nb">float</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">*</span> <span class="n">other</span> <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+<span class="k">def</span> <span class="nf">__div__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span><span class="n">Angle</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">/</span> <span class="n">other</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span><span class="nb">float</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">/</span> <span class="n">other</span> <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+<span class="k">def</span> <span class="nf">__truediv__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__div__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__floordiv__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span><span class="n">Angle</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">//</span> <span class="n">other</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span><span class="nb">float</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">//</span> <span class="n">other</span> <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+<span class="k">def</span> <span class="nf">__mod__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span><span class="n">Angle</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">%</span> <span class="n">other</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span><span class="nb">float</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">%</span> <span class="n">other</span> <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+</pre></div>
+</div>
+<p>Additional methods, not used within this application.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__abs__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__float__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span>
+<span class="k">def</span> <span class="nf">__trunc__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="n">trunc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__ceil__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__floor__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__round__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">ndigits</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="nb">round</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span><span class="p">,</span> <span class="n">ndigits</span><span class="o">=</span><span class="mi">0</span> <span class="p">)</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__neg__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+<span class="k">def</span> <span class="nf">__pos__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span>
+<span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">deg</span>
+<span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">deg</span>
+<span class="k">def</span> <span class="nf">__le__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">&lt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">deg</span>
+<span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">deg</span>
+<span class="k">def</span> <span class="nf">__ge__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">&gt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">deg</span>
+<span class="k">def</span> <span class="nf">__gt__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">&gt;</span> <span class="n">other</span><span class="o">.</span><span class="n">deg</span>
+<span class="k">def</span> <span class="nf">__pow__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">Angle</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span><span class="o">**</span><span class="n">other</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Yet more methods, most of which aren&#8217;t even implemented.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">other</span><span class="o">+</span><span class="bp">self</span>
+<span class="k">def</span> <span class="nf">__rdiv__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="bp">NotImplemented</span>
+<span class="k">def</span> <span class="nf">__rfloordiv__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="bp">NotImplemented</span>
+<span class="k">def</span> <span class="nf">__rmod__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="bp">NotImplemented</span>
+<span class="k">def</span> <span class="nf">__rmul__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">other</span><span class="o">*</span><span class="bp">self</span>
+<span class="k">def</span> <span class="nf">__rpow__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="bp">NotImplemented</span>
+<span class="k">def</span> <span class="nf">__rtruediv__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="bp">NotImplemented</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="globeangle-class">
+<h3>GlobeAngle Class<a class="headerlink" href="#globeangle-class" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="navigation.GlobeAngle">
+<em class="property">class </em><code class="descclassname">navigation.</code><code class="descname">GlobeAngle</code><a class="headerlink" href="#navigation.GlobeAngle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>We need to extend the simple <a class="reference internal" href="#navigation.Angle" title="navigation.Angle"><code class="xref py py-class docutils literal"><span class="pre">Angle</span></code></a> to include globe hemisphere
+information so that the simple angle (in degrees or radians)
+can be parsed and presented in proper N, S, E and W hemisphere
+notation.</p>
+<p>This whole mess doesn&#8217;t handle signs properly, and is deprecated.</p>
+<p>Note that we do not handle sign well as a conversion from a string.
+This is because this angle is axis-independent.  Since it isn&#8217;t
+aware of being a longitude or a latitude, it doesn&#8217;t know which
+hemisphere code to use.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">GlobeAngle</span><span class="p">(</span> <span class="n">Angle</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An Angle which includes hemisphere information: N, S, E or W.</span>
+
+<span class="sd">    :ivar deg: The angle in degrees.</span>
+
+<span class="sd">    :ivar radians: The angle in radians</span>
+
+<span class="sd">    :ivar dm: The angle as a (D, M) tuple</span>
+
+<span class="sd">    :ivar dms: The angle as a (D, M, S, H) tuple</span>
+
+<span class="sd">    :ivar hemi: The hemisphere (&quot;N&quot;, &quot;S&quot;, &quot;E&quot; or &quot;W&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>For construction there are two variations on &#8220;hemisphere&#8221; encoding.</p>
+<ul class="simple">
+<li>A positive number with &#8220;N&#8221;, &#8220;S&#8221;, &#8220;E&#8221; or &#8220;W&#8221;.</li>
+<li>A signed number with &#8220;NS&#8221;, or &#8220;EW&#8221;.</li>
+</ul>
+<p>This method function decodes the two alternatives.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">_hemisphere</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">hemi</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">None</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">hemi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hemi</span><span class="o">=</span> <span class="n">hemi</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">hemi</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hemi</span><span class="o">=</span> <span class="n">hemi</span><span class="p">[</span><span class="mi">0</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s">&quot;Cannot parse GlobeAngle{0!r}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">debug</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Build an <code class="docutils literal"><span class="pre">GlobeAngle</span></code> from a value in degrees in any one of
+a large number of variant formats plus the hemisphere designation or
+a latitude/longitude designation.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@deprecated</span>
+<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">hemi</span><span class="o">=</span><span class="bp">None</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a GlobeAngle from an GlobeAngle, Angle or float degrees.</span>
+<span class="sd">    This will delegate construction to Angle for parsing the</span>
+<span class="sd">    various strings that could be present. An Angle string may</span>
+<span class="sd">    include a &quot;tail&quot; of N, S, E or W, making the hemisphere</span>
+<span class="sd">    irrelevant.</span>
+
+<span class="sd">    :param value: Angle in degrees as :py:class:`Angle`,</span>
+<span class="sd">        :py:class:`GlobeAngle`, float or string.</span>
+<span class="sd">        The string parsing is delegated to :py:class:`Angle`.</span>
+
+<span class="sd">    :param hemi: The hemisphere label (&#39;N&#39;, &#39;S&#39;, &#39;E&#39; or &#39;W&#39;)</span>
+<span class="sd">        Or.</span>
+<span class="sd">        In the case of Angle or Float, this is the set of hemisphere</span>
+<span class="sd">        alternatives. For Latitude provide &quot;NS&quot;; for Longitude provide &quot;EW&quot;.</span>
+<span class="sd">        This must be folded into an Angle or a float value.</span>
+<span class="sd">        Positive Angle or float means N or E.</span>
+<span class="sd">        Negative Angle or float means S or W.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">GlobeAngle</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deg</span><span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">deg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hemi</span><span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">hemi</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">Angle</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deg</span><span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">deg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hemisphere</span><span class="p">(</span> <span class="n">hemi</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">hemi</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="nb">float</span><span class="p">)</span> <span class="ow">and</span> <span class="n">hemi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deg</span><span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hemisphere</span><span class="p">(</span> <span class="n">hemi</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">hemi</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">return</span>
+    <span class="c"># String parsing.</span>
+    <span class="n">angle</span><span class="o">=</span> <span class="n">Angle</span><span class="p">(</span> <span class="n">value</span> <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">deg</span><span class="o">=</span> <span class="n">angle</span><span class="o">.</span><span class="n">deg</span>
+    <span class="k">if</span> <span class="n">angle</span><span class="o">.</span><span class="n">tail</span> <span class="ow">and</span> <span class="n">angle</span><span class="o">.</span><span class="n">tail</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;N&quot;</span><span class="p">,</span><span class="s">&quot;S&quot;</span><span class="p">,</span><span class="s">&quot;E&quot;</span><span class="p">,</span><span class="s">&quot;W&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hemi</span><span class="o">=</span> <span class="n">angle</span><span class="o">.</span><span class="n">tail</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">return</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_hemisphere</span><span class="p">(</span> <span class="n">hemi</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="n">hemi</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+<p>Output conversions</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">radians</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the angle in radians with appropriate sign based on hemisphere.</span>
+<span class="sd">    W and S are negative values.</span>
+
+<span class="sd">    :returns: angle in radians.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hemi</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;W&quot;</span><span class="p">,</span><span class="s">&quot;S&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="nb">super</span><span class="p">(</span><span class="n">GlobeAngle</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">radians</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">GlobeAngle</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">radians</span>
+<span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">dms</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns the angle as a (D, M, S, Hemisphere).</span>
+
+<span class="sd">    :return: (d, m, s, hemisphere) 4-tuple.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">GlobeAngle</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">dms</span> <span class="o">+</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">hemi</span><span class="p">,</span> <span class="p">)</span>
+<span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">sdeg</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns a signed angle: positive N or E, negative S or W.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hemi</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;S&quot;</span><span class="p">,</span> <span class="s">&quot;W&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">deg</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deg</span>
+<span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">deg</span><span class="p">)</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">hemi</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="references-and-notes">
+<h2>References and Notes<a class="headerlink" href="#references-and-notes" title="Permalink to this headline">¶</a></h2>
+<p>See <a class="reference external" href="http://williams.best.vwh.net/avform.htm">http://williams.best.vwh.net/avform.htm</a></p>
+<p>See <a class="reference external" href="http://www.movable-type.co.uk/scripts/latlong.html">http://www.movable-type.co.uk/scripts/latlong.html</a>, © 2002-2010 Chris Veness</p>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="planning.html" class="btn btn-neutral float-right" title="Route Planning Application" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="introduction.html" class="btn btn-neutral" title="Overview" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2012, S.Lott.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
