@@ -11,15 +11,15 @@
 #
 # In addition to Python 3.4, there are two other projects required to build.
 #
-# -   PyLit3.  https://github.com/slott56/PyLit-3
+# -   PyLit3.  https://github.com/slott56/PyLit-3 and http://slott56.github.io/PyLit-3/index.html.
 #
-# -   Sphinx.  http://sphinx.pocoo.org/
+# -   Sphinx.  http://sphinx-doc.org
 #
-# The PyLit3 install is little more than a download and move the :file:`src/pylit.py` file to
+# The PyLit3 install is little more than download and move the :file:`src/pylit.py` file to
 # the Python :file:`site-packages` directory.
 #
 # Sphinx should be
-# installed with ``pip`` or ``easy_install``, both of which are part of the Python3.4 distribution.
+# installed with ``pip3.4`` or ``easy_install_3.4``, both of which are part of the Python3.4 distribution.
 #
 # ..  code-block:: bash
 #
@@ -38,8 +38,8 @@
 #
 # 2.  Use the :file:`build.py` script to create the ``navtools`` source, unit
 #     tests, demonstration applications.
-#     Build the Sphinx documentation.
-#     And run the unit test, too.
+#     It also builds the Sphinx documentation.
+#     And it runs the unit test suite, too.
 #
 #     ..  code-block:: bash
 #
@@ -47,11 +47,12 @@
 #
 #     At the end of this step, the directory tree will include the following.
 #
-#     -   :file:`build`.  The documentation.  In HTML.
-#     -   :file:`navtools`.  The Python package, ready for installation.
+#     -   :file:`../navtools-gh-pages`.  The documentation.  In HTML.
+#     -   :file:`navtools`.  The Python source, ready for installation.
+#     -   :file:`setup.py`. The distutils installation.
 #     -   :file:`test`.  The unit test script.
 #
-#     This reports, also, that 44 tests were run.
+#     This reports, also, that 49 tests were run.
 #
 # An alternative to step 2 is the following:
 #
@@ -70,17 +71,17 @@
 #
 # -   Make both :file:`build.sh` and :file:`build.bat` from a common source.
 #     This would, potentially, lead to some real complication with
-#     PyLit trying to build both files (in different resulting syntax)
-#     from some kind of common source material.
+#     PyLit trying to build two files (in different resulting syntax)
+#     from some kind of common source material. We'd rather not get involved.
 #
-# -   Depend on ``make``, which is quite common.
+# -   Depend on ``make``, which is quite common. While this isn't an onerous
+#     dependency, we'd like to avoid it.
 #
-# -   Use a platform-independent :file:`build.py` file for the build script.
-#     This can use ``from sphinx.application import Sphinx``
-#     and ``import pylit`` to access these modules from within Python
-#     instead of using command-line scripts.
+# -   Create a platform-independent :file:`build.py` file for the build script.
+#     We'll use ``from sphinx.application import Sphinx``
+#     and ``import pylit`` to access these modules from within Python.
 #
-# We'll create a Python script.
+# We'll really like the Python script approach to the build.
 #
 # Overheads
 # -------------

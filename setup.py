@@ -4,34 +4,28 @@
 # Installation via ``setup.py``
 # ##############################
 #
-# The NavTools distribution kit (minimally) is just the following.
+# The NavTools distribution includes the following.
+#
+# -   :file:`navtools`. The Python code which gets installed.
+#
+# -   :file:`igrf11coeffs.txt`. Data used to compute magnetic deviation.
+#     This, too, will be installed.
 #
 # -   :file:`source`.  The RST-formatted source used by PyLit3 to
-#     to create code and documentation.
+#     to create the code and the documentation. This
 #
-# -   :file:`build.py`.  The build procedure.
-#
-# Given this  directory, the build procedure uses PyLit to create the ``navtools`` package.
-# It uses Sphinx to create the documentation.
+# -   :file:`build.py`.  The build procedure to rebuild source
+#     and documentation from the :file:`source`.
 #
 # See :ref:`build` for more information on the build procedure.
-# A build requires PyLit3 and Sphinx to be installed.
+# See https://github.com/slott56/PyLit-3 and http://slott56.github.io/PyLit-3/index.html
+# for more information on Literate Programming.
 #
-# -   PyLit3.  https://github.com/slott56/PyLit-3
-#
-# -   Sphinx.  http://sphinx-doc.org
-#
-# The build itself run like this:
+# Install ``navtools``.  Windows users can omit the ``sudo``.
 #
 # ..  code-block:: bash
 #
-#     python3 build.py
-#
-# Install ``navtools``.  This may require privileges via ``sudo``.
-#
-# ..  code-block:: bash
-#
-#     python3 setup.py install
+#     sudo python3 setup.py install
 #
 # The ``setup.py`` File
 # ======================
