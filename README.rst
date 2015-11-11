@@ -13,12 +13,15 @@ Check out the github or download the .zip archive.
 See https://github.com/slott56/navtools.
 
 Run the ``setup.py`` to install the various components.
+For details, see http://slott56.github.io/navtools/installation.html.
 
-..  important:: Literate Programming
+**Important**. Literate Programming In Use.
 
     The documentations **is** the source. The code
     starts as ``.rst`` files. The ``.py`` is derived
     from the documentation.
+    The `build <http://slott56.github.io/navtools/build.html>`_ documentation
+    shows how this works.
 
 Use
 ====
