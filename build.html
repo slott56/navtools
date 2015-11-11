@@ -279,13 +279,13 @@
 Yes.  The documentation spawns the code.</p>
 <p>In addition to Python 3.4, there are two other projects required to build.</p>
 <ul class="simple">
-<li>PyLit3.  <a class="reference external" href="https://github.com/slott56/PyLit-3">https://github.com/slott56/PyLit-3</a></li>
-<li>Sphinx.  <a class="reference external" href="http://sphinx.pocoo.org/">http://sphinx.pocoo.org/</a></li>
+<li>PyLit3.  <a class="reference external" href="https://github.com/slott56/PyLit-3">https://github.com/slott56/PyLit-3</a> and <a class="reference external" href="http://slott56.github.io/PyLit-3/index.html">http://slott56.github.io/PyLit-3/index.html</a>.</li>
+<li>Sphinx.  <a class="reference external" href="http://sphinx-doc.org">http://sphinx-doc.org</a></li>
 </ul>
-<p>The PyLit3 install is little more than a download and move the <code class="file docutils literal"><span class="pre">src/pylit.py</span></code> file to
+<p>The PyLit3 install is little more than download and move the <code class="file docutils literal"><span class="pre">src/pylit.py</span></code> file to
 the Python <code class="file docutils literal"><span class="pre">site-packages</span></code> directory.</p>
 <p>Sphinx should be
-installed with <code class="docutils literal"><span class="pre">pip</span></code> or <code class="docutils literal"><span class="pre">easy_install</span></code>, both of which are part of the Python3.4 distribution.</p>
+installed with <code class="docutils literal"><span class="pre">pip3.4</span></code> or <code class="docutils literal"><span class="pre">easy_install_3.4</span></code>, both of which are part of the Python3.4 distribution.</p>
 <div class="highlight-bash"><div class="highlight"><pre>pip3.4 install sphinx
 </pre></div>
 </div>
@@ -300,18 +300,19 @@ installed with <code class="docutils literal"><span class="pre">pip</span></code
 </li>
 <li><p class="first">Use the <code class="file docutils literal"><span class="pre">build.py</span></code> script to create the <code class="docutils literal"><span class="pre">navtools</span></code> source, unit
 tests, demonstration applications.
-Build the Sphinx documentation.
-And run the unit test, too.</p>
+It also builds the Sphinx documentation.
+And it runs the unit test suite, too.</p>
 <div class="highlight-bash"><div class="highlight"><pre>python3 build.py
 </pre></div>
 </div>
 <p>At the end of this step, the directory tree will include the following.</p>
 <ul class="simple">
-<li><code class="file docutils literal"><span class="pre">build</span></code>.  The documentation.  In HTML.</li>
-<li><code class="file docutils literal"><span class="pre">navtools</span></code>.  The Python package, ready for installation.</li>
+<li><code class="file docutils literal"><span class="pre">../navtools-gh-pages</span></code>.  The documentation.  In HTML.</li>
+<li><code class="file docutils literal"><span class="pre">navtools</span></code>.  The Python source, ready for installation.</li>
+<li><code class="file docutils literal"><span class="pre">setup.py</span></code>. The distutils installation.</li>
 <li><code class="file docutils literal"><span class="pre">test</span></code>.  The unit test script.</li>
 </ul>
-<p>This reports, also, that 44 tests were run.</p>
+<p>This reports, also, that 49 tests were run.</p>
 </li>
 </ol>
 <p>An alternative to step 2 is the following:</p>
@@ -328,15 +329,15 @@ for multiple OS with slightly different path definitions.</p>
 <ul class="simple">
 <li>Make both <code class="file docutils literal"><span class="pre">build.sh</span></code> and <code class="file docutils literal"><span class="pre">build.bat</span></code> from a common source.
 This would, potentially, lead to some real complication with
-PyLit trying to build both files (in different resulting syntax)
-from some kind of common source material.</li>
-<li>Depend on <code class="docutils literal"><span class="pre">make</span></code>, which is quite common.</li>
-<li>Use a platform-independent <code class="file docutils literal"><span class="pre">build.py</span></code> file for the build script.
-This can use <code class="docutils literal"><span class="pre">from</span> <span class="pre">sphinx.application</span> <span class="pre">import</span> <span class="pre">Sphinx</span></code>
-and <code class="docutils literal"><span class="pre">import</span> <span class="pre">pylit</span></code> to access these modules from within Python
-instead of using command-line scripts.</li>
+PyLit trying to build two files (in different resulting syntax)
+from some kind of common source material. We&#8217;d rather not get involved.</li>
+<li>Depend on <code class="docutils literal"><span class="pre">make</span></code>, which is quite common. While this isn&#8217;t an onerous
+dependency, we&#8217;d like to avoid it.</li>
+<li>Create a platform-independent <code class="file docutils literal"><span class="pre">build.py</span></code> file for the build script.
+We&#8217;ll use <code class="docutils literal"><span class="pre">from</span> <span class="pre">sphinx.application</span> <span class="pre">import</span> <span class="pre">Sphinx</span></code>
+and <code class="docutils literal"><span class="pre">import</span> <span class="pre">pylit</span></code> to access these modules from within Python.</li>
 </ul>
-<p>We&#8217;ll create a Python script.</p>
+<p>We&#8217;ll really like the Python script approach to the build.</p>
 <div class="section" id="overheads">
 <h3>Overheads<a class="headerlink" href="#overheads" title="Permalink to this headline">¶</a></h3>
 <p>We&#8217;re going to make use of three &#8220;applications&#8221; to build navtools.</p>

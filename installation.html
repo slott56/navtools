@@ -274,26 +274,21 @@
             
   <div class="section" id="installation-via-setup-py">
 <h1>Installation via <code class="docutils literal"><span class="pre">setup.py</span></code><a class="headerlink" href="#installation-via-setup-py" title="Permalink to this headline">¶</a></h1>
-<p>The NavTools distribution kit (minimally) is just the following.</p>
+<p>The NavTools distribution includes the following.</p>
 <ul class="simple">
+<li><code class="file docutils literal"><span class="pre">navtools</span></code>. The Python code which gets installed.</li>
+<li><code class="file docutils literal"><span class="pre">igrf11coeffs.txt</span></code>. Data used to compute magnetic deviation.
+This, too, will be installed.</li>
 <li><code class="file docutils literal"><span class="pre">source</span></code>.  The RST-formatted source used by PyLit3 to
-to create code and documentation.</li>
-<li><code class="file docutils literal"><span class="pre">build.py</span></code>.  The build procedure.</li>
+to create the code and the documentation. This</li>
+<li><code class="file docutils literal"><span class="pre">build.py</span></code>.  The build procedure to rebuild source
+and documentation from the <code class="file docutils literal"><span class="pre">source</span></code>.</li>
 </ul>
-<p>Given this  directory, the build procedure uses PyLit to create the <code class="docutils literal"><span class="pre">navtools</span></code> package.
-It uses Sphinx to create the documentation.</p>
 <p>See <a class="reference internal" href="build.html#build"><span>NavTools Build</span></a> for more information on the build procedure.
-A build requires PyLit3 and Sphinx to be installed.</p>
-<ul class="simple">
-<li>PyLit3.  <a class="reference external" href="https://github.com/slott56/PyLit-3">https://github.com/slott56/PyLit-3</a></li>
-<li>Sphinx.  <a class="reference external" href="http://sphinx-doc.org">http://sphinx-doc.org</a></li>
-</ul>
-<p>The build itself run like this:</p>
-<div class="highlight-bash"><div class="highlight"><pre>python3 build.py
-</pre></div>
-</div>
-<p>Install <code class="docutils literal"><span class="pre">navtools</span></code>.  This may require privileges via <code class="docutils literal"><span class="pre">sudo</span></code>.</p>
-<div class="highlight-bash"><div class="highlight"><pre>python3 setup.py install
+See <a class="reference external" href="https://github.com/slott56/PyLit-3">https://github.com/slott56/PyLit-3</a> and <a class="reference external" href="http://slott56.github.io/PyLit-3/index.html">http://slott56.github.io/PyLit-3/index.html</a>
+for more information on Literate Programming.</p>
+<p>Install <code class="docutils literal"><span class="pre">navtools</span></code>.  Windows users can omit the <code class="docutils literal"><span class="pre">sudo</span></code>.</p>
+<div class="highlight-bash"><div class="highlight"><pre>sudo python3 setup.py install
 </pre></div>
 </div>
 <div class="section" id="the-setup-py-file">
