@@ -48,7 +48,7 @@ Build Procedure
     At the end of this step, the directory tree will include the following.
 
     -   :file:`build`.  The documentation.  In HTML.
-    -   :file:`navtools`.  The Python library, ready for installation.
+    -   :file:`navtools`.  The Python package, ready for installation.
     -   :file:`test`.  The unit test script.
 
     This reports, also, that 44 tests were run.
@@ -111,8 +111,12 @@ Sphinx Build
 
 This function handles the simple use case for the ``sphinx-build`` script.
 The destination directory is -- often -- build/html or some place like
-that. When working with GitHub and a ``gh-pages`` branch, it works
-well when the html is generated in the top-level directory.
+that.
+
+When working with GitHub and a ``gh-pages`` branch, it can work
+well when the html is generated in the top-level directory. However.
+For this project, we'll create a separate ``gh-pages`` branch which
+is a peer to this directory.
 
 ::
 
@@ -132,8 +136,6 @@ PyLit Build
 
 This function handles the simple use case for PyLit. We force an overwrite because
 PyLit exits when there's a problem. A bad design.
-
-This also handles the necessary rewrite to modify standard paths to Windows paths.
 
 ::
 
@@ -189,7 +191,7 @@ The Build Sequence
 ::
 
     def build():
-        sphinx_build( 'source', 'build/html', 'html' )
+        sphinx_build( 'source', '../navtools-gh-pages', 'html' )
 
         mkdir( 'navtools' )
 
@@ -232,44 +234,11 @@ The HTML pages are built with this command.
 
 ..  code-block:: bash
 
-    sphinx-build $* -b html source build/html
+    sphinx-build $* -b html source ../navtools-gh-pages
 
 A LaTeX document can be built with this command.
+This can build a great-looking PDF.
 
 ..  code-block:: bash
 
-    sphinx-build $* -b latex source build/latex
-
-TODO
-====
-
-..  todo:: Support gh-pages
-
-    Option 1.  Simply pull build/html to the top-level directory so that
-    the HTML is at the top level. Then the master branch and gh-pages
-    branches are identical.
-
-    Documentation is built via
-
-    ..  code-block:: bash
-
-        sphinx-build $* -b html source .
-
-    This seems messy because a lot of stuff winds up in the top.
-    But it's also very simple.
-
-    Option 2. Create two parallel checkout directories for two branches.
-    checkout master into one directory. Checkout gh-pages into another.
-    The former ``navtools/build/html directory`` is now ../navtools-gh-pages branch.
-
-    Documentation is built via
-
-    ..  code-block:: bash
-
-        sphinx-build $* -b html source ../navtools-gh-pages
-
-    and
-
-    ..  code-block:: bash
-
-        sphinx_build( 'source', '../navtools-gh-pages', 'html' )
+    sphinx-build $* -b latex source ../navtools-gh-pages
