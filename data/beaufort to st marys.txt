@@ -1,0 +1,17 @@
+Beaufort-St. Mary's
+Name	Beaufort-St. Mary's
+Depart From	Beaufort, NC
+Destination	St. Mary's, GA
+Total distance	345.1 NMi
+Speed (Kts)	6
+Departure Time (%x %H:%M)	05/26/2021 08:47
+Time enroute	2d  9H 31M
+
+Leg	To waypoint	Distance	Bearing	Latitude	Longitude	ETE	ETA	Speed	Next tide event	Description	Course	ETD
+---	Beafort, NC	251.7 NMi	192 °M	34° 34.8' N	076° 41.4' W	1d 17H 57M	Start: 05/26/2021 04:47 (Nighttime)	6		Entrance to the fairway	223 °M
+1	Cape Fear	 81.3 NMi	223 °M	33° 25.7' N	077° 32.7' W	13H 33M	05/27/2021 07:53 (Daytime)	6		Outside Frying Pan Shoals	260 °M
+2	Georgetown	 72.6 NMi	260 °M	32° 59.8' N	078° 53.4' W	12H  6M	05/27/2021 19:58 (Daytime)	6		Outside Winyah Inlet	247 °M
+3	Charleston	 41.7 NMi	247 °M	32° 36.8' N	079° 34.6' W	 6H 57M	05/28/2021 02:56 (Nighttime)	6			246 °M
+4	Beaufort, SC -- Port Royal	 59.7 NMi	246 °M	32° 03.0' N	080° 32.6' W	 9H 57M	05/28/2021 12:53 (Daytime)	6			216 °M
+5	Brunswick Entrance	 69.1 NMi	216 °M	31° 00.1' N	081° 06.2' W	11H 31M	05/29/2021 00:24 (Nighttime)	6			224 °M
+6	St. Mary's Inlet	 20.7 NMi	224 °M	30° 42.7' N	081° 19.1' W	 3H 27M	05/29/2021 03:51 (Nighttime)	6			Arrived

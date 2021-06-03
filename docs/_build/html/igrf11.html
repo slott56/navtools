@@ -1,0 +1,339 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>International Geomagnetic Reference Field Module &#8212; Navtools 2021.06.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Track Analysis Application" href="analysis.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="international-geomagnetic-reference-field-module">
+<span id="igrf11"></span><h1>International Geomagnetic Reference Field Module<a class="headerlink" href="#international-geomagnetic-reference-field-module" title="Permalink to this headline">¶</a></h1>
+<p>This module computes the compass deviation (or variance)
+at a given point.  It allows mapping from true bearings to
+magnetic bearings.</p>
+<span class="target" id="module-navtools.igrf11"></span><p>IGRF - International Geomagnetic Reference Field</p>
+<p>This module computes the compass deviation (or variance)
+at a given point.  It allows mapping from true bearings to
+magnetic bearings.</p>
+<p>See <a class="reference external" href="http://www.ngdc.noaa.gov/IAGA/vmod/igrf.html">http://www.ngdc.noaa.gov/IAGA/vmod/igrf.html</a></p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Public Domain</p>
+<p>“The geomag 7.0 software code is in the public domain and not licensed or under copyright”</p>
+</div>
+<section id="model-data">
+<h2>Model Data<a class="headerlink" href="#model-data" title="Permalink to this headline">¶</a></h2>
+<p>The model is in the <code class="file docutils literal notranslate"><span class="pre">igrf11coeffs.txt</span></code> file.</p>
+<p>This can be downloaded from <a class="reference external" href="http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt">http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt</a></p>
+</section>
+<section id="test-cases">
+<h2>Test Cases<a class="headerlink" href="#test-cases" title="Permalink to this headline">¶</a></h2>
+<p>The test cases from from the Geomag 7.0 software, available here
+<a class="reference external" href="http://www.ngdc.noaa.gov/IAGA/vmod/geomag70_linux.tar.gz">http://www.ngdc.noaa.gov/IAGA/vmod/geomag70_linux.tar.gz</a></p>
+<p>Specifically, the file <code class="file docutils literal notranslate"><span class="pre">geomag70_linux/sample_out_IGRF11.txt</span></code>
+provides usable, known unit test results.</p>
+<p>This follows the lead of <a class="reference external" href="http://www.mathworks.com/matlabcentral/fileexchange/28874-igrf-magnetic-field">http://www.mathworks.com/matlabcentral/fileexchange/28874-igrf-magnetic-field</a></p>
+</section>
+<section id="implementation-details">
+<h2>Implementation Details<a class="headerlink" href="#implementation-details" title="Permalink to this headline">¶</a></h2>
+<p>There are two simplifications from the Fortran codes:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">isv</span> <span class="pre">=</span> <span class="pre">0</span></code>: main field only.
+We only want current declination, not rate of change.</p></li>
+<li><p>Latitude and longitude supplied; latitude is converted to colatitude.</p></li>
+</ol>
+<p>Typical use is something like this.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">igrf11syn</span> <span class="o">=</span> <span class="n">igrf11</span><span class="o">.</span><span class="n">IGRF11</span><span class="p">(</span><span class="s2">&quot;igrf11coeffs.txt&quot;</span><span class="p">)</span>
+
+<span class="n">today</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span>
+<span class="n">first_of_year</span> <span class="o">=</span> <span class="n">today</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">month</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">date</span> <span class="o">=</span> <span class="n">today</span><span class="o">.</span><span class="n">year</span> <span class="o">+</span> <span class="p">(</span><span class="n">today</span><span class="o">.</span><span class="n">toordinal</span><span class="p">()</span> <span class="o">-</span> <span class="n">first_of_year</span><span class="o">.</span><span class="n">toordinal</span><span class="p">())</span><span class="o">/</span><span class="mf">365.242</span>
+
+<span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">igrf11syn</span><span class="p">(</span><span class="n">date</span><span class="p">,</span> <span class="n">nlat</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">,</span> <span class="n">elong</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="mf">180.0</span><span class="o">/</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>  <span class="c1"># Declination or Variance in degress</span>
+</pre></div>
+</div>
+</section>
+<section id="background">
+<h2>Background<a class="headerlink" href="#background" title="Permalink to this headline">¶</a></h2>
+<p>From the web page.</p>
+<div class="math notranslate nohighlight">
+\[V(r,\theta,\lambda,t) = R \sum_{n=1}^{N}(\frac{R}{r})^{n+1}\sum_{m=0}^{n}(g_n^m(t)\cos m \lambda+h_n^m(t)\sin m \lambda) P_n^m(\theta)\]</div>
+<p>With <span class="math notranslate nohighlight">\(g_n^m\)</span> and <span class="math notranslate nohighlight">\(h_n^m\)</span> are the coefficients to determine
+phase and amplitude.</p>
+<p><span class="math notranslate nohighlight">\(P_n^m\)</span> are associated Legendre functions of the first kind
+of degree n, order m.</p>
+<p>R is the radius of the Earth.</p>
+<p>The position <span class="math notranslate nohighlight">\(r,\theta,\lambda,t\)</span> is the altitude, latitude,
+longitude and time.</p>
+<p><a class="reference external" href="http://www.ngdc.noaa.gov/IAGA/vmod/igrf.html">http://www.ngdc.noaa.gov/IAGA/vmod/igrf.html</a></p>
+</section>
+<section id="igrf11-fortran-comments">
+<h2>IGRF11 Fortran Comments<a class="headerlink" href="#igrf11-fortran-comments" title="Permalink to this headline">¶</a></h2>
+<p>This is based on <a class="reference external" href="http://www.ngdc.noaa.gov/IAGA/vmod/igrf11.f">http://www.ngdc.noaa.gov/IAGA/vmod/igrf11.f</a></p>
+<p>These are two important comment blocks from the <code class="file docutils literal notranslate"><span class="pre">igrf11.f</span></code> file.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">C</span>     <span class="n">This</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">program</span> <span class="k">for</span> <span class="n">synthesising</span> <span class="n">geomagnetic</span> <span class="n">field</span> <span class="n">values</span> <span class="kn">from</span> <span class="nn">the</span>
+<span class="n">C</span>     <span class="n">International</span> <span class="n">Geomagnetic</span> <span class="n">Reference</span> <span class="n">Field</span> <span class="n">series</span> <span class="n">of</span> <span class="n">models</span> <span class="k">as</span> <span class="n">agreed</span>
+<span class="n">c</span>     <span class="ow">in</span> <span class="n">December</span> <span class="mi">2009</span> <span class="n">by</span> <span class="n">IAGA</span> <span class="n">Working</span> <span class="n">Group</span> <span class="n">V</span><span class="o">-</span><span class="n">MOD</span><span class="o">.</span>
+<span class="n">C</span>     <span class="n">It</span> <span class="ow">is</span> <span class="n">the</span> <span class="mi">11</span><span class="n">th</span> <span class="n">generation</span> <span class="n">IGRF</span><span class="p">,</span> <span class="n">ie</span> <span class="n">the</span> <span class="mi">10</span><span class="n">th</span> <span class="n">revision</span><span class="o">.</span>
+<span class="n">C</span>     <span class="n">The</span> <span class="n">main</span><span class="o">-</span><span class="n">field</span> <span class="n">models</span> <span class="k">for</span> <span class="mf">1900.0</span><span class="p">,</span> <span class="mf">1905.0</span><span class="p">,</span><span class="o">.</span><span class="mf">.1940.0</span> <span class="ow">and</span> <span class="mf">2010.0</span> <span class="n">are</span>
+<span class="n">C</span>     <span class="n">non</span><span class="o">-</span><span class="n">definitive</span><span class="p">,</span> <span class="n">those</span> <span class="k">for</span> <span class="mf">1945.0</span><span class="p">,</span> <span class="mf">1950.0</span><span class="p">,</span><span class="o">..</span><span class="mf">.2005.0</span> <span class="n">are</span> <span class="n">definitive</span> <span class="ow">and</span>
+<span class="n">C</span>     <span class="n">the</span> <span class="n">secular</span><span class="o">-</span><span class="n">variation</span> <span class="n">model</span> <span class="k">for</span> <span class="mf">2010.0</span> <span class="n">to</span> <span class="mf">2015.0</span> <span class="ow">is</span> <span class="n">non</span><span class="o">-</span><span class="n">definitive</span><span class="o">.</span>
+<span class="n">C</span>
+<span class="n">C</span>     <span class="n">Main</span><span class="o">-</span><span class="n">field</span> <span class="n">models</span> <span class="n">are</span> <span class="n">to</span> <span class="n">degree</span> <span class="ow">and</span> <span class="n">order</span> <span class="mi">10</span> <span class="p">(</span><span class="n">ie</span> <span class="mi">120</span> <span class="n">coefficients</span><span class="p">)</span>
+<span class="n">C</span>     <span class="k">for</span> <span class="mf">1900.0</span><span class="o">-</span><span class="mf">1995.0</span> <span class="ow">and</span> <span class="n">to</span> <span class="mi">13</span> <span class="p">(</span><span class="n">ie</span> <span class="mi">195</span> <span class="n">coefficients</span><span class="p">)</span> <span class="k">for</span> <span class="mf">2000.0</span> <span class="n">onwards</span><span class="o">.</span>
+<span class="n">C</span>     <span class="n">The</span> <span class="n">predictive</span> <span class="n">secular</span><span class="o">-</span><span class="n">variation</span> <span class="n">model</span> <span class="ow">is</span> <span class="n">to</span> <span class="n">degree</span> <span class="ow">and</span> <span class="n">order</span> <span class="mi">8</span> <span class="p">(</span><span class="n">ie</span> <span class="mi">80</span>
+<span class="n">C</span>     <span class="n">coefficients</span><span class="p">)</span><span class="o">.</span>
+<span class="n">C</span>
+<span class="n">C</span>     <span class="n">Options</span> <span class="n">include</span> <span class="n">values</span> <span class="n">at</span> <span class="n">different</span> <span class="n">locations</span> <span class="n">at</span> <span class="n">different</span>
+<span class="n">C</span>     <span class="n">times</span> <span class="p">(</span><span class="n">spot</span><span class="p">),</span> <span class="n">values</span> <span class="n">at</span> <span class="n">same</span> <span class="n">location</span> <span class="n">at</span> <span class="n">one</span> <span class="n">year</span> <span class="n">intervals</span>
+<span class="n">C</span>     <span class="p">(</span><span class="n">time</span> <span class="n">series</span><span class="p">),</span> <span class="n">grid</span> <span class="n">of</span> <span class="n">values</span> <span class="n">at</span> <span class="n">one</span> <span class="n">time</span> <span class="p">(</span><span class="n">grid</span><span class="p">);</span> <span class="n">geodetic</span> <span class="ow">or</span>
+<span class="n">C</span>     <span class="n">geocentric</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">latitude</span> <span class="o">&amp;</span> <span class="n">longitude</span> <span class="n">entered</span> <span class="k">as</span> <span class="n">decimal</span>
+<span class="n">C</span>     <span class="n">degrees</span> <span class="ow">or</span> <span class="n">degrees</span> <span class="o">&amp;</span> <span class="n">minutes</span> <span class="p">(</span><span class="ow">not</span> <span class="ow">in</span> <span class="n">grid</span><span class="p">),</span> <span class="n">choice</span> <span class="n">of</span> <span class="n">main</span> <span class="n">field</span>
+<span class="n">C</span>     <span class="ow">or</span> <span class="n">secular</span> <span class="n">variation</span> <span class="ow">or</span> <span class="n">both</span> <span class="p">(</span><span class="n">grid</span> <span class="n">only</span><span class="p">)</span><span class="o">.</span>
+<span class="n">C</span> <span class="n">Recent</span> <span class="n">history</span> <span class="n">of</span> <span class="n">code</span><span class="p">:</span>
+<span class="n">c</span>     <span class="n">Aug</span> <span class="mi">2003</span><span class="p">:</span>
+<span class="n">c</span>     <span class="n">Adapted</span> <span class="kn">from</span> <span class="mi">8</span><span class="n">th</span> <span class="n">generation</span> <span class="n">version</span> <span class="n">to</span> <span class="n">include</span> <span class="n">new</span> <span class="n">maximum</span> <span class="n">degree</span> <span class="k">for</span>
+<span class="n">c</span>     <span class="n">main</span><span class="o">-</span><span class="n">field</span> <span class="n">models</span> <span class="k">for</span> <span class="mf">2000.0</span> <span class="ow">and</span> <span class="n">onwards</span> <span class="ow">and</span> <span class="n">use</span> <span class="n">WGS84</span> <span class="n">spheroid</span> <span class="n">instead</span>
+<span class="n">c</span>     <span class="n">of</span> <span class="n">International</span> <span class="n">Astronomical</span> <span class="n">Union</span> <span class="mi">1966</span> <span class="n">spheroid</span> <span class="k">as</span> <span class="n">recommended</span> <span class="n">by</span> <span class="n">IAGA</span>
+<span class="n">c</span>     <span class="ow">in</span> <span class="n">July</span> <span class="mf">2003.</span> <span class="n">Reference</span> <span class="n">radius</span> <span class="n">remains</span> <span class="k">as</span> <span class="mf">6371.2</span> <span class="n">km</span> <span class="o">-</span> <span class="n">it</span> <span class="ow">is</span> <span class="n">NOT</span> <span class="n">the</span> <span class="n">mean</span>
+<span class="n">c</span>     <span class="n">radius</span> <span class="p">(</span><span class="o">=</span> <span class="mf">6371.0</span> <span class="n">km</span><span class="p">)</span> <span class="n">but</span> <span class="mf">6371.2</span> <span class="n">km</span> <span class="ow">is</span> <span class="n">what</span> <span class="ow">is</span> <span class="n">used</span> <span class="ow">in</span> <span class="n">determining</span> <span class="n">the</span>
+<span class="n">c</span>     <span class="n">coefficients</span><span class="o">.</span>
+<span class="n">c</span>     <span class="n">Dec</span> <span class="mi">2004</span><span class="p">:</span>
+<span class="n">c</span>     <span class="n">Adapted</span> <span class="k">for</span> <span class="mi">10</span><span class="n">th</span> <span class="n">generation</span>
+<span class="n">c</span>     <span class="n">Jul</span> <span class="mi">2005</span><span class="p">:</span>
+<span class="n">c</span>     <span class="mf">1995.0</span> <span class="n">coefficients</span> <span class="k">as</span> <span class="n">published</span> <span class="ow">in</span> <span class="n">igrf9coeffs</span><span class="o">.</span><span class="n">xls</span> <span class="ow">and</span> <span class="n">igrf10coeffs</span><span class="o">.</span><span class="n">xls</span>
+<span class="n">c</span>     <span class="n">now</span> <span class="n">used</span> <span class="ow">in</span> <span class="n">code</span> <span class="o">-</span> <span class="p">(</span><span class="n">Kimmo</span> <span class="n">Korhonen</span> <span class="n">spotted</span> <span class="mi">1</span> <span class="n">nT</span> <span class="n">difference</span> <span class="ow">in</span> <span class="mi">11</span> <span class="n">coefficients</span><span class="p">)</span>
+<span class="n">c</span>     <span class="n">Dec</span> <span class="mi">2009</span><span class="p">:</span>
+<span class="n">c</span>     <span class="n">Adapted</span> <span class="k">for</span> <span class="mi">11</span><span class="n">th</span> <span class="n">generation</span>
+</pre></div>
+</div>
+<p>This is the comment from the relevant subroutine.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>      <span class="n">subroutine</span> <span class="n">igrf11syn</span> <span class="p">(</span><span class="n">isv</span><span class="p">,</span><span class="n">date</span><span class="p">,</span><span class="n">itype</span><span class="p">,</span><span class="n">alt</span><span class="p">,</span><span class="n">colat</span><span class="p">,</span><span class="n">elong</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">z</span><span class="p">,</span><span class="n">f</span><span class="p">)</span>
+<span class="n">c</span>
+<span class="n">c</span>     <span class="n">This</span> <span class="ow">is</span> <span class="n">a</span> <span class="n">synthesis</span> <span class="n">routine</span> <span class="k">for</span> <span class="n">the</span> <span class="mi">11</span><span class="n">th</span> <span class="n">generation</span> <span class="n">IGRF</span> <span class="k">as</span> <span class="n">agreed</span>
+<span class="n">c</span>     <span class="ow">in</span> <span class="n">December</span> <span class="mi">2009</span> <span class="n">by</span> <span class="n">IAGA</span> <span class="n">Working</span> <span class="n">Group</span> <span class="n">V</span><span class="o">-</span><span class="n">MOD</span><span class="o">.</span> <span class="n">It</span> <span class="ow">is</span> <span class="n">valid</span> <span class="mf">1900.0</span> <span class="n">to</span>
+<span class="n">c</span>     <span class="mf">2015.0</span> <span class="n">inclusive</span><span class="o">.</span> <span class="n">Values</span> <span class="k">for</span> <span class="n">dates</span> <span class="kn">from</span> <span class="mf">1945.0</span> <span class="n">to</span> <span class="mf">2005.0</span> <span class="n">inclusive</span> <span class="n">are</span>
+<span class="n">c</span>     <span class="n">definitive</span><span class="p">,</span> <span class="n">otherwise</span> <span class="n">they</span> <span class="n">are</span> <span class="n">non</span><span class="o">-</span><span class="n">definitive</span><span class="o">.</span>
+<span class="n">c</span>   <span class="n">INPUT</span>
+<span class="n">c</span>     <span class="n">isv</span>   <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">main</span><span class="o">-</span><span class="n">field</span> <span class="n">values</span> <span class="n">are</span> <span class="n">required</span>
+<span class="n">c</span>     <span class="n">isv</span>   <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">secular</span> <span class="n">variation</span> <span class="n">values</span> <span class="n">are</span> <span class="n">required</span>
+<span class="n">c</span>     <span class="n">date</span>  <span class="o">=</span> <span class="n">year</span> <span class="n">A</span><span class="o">.</span><span class="n">D</span><span class="o">.</span> <span class="n">Must</span> <span class="n">be</span> <span class="n">greater</span> <span class="n">than</span> <span class="ow">or</span> <span class="n">equal</span> <span class="n">to</span> <span class="mf">1900.0</span> <span class="ow">and</span>
+<span class="n">c</span>             <span class="n">less</span> <span class="n">than</span> <span class="ow">or</span> <span class="n">equal</span> <span class="n">to</span> <span class="mf">2020.0</span><span class="o">.</span> <span class="ne">Warning</span> <span class="n">message</span> <span class="ow">is</span> <span class="n">given</span>
+<span class="n">c</span>             <span class="k">for</span> <span class="n">dates</span> <span class="n">greater</span> <span class="n">than</span> <span class="mf">2015.0</span><span class="o">.</span> <span class="n">Must</span> <span class="n">be</span> <span class="n">double</span> <span class="n">precision</span><span class="o">.</span>
+<span class="n">c</span>     <span class="n">itype</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">geodetic</span> <span class="p">(</span><span class="n">spheroid</span><span class="p">)</span>
+<span class="n">c</span>     <span class="n">itype</span> <span class="o">=</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">geocentric</span> <span class="p">(</span><span class="n">sphere</span><span class="p">)</span>
+<span class="n">c</span>     <span class="n">alt</span>   <span class="o">=</span> <span class="n">height</span> <span class="ow">in</span> <span class="n">km</span> <span class="n">above</span> <span class="n">sea</span> <span class="n">level</span> <span class="k">if</span> <span class="n">itype</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">c</span>           <span class="o">=</span> <span class="n">distance</span> <span class="kn">from</span> <span class="nn">centre</span> <span class="n">of</span> <span class="n">Earth</span> <span class="ow">in</span> <span class="n">km</span> <span class="k">if</span> <span class="n">itype</span> <span class="o">=</span> <span class="mi">2</span> <span class="p">(</span><span class="o">&gt;</span><span class="mi">3485</span> <span class="n">km</span><span class="p">)</span>
+<span class="n">c</span>     <span class="n">colat</span> <span class="o">=</span> <span class="n">colatitude</span> <span class="p">(</span><span class="mi">0</span><span class="o">-</span><span class="mi">180</span><span class="p">)</span>
+<span class="n">c</span>     <span class="n">elong</span> <span class="o">=</span> <span class="n">east</span><span class="o">-</span><span class="n">longitude</span> <span class="p">(</span><span class="mi">0</span><span class="o">-</span><span class="mi">360</span><span class="p">)</span>
+<span class="n">c</span>     <span class="n">alt</span><span class="p">,</span> <span class="n">colat</span> <span class="ow">and</span> <span class="n">elong</span> <span class="n">must</span> <span class="n">be</span> <span class="n">double</span> <span class="n">precision</span><span class="o">.</span>
+<span class="n">c</span>   <span class="n">OUTPUT</span>
+<span class="n">c</span>     <span class="n">x</span>     <span class="o">=</span> <span class="n">north</span> <span class="n">component</span> <span class="p">(</span><span class="n">nT</span><span class="p">)</span> <span class="k">if</span> <span class="n">isv</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nT</span><span class="o">/</span><span class="n">year</span> <span class="k">if</span> <span class="n">isv</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">c</span>     <span class="n">y</span>     <span class="o">=</span> <span class="n">east</span> <span class="n">component</span> <span class="p">(</span><span class="n">nT</span><span class="p">)</span> <span class="k">if</span> <span class="n">isv</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nT</span><span class="o">/</span><span class="n">year</span> <span class="k">if</span> <span class="n">isv</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">c</span>     <span class="n">z</span>     <span class="o">=</span> <span class="n">vertical</span> <span class="n">component</span> <span class="p">(</span><span class="n">nT</span><span class="p">)</span> <span class="k">if</span> <span class="n">isv</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">nT</span><span class="o">/</span><span class="n">year</span> <span class="k">if</span> <span class="n">isv</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">c</span>     <span class="n">f</span>     <span class="o">=</span> <span class="n">total</span> <span class="n">intensity</span> <span class="p">(</span><span class="n">nT</span><span class="p">)</span> <span class="k">if</span> <span class="n">isv</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">rubbish</span> <span class="k">if</span> <span class="n">isv</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">c</span>
+<span class="n">c</span>     <span class="n">To</span> <span class="n">get</span> <span class="n">the</span> <span class="n">other</span> <span class="n">geomagnetic</span> <span class="n">elements</span> <span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">I</span><span class="p">,</span> <span class="n">H</span> <span class="ow">and</span> <span class="n">secular</span>
+<span class="n">c</span>     <span class="n">variations</span> <span class="n">dD</span><span class="p">,</span> <span class="n">dH</span><span class="p">,</span> <span class="n">dI</span> <span class="ow">and</span> <span class="n">dF</span><span class="p">)</span> <span class="n">use</span> <span class="n">routines</span> <span class="n">ptoc</span> <span class="ow">and</span> <span class="n">ptocsv</span><span class="o">.</span>
+<span class="n">c</span>
+<span class="n">c</span>     <span class="n">Adapted</span> <span class="kn">from</span> <span class="mi">8</span><span class="n">th</span> <span class="n">generation</span> <span class="n">version</span> <span class="n">to</span> <span class="n">include</span> <span class="n">new</span> <span class="n">maximum</span> <span class="n">degree</span> <span class="k">for</span>
+<span class="n">c</span>     <span class="n">main</span><span class="o">-</span><span class="n">field</span> <span class="n">models</span> <span class="k">for</span> <span class="mf">2000.0</span> <span class="ow">and</span> <span class="n">onwards</span> <span class="ow">and</span> <span class="n">use</span> <span class="n">WGS84</span> <span class="n">spheroid</span> <span class="n">instead</span>
+<span class="n">c</span>     <span class="n">of</span> <span class="n">International</span> <span class="n">Astronomical</span> <span class="n">Union</span> <span class="mi">1966</span> <span class="n">spheroid</span> <span class="k">as</span> <span class="n">recommended</span> <span class="n">by</span> <span class="n">IAGA</span>
+<span class="n">c</span>     <span class="ow">in</span> <span class="n">July</span> <span class="mf">2003.</span> <span class="n">Reference</span> <span class="n">radius</span> <span class="n">remains</span> <span class="k">as</span> <span class="mf">6371.2</span> <span class="n">km</span> <span class="o">-</span> <span class="n">it</span> <span class="ow">is</span> <span class="n">NOT</span> <span class="n">the</span> <span class="n">mean</span>
+<span class="n">c</span>     <span class="n">radius</span> <span class="p">(</span><span class="o">=</span> <span class="mf">6371.0</span> <span class="n">km</span><span class="p">)</span> <span class="n">but</span> <span class="mf">6371.2</span> <span class="n">km</span> <span class="ow">is</span> <span class="n">what</span> <span class="ow">is</span> <span class="n">used</span> <span class="ow">in</span> <span class="n">determining</span> <span class="n">the</span>
+<span class="n">c</span>     <span class="n">coefficients</span><span class="o">.</span> <span class="n">Adaptation</span> <span class="n">by</span> <span class="n">Susan</span> <span class="n">Macmillan</span><span class="p">,</span> <span class="n">August</span> <span class="mi">2003</span> <span class="p">(</span><span class="k">for</span>
+<span class="n">c</span>     <span class="mi">9</span><span class="n">th</span> <span class="n">generation</span><span class="p">),</span> <span class="n">December</span> <span class="mi">2004</span> <span class="o">&amp;</span> <span class="n">December</span> <span class="mf">2009.</span>
+<span class="n">c</span>
+<span class="n">c</span>     <span class="n">Coefficients</span> <span class="n">at</span> <span class="mf">1995.0</span> <span class="n">incorrectly</span> <span class="n">rounded</span> <span class="p">(</span><span class="n">rounded</span> <span class="n">up</span> <span class="n">instead</span> <span class="n">of</span>
+<span class="n">c</span>     <span class="n">to</span> <span class="n">even</span><span class="p">)</span> <span class="n">included</span> <span class="k">as</span> <span class="n">these</span> <span class="n">are</span> <span class="n">the</span> <span class="n">coefficients</span> <span class="n">published</span> <span class="ow">in</span> <span class="n">Excel</span>
+<span class="n">c</span>     <span class="n">spreadsheet</span> <span class="n">July</span> <span class="mf">2005.</span>
+<span class="n">c</span>
+</pre></div>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="navtools.igrf11.IGRF11">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.igrf11.</span></span><span class="sig-name descname"><span class="pre">IGRF11</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'./igrf11coeffs.txt'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.igrf11.IGRF11" title="Permalink to this definition">¶</a></dt>
+<dd><p>The IGRF11 model.</p>
+<p>The IGRF11 calculation requires a complex table of coefficients.
+We peform coefficient loading once when an instance of
+this class is created.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.igrf11.IGRF11.load_coeffs">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">load_coeffs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pathlib.Path</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="headerlink" href="#navtools.igrf11.IGRF11.load_coeffs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns two dictionaries of g and h coefficients by year and [n,m] index.</p>
+<p>Coefficient loading includes disentangling the unpleasant sparse matrix optimizations.
+The Fortran program had a number of very clever techniques
+to ruthlessly minimize the memory footprint.</p>
+<p>Years 1900 through 1990 have 120 values.  Degree of 10.
+Years 1995 to 2012 have 195 values.  Degree of 13.</p>
+<p>The file has a number of comment lines which begin with <code class="docutils literal notranslate"><span class="pre">#</span></code>.
+These are simply skipped.</p>
+<p>The file has heading lines.  The last of these starts with <code class="docutils literal notranslate"><span class="pre">g/h</span></code>.
+This line provides useful column titles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file_name</strong> – the path to the <code class="file docutils literal notranslate"><span class="pre">igrf11coeffs.txt</span></code> file.
+Ideally this  is a <code class="xref py py-class docutils literal notranslate"><span class="pre">pathlib.Path</span></code>, but a string will do.</p>
+</dd>
+</dl>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>Use urllib2</p>
+<p>We can then use <code class="xref py py-mod docutils literal notranslate"><span class="pre">urllib</span></code> instead of simple
+<code class="xref py py-func docutils literal notranslate"><span class="pre">Path.open()</span></code> so that we could use
+“<a class="reference external" href="file:///path/to/file">file:///path/to/file</a>” or “<a class="reference external" href="https://server/path/to/file">https://server/path/to/file</a>”.</p>
+<p>Most use cases involve disconnected computers,
+with a statically downloaded file, it’s easy to cover
+<em>all</em> the bases by opening a URL.</p>
+<p>The official file:
+<a class="reference external" href="http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt">http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt</a></p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="navtools.igrf11.declination">
+<span class="sig-prename descclassname"><span class="pre">navtools.igrf11.</span></span><span class="sig-name descname"><span class="pre">declination</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nlat</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elong</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="headerlink" href="#navtools.igrf11.declination" title="Permalink to this definition">¶</a></dt>
+<dd><p>IGRF 11 model for current declination.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nlat</strong> – north latitude as floating-point degrees</p></li>
+<li><p><strong>elog</strong> – east longitude as floating-point degrees</p></li>
+<li><p><strong>date</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code> in question, default is today.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>declination as degrees.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="navtools.igrf11.deg2dm">
+<span class="sig-prename descclassname"><span class="pre">navtools.igrf11.</span></span><span class="sig-name descname"><span class="pre">deg2dm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deg</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="headerlink" href="#navtools.igrf11.deg2dm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a simple degree value
+into a proper <code class="samp docutils literal notranslate"><span class="pre">(degree,minute)</span></code> pair with appropriate
+signs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>deg</strong> – Degrees to convert</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple of <code class="samp docutils literal notranslate"><span class="pre">(</span><em><span class="pre">deg</span></em><span class="pre">,</span> <em><span class="pre">min</span></em><span class="pre">)</span></code> with proper signs.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Navtools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#actors">Actors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#use-cases">Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#solution-overview">Solution Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#architecture">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#references">References</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="navigation.html">Navigation Calculations Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="planning.html">Route Planning Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Track Analysis Application</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">International Geomagnetic Reference Field Module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="analysis.html" title="previous chapter">Track Analysis Application</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/igrf11.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,457 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Test Planning &#8212; Navtools 2021.06.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Test Analysis" href="test_analysis.html" />
+    <link rel="prev" title="Test Navigation" href="test_navigation.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="test-planning">
+<h1>Test Planning<a class="headerlink" href="#test-planning" title="Permalink to this headline">¶</a></h1>
+<p>There are a number of test cases for route planning embodied
+in the <a class="reference internal" href="../planning.html#module-planning" title="planning"><code class="xref py py-mod docutils literal notranslate"><span class="pre">planning</span></code></a> module.</p>
+<section id="overheads">
+<h2>Overheads<a class="headerlink" href="#overheads" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">navtools.navigation</span> <span class="kn">import</span> <span class="n">LatLon</span><span class="p">,</span> <span class="n">declination</span><span class="p">,</span> <span class="n">Angle2</span>
+<span class="kn">from</span> <span class="nn">navtools.planning</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">RoutePoint</span><span class="p">,</span> <span class="n">RoutePoint_Rhumb</span><span class="p">,</span> <span class="n">RoutePoint_Rhumb_Magnetic</span><span class="p">,</span>
+    <span class="n">SchedulePoint</span><span class="p">,</span>
+    <span class="n">csv_to_RoutePoint</span><span class="p">,</span> <span class="n">gpx_to_RoutePoint</span><span class="p">,</span>
+    <span class="n">gen_rhumb</span><span class="p">,</span> <span class="n">gen_mag_bearing</span><span class="p">,</span> <span class="n">gen_schedule</span><span class="p">,</span>
+    <span class="n">write_csv</span><span class="p">,</span> <span class="n">plan</span><span class="p">,</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="test-cases">
+<h2>Test Cases<a class="headerlink" href="#test-cases" title="Permalink to this headline">¶</a></h2>
+<section id="csv-to-routepoint-function">
+<h3>csv_to_RoutePoint function<a class="headerlink" href="#csv-to-routepoint-function" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">csv_data</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2">Piankatank 6,37º31.99&#39;N,076º19.02&#39;W,</span>
+<span class="s2">Jackson Creek Entrance,37º32.58&#39;N,076º19.17&#39;W,</span>
+<span class="s2">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Test_csv_to_RoutePoint</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">data_file</span><span class="o">=</span> <span class="n">StringIO</span><span class="p">(</span> <span class="n">csv_data</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="o">=</span> <span class="n">csv_to_RoutePoint</span><span class="p">(</span> <span class="n">data_file</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_parse</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">points</span><span class="o">=</span> <span class="nb">list</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">generator</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s2">&quot;Piankatank 6&quot;</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="mf">37.53316666</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="o">-</span><span class="mf">76.3170</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s2">&quot;Jackson Creek Entrance&quot;</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="mf">37.5430</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="o">-</span><span class="mf">76.3195</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="gpx-to-routepoint-function">
+<h3>gpx_to_RoutePoint function<a class="headerlink" href="#gpx-to-routepoint-function" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gpx_data</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</span>
+<span class="s2">&lt;gpx version=&quot;1.1&quot; creator=&quot;GPSNavX&quot;</span>
+<span class="s2">xmlns=&quot;http://www.topografix.com/GPX/1/1&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd&quot;&gt;</span>
+<span class="s2">&lt;rte&gt;</span>
+<span class="s2">&lt;name&gt;Whitby Rendezvous&lt;/name&gt;</span>
+<span class="s2">&lt;rtept lat=&quot;37.533195&quot; lon=&quot;-76.316963&quot;&gt;</span>
+<span class="s2">&lt;name&gt;Piankatank 6&lt;/name&gt;</span>
+<span class="s2">&lt;sym&gt;BUOYR&lt;/sym&gt;</span>
+<span class="s2">&lt;/rtept&gt;</span>
+<span class="s2">&lt;rtept lat=&quot;37.542961&quot; lon=&quot;-76.319580&quot;&gt;</span>
+<span class="s2">&lt;name&gt;Jackson Creek Entrance&lt;/name&gt;</span>
+<span class="s2">&lt;sym&gt;BOATSLIP&lt;/sym&gt;</span>
+<span class="s2">&lt;/rtept&gt;</span>
+<span class="s2">&lt;/rte&gt;</span>
+<span class="s2">&lt;/gpx&gt;</span>
+<span class="s2">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Test_gpx_to_RoutePoint</span><span class="p">(</span> <span class="n">Test_csv_to_RoutePoint</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">data_file</span><span class="o">=</span> <span class="n">StringIO</span><span class="p">(</span> <span class="n">gpx_data</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="o">=</span> <span class="n">gpx_to_RoutePoint</span><span class="p">(</span> <span class="n">data_file</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_parse</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">points</span><span class="o">=</span> <span class="nb">list</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">generator</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s2">&quot;Piankatank 6&quot;</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="mf">37.533195</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="o">-</span><span class="mf">76.316963</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s2">&quot;Jackson Creek Entrance&quot;</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="mf">37.542961</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="o">-</span><span class="mf">76.319580</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="gen-rhumb-function">
+<h3>gen_rhumb Function<a class="headerlink" href="#gen-rhumb-function" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Test_gen_rhumb</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">route</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">RoutePoint</span><span class="p">(</span> <span class="s2">&quot;Piankatank 6&quot;</span><span class="p">,</span> <span class="s2">&quot;37.533195&quot;</span><span class="p">,</span> <span class="s2">&quot;-76.316963&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="n">LatLon</span><span class="p">(</span><span class="s2">&quot;37.533195N&quot;</span><span class="p">,</span> <span class="s2">&quot;76.316963W&quot;</span><span class="p">)</span> <span class="p">),</span>
+            <span class="n">RoutePoint</span><span class="p">(</span> <span class="s2">&quot;Jackson Creek Entrance&quot;</span><span class="p">,</span> <span class="s2">&quot;37.542961&quot;</span><span class="p">,</span> <span class="s2">&quot;-76.319580&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="n">LatLon</span><span class="p">(</span><span class="s2">&quot;37.542961N&quot;</span><span class="p">,</span> <span class="s2">&quot;76.319580W&quot;</span><span class="p">)</span> <span class="p">),</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="o">=</span> <span class="n">gen_rhumb</span><span class="p">(</span> <span class="nb">iter</span><span class="p">(</span> <span class="n">route</span> <span class="p">)</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_compute_rhumb</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">points</span><span class="o">=</span> <span class="nb">list</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">generator</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s2">&quot;Piankatank 6&quot;</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">name</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="mf">0.59944686</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">distance</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="mf">348.0038223</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">bearing</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+
+        <span class="c1"># Last is always None -- no more places to go.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s2">&quot;Jackson Creek Entrance&quot;</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">name</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">distance</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">bearing</span> <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="gen-mag-bearing-function">
+<h3>gen_mag_bearing Function<a class="headerlink" href="#gen-mag-bearing-function" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Test_gen_mag_bearing</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">route</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">RoutePoint_Rhumb</span><span class="p">(</span>
+                <span class="n">RoutePoint</span><span class="p">(</span>  <span class="s2">&quot;Piankatank 6&quot;</span><span class="p">,</span> <span class="s2">&quot;37.533195&quot;</span><span class="p">,</span> <span class="s2">&quot;-76.316963&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="n">LatLon</span><span class="p">(</span><span class="s2">&quot;37.533195N&quot;</span><span class="p">,</span> <span class="s2">&quot;76.316963W&quot;</span><span class="p">),</span>
+                 <span class="p">),</span>
+                 <span class="mf">0.59944686</span><span class="p">,</span>
+                 <span class="n">Angle2</span><span class="o">.</span><span class="n">fromdegrees</span><span class="p">(</span><span class="mf">348.0038223</span><span class="p">),</span>
+                <span class="p">),</span>
+            <span class="n">RoutePoint_Rhumb</span><span class="p">(</span>
+                <span class="n">RoutePoint</span><span class="p">(</span> <span class="s2">&quot;Jackson Creek Entrance&quot;</span><span class="p">,</span> <span class="s2">&quot;37.542961&quot;</span><span class="p">,</span> <span class="s2">&quot;-76.319580&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="n">LatLon</span><span class="p">(</span><span class="s2">&quot;37.542961N&quot;</span><span class="p">,</span> <span class="s2">&quot;76.319580W&quot;</span><span class="p">)</span>
+                <span class="p">),</span>
+                <span class="kc">None</span><span class="p">,</span>
+                <span class="kc">None</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="o">=</span> <span class="n">gen_mag_bearing</span><span class="p">(</span> <span class="nb">iter</span><span class="p">(</span> <span class="n">route</span> <span class="p">),</span> <span class="n">declination</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="mi">2012</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">18</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_compute_magnetic_bearing</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">points</span><span class="o">=</span> <span class="nb">list</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">generator</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s2">&quot;Piankatank 6&quot;</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">name</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="mf">0.59944686</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">distance</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="mf">348.0038223</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">true_bearing</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="mf">337.0867231</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">magnetic</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+
+        <span class="c1"># Last is always None -- no more places to go.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s2">&quot;Jackson Creek Entrance&quot;</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">name</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">distance</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">true_bearing</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">magnetic</span> <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="gen-schedule-function">
+<h3>gen_schedule Function<a class="headerlink" href="#gen-schedule-function" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Test_gen_schedule</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">route</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">RoutePoint_Rhumb_Magnetic</span><span class="p">(</span>
+                <span class="n">RoutePoint_Rhumb</span><span class="p">(</span>
+                    <span class="n">RoutePoint</span><span class="p">(</span>  <span class="s2">&quot;Piankatank 6&quot;</span><span class="p">,</span> <span class="s2">&quot;37.533195&quot;</span><span class="p">,</span> <span class="s2">&quot;-76.316963&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="n">LatLon</span><span class="p">(</span><span class="s2">&quot;37.533195N&quot;</span><span class="p">,</span> <span class="s2">&quot;76.316963W&quot;</span><span class="p">),</span>
+                     <span class="p">),</span>
+                     <span class="mf">0.59944686</span><span class="p">,</span>
+                     <span class="n">Angle2</span><span class="o">.</span><span class="n">fromdegrees</span><span class="p">(</span><span class="mf">348.0038223</span><span class="p">),</span>
+                <span class="p">),</span>
+                <span class="mf">0.59944686</span><span class="p">,</span>
+                <span class="n">Angle2</span><span class="o">.</span><span class="n">fromdegrees</span><span class="p">(</span><span class="mf">348.0038223</span><span class="p">),</span>
+                <span class="n">Angle2</span><span class="o">.</span><span class="n">fromdegrees</span><span class="p">(</span><span class="mf">337.0867607</span><span class="p">),</span>
+            <span class="p">),</span>
+            <span class="n">RoutePoint_Rhumb_Magnetic</span><span class="p">(</span>
+                <span class="n">RoutePoint_Rhumb</span><span class="p">(</span>
+                    <span class="n">RoutePoint</span><span class="p">(</span> <span class="s2">&quot;Jackson Creek Entrance&quot;</span><span class="p">,</span> <span class="s2">&quot;37.542961&quot;</span><span class="p">,</span> <span class="s2">&quot;-76.319580&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="n">LatLon</span><span class="p">(</span><span class="s2">&quot;37.542961N&quot;</span><span class="p">,</span> <span class="s2">&quot;76.319580W&quot;</span><span class="p">)</span>
+                    <span class="p">),</span>
+                    <span class="kc">None</span><span class="p">,</span>
+                    <span class="kc">None</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="kc">None</span><span class="p">,</span>
+                <span class="kc">None</span><span class="p">,</span>
+                <span class="kc">None</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">generator</span><span class="o">=</span> <span class="n">gen_schedule</span><span class="p">(</span> <span class="nb">iter</span><span class="p">(</span> <span class="n">route</span> <span class="p">),</span> <span class="n">speed</span><span class="o">=</span><span class="mi">5</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">test_should_compute_magnetic_bearing</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">points</span><span class="o">=</span> <span class="nb">list</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">generator</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s2">&quot;Piankatank 6&quot;</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">name</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="mf">0.59944686</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">distance</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="mf">348.0038223</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">true_bearing</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="mf">337.0867607</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">magnetic</span><span class="o">.</span><span class="n">deg</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="mf">0.59944686</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">running</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertAlmostEqual</span><span class="p">(</span> <span class="mf">7.19336232</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">elapsed_min</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s2">&quot;00h 07m&quot;</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">elapsed_hm</span> <span class="p">)</span>
+
+        <span class="c1"># Last is always None -- no more places to go.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="s2">&quot;Jackson Creek Entrance&quot;</span><span class="p">,</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">point</span><span class="o">.</span><span class="n">name</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">distance</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">true_bearing</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">magnetic</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">running</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">elapsed_min</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertIsNone</span><span class="p">(</span> <span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">elapsed_hm</span> <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="write-csv-function">
+<h3>write_csv Function<a class="headerlink" href="#write-csv-function" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Test_write_csv</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">schedule</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">SchedulePoint</span><span class="p">(</span>
+                    <span class="n">RoutePoint_Rhumb</span><span class="p">(</span>
+                        <span class="n">RoutePoint</span><span class="p">(</span>  <span class="s2">&quot;Piankatank 6&quot;</span><span class="p">,</span> <span class="s2">&quot;37.533195&quot;</span><span class="p">,</span> <span class="s2">&quot;-76.316963&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                        <span class="n">LatLon</span><span class="p">(</span><span class="s2">&quot;37.533195N&quot;</span><span class="p">,</span> <span class="s2">&quot;76.316963W&quot;</span><span class="p">),</span>
+                         <span class="p">),</span>
+                         <span class="mf">0.59944686</span><span class="p">,</span>
+                         <span class="n">Angle2</span><span class="o">.</span><span class="n">fromdegrees</span><span class="p">(</span><span class="mf">348.0038223</span><span class="p">),</span>
+                    <span class="p">),</span>
+                <span class="mf">0.59944686</span><span class="p">,</span>
+                <span class="n">Angle2</span><span class="o">.</span><span class="n">fromdegrees</span><span class="p">(</span><span class="mf">348.0038223</span><span class="p">),</span>
+                <span class="n">Angle2</span><span class="o">.</span><span class="n">fromdegrees</span><span class="p">(</span><span class="mf">337.0867607</span><span class="p">),</span>
+                <span class="mf">0.59944686</span><span class="p">,</span>
+                <span class="mf">7.19336232</span><span class="p">,</span>
+                <span class="s2">&quot;00h 07m&quot;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">SchedulePoint</span><span class="p">(</span>
+                    <span class="n">RoutePoint_Rhumb</span><span class="p">(</span>
+                        <span class="n">RoutePoint</span><span class="p">(</span> <span class="s2">&quot;Jackson Creek Entrance&quot;</span><span class="p">,</span> <span class="s2">&quot;37.542961&quot;</span><span class="p">,</span> <span class="s2">&quot;-76.319580&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                        <span class="n">LatLon</span><span class="p">(</span><span class="s2">&quot;37.542961N&quot;</span><span class="p">,</span> <span class="s2">&quot;76.319580W&quot;</span><span class="p">)</span>
+                        <span class="p">),</span>
+                        <span class="kc">None</span><span class="p">,</span>
+                        <span class="kc">None</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="kc">None</span><span class="p">,</span>
+                <span class="kc">None</span><span class="p">,</span>
+                <span class="kc">None</span><span class="p">,</span>
+                <span class="kc">None</span><span class="p">,</span>
+                <span class="kc">None</span><span class="p">,</span>
+                <span class="kc">None</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">=</span> <span class="n">StringIO</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expected</span><span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2">Name,Lat,Lon,Desc,Distance (nm),True Bearing,Magnetic Bearing,Distance Run,Elapsed HH:MM</span><span class="se">\r</span><span class="s2"></span>
+<span class="s2">Piankatank 6,37 31.992N,076 19.018W,,0.59945,348.0,337.0,0.59945,00h 07m</span><span class="se">\r</span><span class="s2"></span>
+<span class="s2">Jackson Creek Entrance,37 32.578N,076 19.175W,,,,,,</span><span class="se">\r</span><span class="s2"></span>
+<span class="s2">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">test_should_write</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">write_csv</span><span class="p">(</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schedule</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span> <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="plan-function">
+<h3>plan Function<a class="headerlink" href="#plan-function" title="Permalink to this headline">¶</a></h3>
+<p>Note. This is highly Python release dependent because the distance
+values may differ several decimal places in. The values <em>shuold</em>
+be truncated and compared a little more rationally.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Test_plan_CSV</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="n">maxDiff</span><span class="o">=</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;temp1.csv&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fixture</span><span class="p">:</span>
+            <span class="n">fixture</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="n">csv_data</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expected</span><span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2">Name,Lat,Lon,Desc,Distance (nm),True Bearing,Magnetic Bearing,Distance Run,Elapsed HH:MM</span>
+<span class="s2">Piankatank 6,37 31.990N,076 19.020W,,0.60228,349.0,338.0,0.60228,00h 07m</span>
+<span class="s2">Jackson Creek Entrance,37 32.580N,076 19.170W,,,,,,</span>
+<span class="s2">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">tearDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="s1">&#39;temp1.csv&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="s1">&#39;temp1 Schedule.csv&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">def</span> <span class="nf">test_should_plan</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">plan</span><span class="p">(</span> <span class="s2">&quot;temp1.csv&quot;</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="mi">2012</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">18</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;temp1 Schedule.csv&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">result</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">Test_plan_GPX</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span> <span class="p">):</span>
+    <span class="n">maxDiff</span><span class="o">=</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;temp2.gpx&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fixture</span><span class="p">:</span>
+            <span class="n">fixture</span><span class="o">.</span><span class="n">write</span><span class="p">(</span> <span class="n">gpx_data</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expected</span><span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span><span class="se">\</span>
+<span class="s2">Name,Lat,Lon,Desc,Distance (nm),True Bearing,Magnetic Bearing,Distance Run,Elapsed HH:MM</span>
+<span class="s2">Piankatank 6,37 31.992N,076 19.018W,,0.59945,348.0,337.0,0.59945,00h 07m</span>
+<span class="s2">Jackson Creek Entrance,37 32.578N,076 19.175W,,,,,,</span>
+<span class="s2">&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">tearDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="s1">&#39;temp2.gpx&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="s1">&#39;temp2 Schedule.csv&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">def</span> <span class="nf">test_should_plan</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="n">plan</span><span class="p">(</span> <span class="s2">&quot;temp2.gpx&quot;</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="mi">2012</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">18</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;temp2 Schedule.csv&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">result</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="suite-function">
+<h2>suite Function<a class="headerlink" href="#suite-function" title="Permalink to this headline">¶</a></h2>
+<p>Build a suite from the test classes.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">suite</span><span class="p">():</span>
+    <span class="n">s</span><span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestSuite</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">Test_csv_to_RoutePoint</span><span class="p">,</span> <span class="n">Test_gpx_to_RoutePoint</span><span class="p">,</span> <span class="n">Test_gen_rhumb</span><span class="p">,</span> <span class="n">Test_gen_mag_bearing</span><span class="p">,</span> <span class="n">Test_gen_schedule</span><span class="p">,</span> <span class="n">Test_write_csv</span><span class="p">,</span> <span class="n">Test_plan_CSV</span><span class="p">,</span> <span class="n">Test_plan_GPX</span><span class="p">:</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">addTests</span><span class="p">(</span> <span class="n">unittest</span><span class="o">.</span><span class="n">defaultTestLoader</span><span class="o">.</span><span class="n">loadTestsFromTestCase</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">s</span>
+</pre></div>
+</div>
+</section>
+<section id="main-script">
+<h2>Main Script<a class="headerlink" href="#main-script" title="Permalink to this headline">¶</a></h2>
+<p>Run the test suite from the test classes. We can use this for debugging purposes.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="nb">print</span><span class="p">(</span> <span class="n">sys</span><span class="o">.</span><span class="n">version</span> <span class="p">)</span>
+    <span class="n">unittest</span><span class="o">.</span><span class="n">main</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Navtools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#actors">Actors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#use-cases">Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#solution-overview">Solution Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#architecture">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html#references">References</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../navigation.html">Navigation Calculations Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../planning.html">Route Planning Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analysis.html">Track Analysis Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../igrf11.html">International Geomagnetic Reference Field Module</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Testing</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="main.html">Main Test Script</a></li>
+<li class="toctree-l2"><a class="reference internal" href="test_igrf11.html">Test IGRF11</a></li>
+<li class="toctree-l2"><a class="reference internal" href="test_navigation.html">Test Navigation</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Test Planning</a></li>
+<li class="toctree-l2"><a class="reference internal" href="test_analysis.html">Test Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="test_init.html">navtools test <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Testing</a><ul>
+      <li>Previous: <a href="test_navigation.html" title="previous chapter">Test Navigation</a></li>
+      <li>Next: <a href="test_analysis.html" title="next chapter">Test Analysis</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/testing/test_planning.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

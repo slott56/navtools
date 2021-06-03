@@ -1,0 +1,507 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Track Analysis Application &#8212; Navtools 2021.06.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="OpenCPN Table Application" href="opencpn_table.html" />
+    <link rel="prev" title="Route Planning Application" href="planning.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="track-analysis-application">
+<h1>Track Analysis Application<a class="headerlink" href="#track-analysis-application" title="Permalink to this headline">¶</a></h1>
+<p>The <code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code> application is used to do voyage analysis.
+This can make a more useful log from manually prepared log data or
+tracks dumped from GPSNavX (or iNavX or OpenCPN.)
+It’s helpful to add the distance run between waypoints as well as the
+elapsed time between waypoints.</p>
+<p>This additional waypoint-to-waypoint time and distance allows
+for fine-grained analysis of sailing performance.</p>
+<p>This module includes three groups of components.
+The <a class="reference internal" href="#input-parsing">Input Parsing</a> group is the functions and a namedtuple that
+acquire input from the GPX or CSV file.</p>
+<p>Finally, the <a class="reference internal" href="#command-line-interface">Command-Line Interface</a> components are used
+to build a proper command-line application.</p>
+<section id="input-parsing">
+<h2>Input Parsing<a class="headerlink" href="#input-parsing" title="Permalink to this headline">¶</a></h2>
+<p>The purpose of input parsing is to create <code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry</span></code> objects
+from input file sources.</p>
+<p>Manually prepared data will be a CSV in the following form</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Time</span><span class="p">,</span><span class="n">Lat</span><span class="p">,</span><span class="n">Lon</span><span class="p">,</span><span class="n">COG</span><span class="p">,</span><span class="n">SOG</span><span class="p">,</span><span class="n">Rig</span><span class="p">,</span><span class="n">Engine</span><span class="p">,</span><span class="n">windAngle</span><span class="p">,</span><span class="n">windSpeed</span><span class="p">,</span><span class="n">Location</span>
+<span class="mi">9</span><span class="p">:</span><span class="mi">21</span> <span class="n">AM</span><span class="p">,</span><span class="mi">37</span> <span class="mf">50.424</span><span class="n">N</span><span class="p">,</span><span class="mi">076</span> <span class="mf">16.385</span><span class="n">W</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span><span class="mi">1200</span> <span class="n">RPM</span><span class="p">,,,</span><span class="n">Cockrell</span> <span class="n">Creek</span>
+<span class="mi">10</span><span class="p">:</span><span class="mi">06</span> <span class="n">AM</span><span class="p">,</span><span class="mi">37</span> <span class="mf">47.988</span><span class="n">N</span><span class="p">,</span><span class="mi">076</span> <span class="mf">16.056</span><span class="n">W</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span><span class="mf">6.6</span><span class="p">,</span><span class="kc">None</span><span class="p">,</span><span class="mi">1500</span> <span class="n">RPM</span><span class="p">,</span><span class="mi">315</span><span class="p">,</span><span class="mf">7.0</span><span class="p">,</span>
+</pre></div>
+</div>
+<p>This is essentially a deck log entry: time, lat, lon, course over ground,
+speed over ground, rig configuration, engine RPM, wind information, and any
+additional notes on the location.</p>
+<p>The times for the manual entry are generally local.</p>
+<p>GPSNavX track has the following format for CSV extract</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2011</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">04</span> <span class="mi">13</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">32</span> <span class="o">+</span><span class="mi">0000</span><span class="p">,</span><span class="mf">37.549225</span><span class="p">,</span><span class="o">-</span><span class="mf">76.330536</span><span class="p">,</span><span class="mi">219</span><span class="p">,</span><span class="mf">3.6</span><span class="p">,,,,,,</span>
+<span class="mi">2011</span><span class="o">-</span><span class="mi">06</span><span class="o">-</span><span class="mi">04</span> <span class="mi">13</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">43</span> <span class="o">+</span><span class="mi">0000</span><span class="p">,</span><span class="mf">37.549084</span><span class="p">,</span><span class="o">-</span><span class="mf">76.330681</span><span class="p">,</span><span class="mi">186</span><span class="p">,</span><span class="mf">3.0</span><span class="p">,,,,,,</span>
+</pre></div>
+</div>
+<p>The columns with data include date, latitude, longitude, cog, sog, heading, speed, depth, windAngle, windSpeed, comment.  Not all of these
+fields are populated unless GPSNavX (or iNavX or OpenCPN) gets an instrument feed.</p>
+<p>GPSNavX track has the following format for GPX extract</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;gpx version=&quot;1.1&quot; creator=&quot;GPSNavX&quot;
+xmlns=&quot;http://www.topografix.com/GPX/1/1&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd&quot;&gt;
+&lt;trk&gt;
+&lt;name&gt;TRACK_041812&lt;/name&gt;
+&lt;trkseg&gt;
+&lt;trkpt lat=&quot;37.549225&quot; lon=&quot;-76.330536&quot;&gt;
+&lt;time&gt;2011-06-04T13:12:32Z&lt;/time&gt;
+&lt;/trkpt&gt;
+&lt;trkpt lat=&quot;37.549084&quot; lon=&quot;-76.330681&quot;&gt;
+&lt;time&gt;2011-06-04T13:12:43Z&lt;/time&gt;
+&lt;/trkpt&gt;
+&lt;/trkseg&gt;
+&lt;/trk&gt;
+&lt;/gpx&gt;
+</pre></div>
+</div>
+<p>The iPhone iNavX can save track information via
+<a class="reference external" href="http://x-traverse.com/">http://x-traverse.com/</a>.  These are standard GPX files, and are
+identical with the tracks created directly by GPSNavX.</p>
+</section>
+<section id="command-line-interface">
+<h2>Command-Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline">¶</a></h2>
+<p>Typical use cases for this module include the following:</p>
+<ul class="simple">
+<li><p>Command Line:</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">navtools</span><span class="o">.</span><span class="n">analysis</span> <span class="s1">&#39;../../Sailing/Cruise History/2011 Reedville/reedville.csv&#39;</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Within a Python Script:</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navtools.analysis</span> <span class="kn">import</span> <span class="n">analyze</span>
+<span class="n">analyze</span><span class="p">(</span> <span class="s1">&#39;../../Sailing/Cruise History/2011 Reedville/jackson.csv&#39;</span><span class="p">,</span> <span class="mf">5.0</span> <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="module-navtools.analysis">
+<span id="implementation"></span><h2>Implementation<a class="headerlink" href="#module-navtools.analysis" title="Permalink to this headline">¶</a></h2>
+<p>Voyage Analysis Application</p>
+<p>The <code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code> application is used to do voyage analysis.
+This can make a more useful log from manually prepared log data or
+tracks dumped from tools like GPSNavX, iNavX, and OpenCPN.
+It’s helpful to add the distance run between waypoints as well as the
+elapsed time between waypoints.</p>
+<p>This additional waypoint-to-waypoint time and distance allows
+for fine-grained analysis of sailing performance.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="navtools.analysis.parse_date">
+<span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">parse_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">datetime.datetime</span><a class="headerlink" href="#navtools.analysis.parse_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>March through all of the known date formats until we find one that works.</p>
+<p>For more complex situations (i.e., multi-day voyages with partial
+date-time stamps in the log) this function isn’t quite appropriate.
+This assumes a single date field is sufficient to fill in all attributes of a date.
+In some cases, we might have timestamps that roll past midnight without an obvious
+indicator of date change. Or, we might have some notation like “d1, d2” or “+1d, +2d”.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">LogEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_row</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.analysis.LogEntry" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry.time">
+<span class="sig-name descname"><span class="pre">time</span></span><em class="property"><span class="pre">:</span> <span class="pre">datetime.datetime</span></em><a class="headerlink" href="#navtools.analysis.LogEntry.time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry.lat">
+<span class="sig-name descname"><span class="pre">lat</span></span><em class="property"><span class="pre">:</span> <span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.analysis.LogEntry.lat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry.lon">
+<span class="sig-name descname"><span class="pre">lon</span></span><em class="property"><span class="pre">:</span> <span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.analysis.LogEntry.lon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry.point">
+<span class="sig-name descname"><span class="pre">point</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="navigation.html#navtools.navigation.LatLon" title="navtools.navigation.LatLon"><span class="pre">navtools.navigation.LatLon</span></a></em><a class="headerlink" href="#navtools.analysis.LogEntry.point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry.source_row">
+<span class="sig-name descname"><span class="pre">source_row</span></span><em class="property"><span class="pre">:</span> <span class="pre">dict</span></em><a class="headerlink" href="#navtools.analysis.LogEntry.source_row" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry._asdict">
+<span class="sig-name descname"><span class="pre">_asdict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navtools.analysis.LogEntry._asdict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new dict which maps field names to their values.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry._field_defaults">
+<span class="sig-name descname"><span class="pre">_field_defaults</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{}</span></em><a class="headerlink" href="#navtools.analysis.LogEntry._field_defaults" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry._fields">
+<span class="sig-name descname"><span class="pre">_fields</span></span><em class="property"> <span class="pre">=</span> <span class="pre">('time',</span> <span class="pre">'lat',</span> <span class="pre">'lon',</span> <span class="pre">'point',</span> <span class="pre">'source_row')</span></em><a class="headerlink" href="#navtools.analysis.LogEntry._fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry._make">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">_make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.analysis.LogEntry._make" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a new LogEntry object from a sequence or iterable</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry._replace">
+<span class="sig-name descname"><span class="pre">_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.analysis.LogEntry._replace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new LogEntry object replacing specified fields with new values</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="navtools.analysis.csv_to_LogEntry">
+<span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">csv_to_LogEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><span class="pre">navtools.analysis.LogEntry</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.analysis.csv_to_LogEntry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses a CSV file to yield an iterable sequence
+of <a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry</span></code></a> objects.</p>
+<p>There are two formats:</p>
+<ul>
+<li><p>Standard (i.e., GPSNavX). These files have no header. We assume a set of headings.</p></li>
+<li><p>Manual. These files <strong>must</strong> include a heading row for it to be processed.
+The heading row <strong>must</strong> use labels like the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;date&quot;</span><span class="p">,</span> <span class="s2">&quot;latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;cog&quot;</span><span class="p">,</span> <span class="s2">&quot;sog&quot;</span><span class="p">,</span> <span class="s2">&quot;heading&quot;</span><span class="p">,</span> <span class="s2">&quot;speed&quot;</span><span class="p">,</span>
+<span class="s2">&quot;depth&quot;</span><span class="p">,</span> <span class="s2">&quot;windAngle&quot;</span><span class="p">,</span> <span class="s2">&quot;windSpeed&quot;</span><span class="p">,</span> <span class="s2">&quot;comment&quot;</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>Refactor the sniffing out of csv_to_LogEntry.</p>
+<p>There should be two, separate, csv readers for files with headers
+and a separate one for files without headers, where a default header
+is assumed or the analysis main program provides a header.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source</strong> – Open file or file-like object that can be read.</p></li>
+<li><p><strong>date</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code> object used to fill in default
+values for incomplete dates. By default, it’s “now”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An iterator over <a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry</span></code></a> objects.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="navtools.analysis.gpx_to_LogEntry">
+<span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">gpx_to_LogEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">TextIO</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><span class="pre">navtools.analysis.LogEntry</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.analysis.gpx_to_LogEntry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate LogEntry from an GPX doc.</p>
+<p>We assume a minimal schema:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;trk&gt;</span></code> contains</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;trkseg&gt;</span></code> contains</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;trkpt</span> <span class="pre">lat=&quot;&quot;</span> <span class="pre">lon=&quot;&quot;&gt;</span></code> contains</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;time&gt;</span></code> ISO format timestamp</p></li>
+<li><p>Any other tag values and attribute are preserved as the “source row”</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>source</strong> – an open XML file.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>An iterator over <a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry</span></code></a> objects.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="navtools.analysis.xml_to_pairs">
+<span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">xml_to_pairs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">xml.etree.ElementTree.Element</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">tuple</span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.analysis.xml_to_pairs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms a sequence of XML <code class="docutils literal notranslate"><span class="pre">&lt;tag&gt;value&lt;/tag&gt;</span></code> into a Python <code class="docutils literal notranslate"><span class="pre">('tag',</span> <span class="pre">'value')</span></code>
+sequence. This can be used to build a dictionary with a <code class="docutils literal notranslate"><span class="pre">{'tag':</span> <span class="pre">'value'}</span></code>
+structure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>pt</strong> – an XML structure with a number of children to process.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>iterable over (tag, text) tuples.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry_Rhumb">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">LogEntry_Rhumb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><span class="pre">LogEntry</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bearing</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">navigation.Angle</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta_time</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.timedelta</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.analysis.LogEntry_Rhumb" title="Permalink to this definition">¶</a></dt>
+<dd><p>The raw point plus the distance, bearing, and delta-time to the next waypoint.</p>
+<p>As a special case, a final waypoint will have no additional distance, bearing, or delta-time.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry_Rhumb.point">
+<span class="sig-name descname"><span class="pre">point</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><span class="pre">navtools.analysis.LogEntry</span></a></em><a class="headerlink" href="#navtools.analysis.LogEntry_Rhumb.point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry_Rhumb.distance">
+<span class="sig-name descname"><span class="pre">distance</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.analysis.LogEntry_Rhumb.distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry_Rhumb.bearing">
+<span class="sig-name descname"><span class="pre">bearing</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.analysis.LogEntry_Rhumb.bearing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry_Rhumb.delta_time">
+<span class="sig-name descname"><span class="pre">delta_time</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.timedelta</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.analysis.LogEntry_Rhumb.delta_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry_Rhumb._asdict">
+<span class="sig-name descname"><span class="pre">_asdict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navtools.analysis.LogEntry_Rhumb._asdict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new dict which maps field names to their values.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry_Rhumb._field_defaults">
+<span class="sig-name descname"><span class="pre">_field_defaults</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{}</span></em><a class="headerlink" href="#navtools.analysis.LogEntry_Rhumb._field_defaults" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry_Rhumb._fields">
+<span class="sig-name descname"><span class="pre">_fields</span></span><em class="property"> <span class="pre">=</span> <span class="pre">('point',</span> <span class="pre">'distance',</span> <span class="pre">'bearing',</span> <span class="pre">'delta_time')</span></em><a class="headerlink" href="#navtools.analysis.LogEntry_Rhumb._fields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry_Rhumb._make">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">_make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.analysis.LogEntry_Rhumb._make" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a new LogEntry_Rhumb object from a sequence or iterable</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry_Rhumb._replace">
+<span class="sig-name descname"><span class="pre">_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.analysis.LogEntry_Rhumb._replace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new LogEntry_Rhumb object replacing specified fields with new values</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="navtools.analysis.gen_rhumb">
+<span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">gen_rhumb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_entry_iter</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><span class="pre">navtools.analysis.LogEntry</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.analysis.LogEntry_Rhumb" title="navtools.analysis.LogEntry_Rhumb"><span class="pre">navtools.analysis.LogEntry_Rhumb</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.analysis.gen_rhumb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transforms a sequence of <a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry</span></code></a> instances into
+<a class="reference internal" href="#navtools.analysis.LogEntry_Rhumb" title="navtools.analysis.LogEntry_Rhumb"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry_Rhumb</span></code></a> instances. The rhumb line distance, bearing, and
+delta-time are added to each entry.</p>
+<p>Each point has range and bearing to the next point.
+The last point as no range and bearing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>log_entry_iter</strong> – iterable sequence of <a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry</span></code></a> instances.
+This can be produced by <a class="reference internal" href="#navtools.analysis.gpx_to_LogEntry" title="navtools.analysis.gpx_to_LogEntry"><code class="xref py py-func docutils literal notranslate"><span class="pre">gpx_to_LogEntry()</span></code></a> or <a class="reference internal" href="#navtools.analysis.csv_to_LogEntry" title="navtools.analysis.csv_to_LogEntry"><code class="xref py py-func docutils literal notranslate"><span class="pre">csv_to_LogEntry()</span></code></a>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>iterable sequence of  <a class="reference internal" href="#navtools.analysis.LogEntry_Rhumb" title="navtools.analysis.LogEntry_Rhumb"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry_Rhumb</span></code></a> instances.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="navtools.analysis.nround">
+<span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">nround</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.analysis.nround" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="navtools.analysis.write_csv">
+<span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">write_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_entry_rhumb_iter</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.analysis.LogEntry_Rhumb" title="navtools.analysis.LogEntry_Rhumb"><span class="pre">navtools.analysis.LogEntry_Rhumb</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">TextIO</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#navtools.analysis.write_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes a sequence of <a class="reference internal" href="#navtools.analysis.LogEntry_Rhumb" title="navtools.analysis.LogEntry_Rhumb"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry_Rhumb</span></code></a>
+objects to a given target file.   The objects are usually built by the
+<a class="reference internal" href="#navtools.analysis.gen_rhumb" title="navtools.analysis.gen_rhumb"><code class="xref py py-func docutils literal notranslate"><span class="pre">gen_rhumb()</span></code></a> function.</p>
+<p>Since the source data has a poorly-defined set of columns,
+we emit just a few additional attributes joined onto the original,
+untouched row.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log_entry_rhumb_iter</strong> – iterable sequence of  <a class="reference internal" href="#navtools.analysis.LogEntry_Rhumb" title="navtools.analysis.LogEntry_Rhumb"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry_Rhumb</span></code></a> instances.
+This is often the output of <a class="reference internal" href="#navtools.analysis.gen_rhumb" title="navtools.analysis.gen_rhumb"><code class="xref py py-func docutils literal notranslate"><span class="pre">gen_rhumb()</span></code></a>.</p></li>
+<li><p><strong>target</strong> – File to which to write the analyzed rows.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Note that we apply some rounding rules to these values before writing them
+to a CSV file. The distances are rounded to <span class="math notranslate nohighlight">\(10^{-5}\)</span> which is about
+an inch, or 2 cm: more accurate than the GPS position.
+The bearing is rounded to an 0 places.</p>
+<div class="admonition-todo admonition" id="id2">
+<p class="admonition-title">Todo</p>
+<p>Refactor to eliminate (if possible) sniffing the source_row keys to create CSV headers.</p>
+<p>Option 1. Replace with a class. An iterator method to update the source_row
+with LogEntry_Rhumb and accumulated sub-totals. Essentially, <code class="docutils literal notranslate"><span class="pre">build_row_dict</span></code>.
+A method to write CSV preserving original headers
+and adding new headers based on values computed by the iterator.</p>
+<p>Option 2. The client provides the source_row keys, doing the sniffing for us.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="navtools.analysis.analyze">
+<span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">analyze</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_filepath</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#navtools.analysis.analyze" title="Permalink to this definition">¶</a></dt>
+<dd><p>Analyze a log file, writing a new log file with additional
+calculated values.</p>
+<p>The <a class="reference internal" href="#navtools.analysis.gen_rhumb" title="navtools.analysis.gen_rhumb"><code class="xref py py-func docutils literal notranslate"><span class="pre">gen_rhumb()</span></code></a> calculation is applied to each row.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log_filepath</strong> – Path of a log file to analyze.
+If the input is <code class="samp docutils literal notranslate"><em><span class="pre">some_name</span></em><span class="pre">.csv</span></code> or <code class="samp docutils literal notranslate"><em><span class="pre">some_name</span></em><span class="pre">.gpx</span></code>
+the output will be <code class="samp docutils literal notranslate"><em><span class="pre">some_name</span></em> <span class="pre">Distance.csv</span></code>.</p></li>
+<li><p><strong>date</strong> – Default date to use when incomplete date-time fields
+are present in the input.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="navtools.analysis.main">
+<span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#navtools.analysis.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse command-line arguments to get the log file names and the default
+date to use for partial date strings.</p>
+<p>Then use <a class="reference internal" href="#navtools.analysis.analyze" title="navtools.analysis.analyze"><code class="xref py py-func docutils literal notranslate"><span class="pre">analyze()</span></code></a> to process each file, creating a <code class="file docutils literal notranslate"><em><span class="pre">name</span></em> <span class="pre">Distance.csv</span></code>
+output file with the detailed analysis.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Navtools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#actors">Actors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#use-cases">Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#solution-overview">Solution Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#architecture">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#references">References</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="navigation.html">Navigation Calculations Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="planning.html">Route Planning Application</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Track Analysis Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opencpn_table.html">OpenCPN Table Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="igrf11.html">International Geomagnetic Reference Field Module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="planning.html" title="previous chapter">Route Planning Application</a></li>
+      <li>Next: <a href="opencpn_table.html" title="next chapter">OpenCPN Table Application</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/analysis.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

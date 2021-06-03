@@ -9,32 +9,46 @@ See http://slott56.github.io/navtools/.
 Installation
 ============
 
-Check out the github or download the .zip archive.
-See https://github.com/slott56/navtools.
+The NavTools distribution includes the following.
 
-Run the ``setup.py`` to install the various components.
+-   :file:`navtools`. The Python code which gets installed.
+
+-   :file:`igrf11coeffs.txt`. Data used to compute magnetic deviation.
+    This is from http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt
+
+-   :file:`docs`.  The RST-formatted documentation files.
+
+Clone the Git repository (or download the .zip archive).
+
+..  code-block:: bash
+
+    git clone https://github.com/slott56/navtools
+
+Run the ``setup.py`` to install the package.
+
+..  code-block:: bash
+
+    python setup.py install
+
 For details, see http://slott56.github.io/navtools/installation.html.
-
-**Important**. Literate Programming In Use.
-
-    The documentations **is** the source. The code
-    starts as ``.rst`` files. The ``.py`` is derived
-    from the documentation.
-    The `build <http://slott56.github.io/navtools/build.html>`_ documentation
-    shows how this works.
+This is not available in PyPI, so a simple `python -m pip install navtools` isn't supported.
 
 Use
 ====
 
-There are two sample applications that annotate ``.gpx`` or ``.csv``
-files. One computes a schedule for arrival at the various waypoints.
-The other annotates a historical log with distance and speed.
+There are three sample applications that process ``.gpx`` or ``.csv``
+files:
 
 -   Route Planning: http://slott56.github.io/navtools/planning.html
+    computes a schedule for arrival at the various waypoints.
 
 -   Track Analysis: http://slott56.github.io/navtools/analysis.html
+    annotates a historical log with distance and speed.
 
-The more common use case is to import that navigation module
+-   OpenCPN Conversion: transforms an OpenCPN route planning table into
+    a more useful form for spreadsheet use.
+
+An additional use case is to import that :mod:`navtools.navigation` module
 to create your own applications.
 
 See http://slott56.github.io/navtools/navigation.html for information

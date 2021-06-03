@@ -1,0 +1,343 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>NavTools Build &#8212; Navtools 2021.06.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation via setup.py" href="installation.html" />
+    <link rel="prev" title="navtools test __init__.py" href="testing/test_init.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="navtools-build">
+<span id="build"></span><h1>NavTools Build<a class="headerlink" href="#navtools-build" title="Permalink to this headline">¶</a></h1>
+<p>The source for <code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools</span></code> is a Sphinx project that depends on PyLit.
+Yes.  The documentation spawns the code.</p>
+<p>In addition to Python 3.4, there are two other projects required to build.</p>
+<ul class="simple">
+<li><p>PyLit3.  <a class="reference external" href="https://github.com/slott56/PyLit-3">https://github.com/slott56/PyLit-3</a> and <a class="reference external" href="http://slott56.github.io/PyLit-3/index.html">http://slott56.github.io/PyLit-3/index.html</a>.</p></li>
+<li><p>Sphinx.  <a class="reference external" href="http://sphinx-doc.org">http://sphinx-doc.org</a></p></li>
+</ul>
+<p>The PyLit3 install is little more than download and move the <code class="file docutils literal notranslate"><span class="pre">src/pylit.py</span></code> file to
+the Python <code class="file docutils literal notranslate"><span class="pre">site-packages</span></code> directory.</p>
+<p>Sphinx should be
+installed with <code class="docutils literal notranslate"><span class="pre">pip3.4</span></code> or <code class="docutils literal notranslate"><span class="pre">easy_install_3.4</span></code>, both of which are part of the Python3.4 distribution.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3.4 install sphinx
+</pre></div>
+</div>
+<section id="build-procedure">
+<h2>Build Procedure<a class="headerlink" href="#build-procedure" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic">
+<li><p>Bootstrap the <code class="file docutils literal notranslate"><span class="pre">build.py</span></code> script by running PyLit.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 -m pylit -t source/build.rst build.py
+</pre></div>
+</div>
+<p>This reports that an extract was written to <code class="file docutils literal notranslate"><span class="pre">build.py</span></code>.</p>
+</li>
+<li><p>Use the <code class="file docutils literal notranslate"><span class="pre">build.py</span></code> script to create the <code class="docutils literal notranslate"><span class="pre">navtools</span></code> source, unit
+tests, demonstration applications.
+It also builds the Sphinx documentation.
+And it runs the unit test suite, too.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python3 build.py
+</pre></div>
+</div>
+<p>At the end of this step, the directory tree will include the following.</p>
+<ul class="simple">
+<li><p><code class="file docutils literal notranslate"><span class="pre">../navtools-gh-pages</span></code>.  The documentation.  In HTML.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">navtools</span></code>.  The Python source, ready for installation.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">setup.py</span></code>. The distutils installation.</p></li>
+<li><p><code class="file docutils literal notranslate"><span class="pre">test</span></code>.  The unit test script.</p></li>
+</ul>
+<p>This reports, also, that 49 tests were run.</p>
+</li>
+</ol>
+<p>An alternative to step 2 is the following:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>chmod +x build.py
+./build.py
+</pre></div>
+</div>
+</section>
+<section id="build-script-design">
+<h2>Build Script Design<a class="headerlink" href="#build-script-design" title="Permalink to this headline">¶</a></h2>
+<p>The issue is to remain DRY: we hate to repeat the list of PyLit steps
+for multiple OS with slightly different path definitions.</p>
+<p>There are three common choices:</p>
+<ul class="simple">
+<li><p>Make both <code class="file docutils literal notranslate"><span class="pre">build.sh</span></code> and <code class="file docutils literal notranslate"><span class="pre">build.bat</span></code> from a common source.
+This would, potentially, lead to some real complication with
+PyLit trying to build two files (in different resulting syntax)
+from some kind of common source material. We’d rather not get involved.</p></li>
+<li><p>Depend on <code class="docutils literal notranslate"><span class="pre">make</span></code>, which is quite common. While this isn’t an onerous
+dependency, we’d like to avoid it.</p></li>
+<li><p>Create a platform-independent <code class="file docutils literal notranslate"><span class="pre">build.py</span></code> file for the build script.
+We’ll use <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">sphinx.application</span> <span class="pre">import</span> <span class="pre">Sphinx</span></code>
+and <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pylit</span></code> to access these modules from within Python.</p></li>
+</ul>
+<p>We’ll really like the Python script approach to the build.</p>
+<section id="overheads">
+<h3>Overheads<a class="headerlink" href="#overheads" title="Permalink to this headline">¶</a></h3>
+<p>We’re going to make use of three “applications” to build navtools.</p>
+<ul class="simple">
+<li><p>Sphinx top-level application.</p></li>
+<li><p>PyLit top-level application.</p></li>
+<li><p>Unittest top-level test runner.</p></li>
+</ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Platform-independent build script for NavTools 2.1&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">errno</span>
+<span class="kn">from</span> <span class="nn">sphinx.application</span> <span class="kn">import</span> <span class="n">Sphinx</span>
+<span class="kn">import</span> <span class="nn">pylit</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+</pre></div>
+</div>
+</section>
+<section id="sphinx-build">
+<h3>Sphinx Build<a class="headerlink" href="#sphinx-build" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="sphinx_build">
+<span class="sig-name descname"><span class="pre">sphinx_build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">srcdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buildername</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'html'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sphinx_build" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This function handles the simple use case for the <code class="docutils literal notranslate"><span class="pre">sphinx-build</span></code> script.
+The destination directory is – often – build/html or some place like
+that.</p>
+<p>When working with GitHub and a <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code> branch, it can work
+well when the html is generated in the top-level directory. However.
+For this project, we’ll create a separate <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code> branch which
+is a peer to this directory.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">sphinx_build</span><span class="p">(</span> <span class="n">srcdir</span><span class="p">,</span> <span class="n">outdir</span><span class="p">,</span> <span class="n">buildername</span><span class="o">=</span><span class="s1">&#39;html&#39;</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Essentially: ``sphinx-build $* -b html source .``&quot;&quot;&quot;</span>
+    <span class="n">confdir</span><span class="o">=</span> <span class="n">srcdir</span><span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span> <span class="n">srcdir</span> <span class="p">)</span>
+    <span class="n">outdir</span><span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span> <span class="n">outdir</span> <span class="p">)</span>
+    <span class="n">doctreedir</span> <span class="o">=</span> <span class="n">outdir</span> <span class="o">/</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;.doctrees&#39;</span><span class="p">)</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">Sphinx</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">srcdir</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">confdir</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">outdir</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">doctreedir</span><span class="p">),</span> <span class="n">buildername</span><span class="p">)</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">force_all</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">filenames</span><span class="o">=</span><span class="p">[])</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">statuscode</span>
+</pre></div>
+</div>
+</section>
+<section id="pylit-build">
+<h3>PyLit Build<a class="headerlink" href="#pylit-build" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="pylit_build">
+<span class="sig-name descname"><span class="pre">pylit_build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfile</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pylit_build" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This function handles the simple use case for PyLit. We force an overwrite because
+PyLit exits when there’s a problem. A bad design.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">pylit_build</span><span class="p">(</span> <span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span> <span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Essentially: ``python3 -m pylit -t source/{document}.rst demo/{module}.py``</span>
+
+<span class="sd">    The issue here is that we need to provide platform-specific paths.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">pylit</span><span class="o">.</span><span class="n">main</span><span class="p">(</span> <span class="n">txt2code</span><span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span> <span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="n">infile</span><span class="o">=</span> <span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="o">=</span> <span class="n">outfile</span> <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">SystemExit</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Failed to transform </span><span class="si">{0}</span><span class="s2"> to </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">infile</span><span class="p">,</span> <span class="n">outfile</span><span class="p">))</span>
+        <span class="k">raise</span>
+</pre></div>
+</div>
+</section>
+<section id="make-directories">
+<h3>Make Directories<a class="headerlink" href="#make-directories" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="mkdir">
+<span class="sig-name descname"><span class="pre">mkdir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mkdir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>This function handles the simple use case for assuring that the directory
+tree exists.</p>
+<p>This also handles a rewrite to modify standard paths to Windows paths.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">mkdir</span><span class="p">(</span> <span class="n">path</span> <span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span> <span class="n">path</span> <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">==</span> <span class="n">errno</span><span class="o">.</span><span class="n">EEXIST</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span>
+</pre></div>
+</div>
+</section>
+<section id="run-the-test-script">
+<h3>Run the Test Script<a class="headerlink" href="#run-the-test-script" title="Permalink to this headline">¶</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="run_test">
+<span class="sig-name descname"><span class="pre">run_test</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#run_test" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p>In effect, this does <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">test/main.py</span></code></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">run_test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">test.main</span>
+    <span class="n">result</span><span class="o">=</span> <span class="n">test</span><span class="o">.</span><span class="n">main</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="the-build-sequence">
+<h3>The Build Sequence<a class="headerlink" href="#the-build-sequence" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">build</span><span class="p">():</span>
+    <span class="n">sphinx_build</span><span class="p">(</span> <span class="s1">&#39;source&#39;</span><span class="p">,</span> <span class="s1">&#39;../navtools-gh-pages&#39;</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span> <span class="p">)</span>
+
+    <span class="n">mkdir</span><span class="p">(</span> <span class="s1">&#39;navtools&#39;</span> <span class="p">)</span>
+
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s1">&#39;source/navtools_init.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;navtools/__init__.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s1">&#39;source/igrf11.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;navtools/igrf11.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s1">&#39;source/navigation.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;navtools/navigation.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s1">&#39;source/planning.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;navtools/planning.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s1">&#39;source/analysis.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;navtools/analysis.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s1">&#39;source/installation.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;setup.py&#39;</span> <span class="p">)</span>
+
+    <span class="n">mkdir</span><span class="p">(</span> <span class="s1">&#39;test&#39;</span> <span class="p">)</span>
+
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s1">&#39;source/testing/test_init.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/__init__.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s1">&#39;source/testing/main.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/main.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s1">&#39;source/testing/test_igrf11.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/test_igrf11.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s1">&#39;source/testing/test_navigation.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/test_navigation.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s1">&#39;source/testing/test_planning.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/test_planning.py&#39;</span> <span class="p">)</span>
+    <span class="n">pylit_build</span><span class="p">(</span> <span class="s1">&#39;source/testing/test_analysis.rst&#39;</span><span class="p">,</span> <span class="s1">&#39;test/test_analysis.py&#39;</span> <span class="p">)</span>
+
+    <span class="n">run_test</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="main-program-switch">
+<h3>Main Program Switch<a class="headerlink" href="#main-program-switch" title="Permalink to this headline">¶</a></h3>
+<p>When the <code class="file docutils literal notranslate"><span class="pre">build.py</span></code> script is run from the command line,
+it will execute the <code class="xref py py-func docutils literal notranslate"><span class="pre">build()</span></code> function.  When it is imported,
+however, it will do nothing special.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">build</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="additional-builds">
+<h2>Additional Builds<a class="headerlink" href="#additional-builds" title="Permalink to this headline">¶</a></h2>
+<p>Sometimes it’s desriable to refresh the documentation.</p>
+<p>The HTML pages are built with this command.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sphinx-build <span class="nv">$*</span> -b html <span class="nb">source</span> ../navtools-gh-pages
+</pre></div>
+</div>
+<p>A LaTeX document can be built with this command.
+This can build a great-looking PDF.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sphinx-build <span class="nv">$*</span> -b latex <span class="nb">source</span> ../navtools-gh-pages
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Navtools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#actors">Actors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#use-cases">Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#solution-overview">Solution Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#architecture">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#references">References</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="navigation.html">Navigation Calculations Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="planning.html">Route Planning Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Track Analysis Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="igrf11.html">International Geomagnetic Reference Field Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="navtools_init.html">navtools <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code></a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="testing/index.html">Testing</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">NavTools Build</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation via <code class="docutils literal notranslate"><span class="pre">setup.py</span></code></a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="testing/test_init.html" title="previous chapter">navtools test <code class="docutils literal notranslate"><span class="pre">__init__.py</span></code></a></li>
+      <li>Next: <a href="installation.html" title="next chapter">Installation via <code class="docutils literal notranslate"><span class="pre">setup.py</span></code></a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/build.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

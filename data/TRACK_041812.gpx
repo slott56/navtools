@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<gpx version="1.1" creator="GPSNavX"
+xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+<trk>
+<name>TRACK_041812</name>
+<trkseg>
+<trkpt lat="37.549225" lon="-76.330536">
+<time>2011-06-04T13:12:32Z</time>
+</trkpt>
+<trkpt lat="37.549084" lon="-76.330681">
+<time>2011-06-04T13:12:43Z</time>
+</trkpt>
+<trkpt lat="37.548916" lon="-76.330704">
+<time>2011-06-04T13:12:55Z</time>
+</trkpt>
+</trkseg>
+<trkseg>
+<trkpt lat="37.540588" lon="-76.304459">
+<time>2011-06-04T13:34:53Z</time>
+</trkpt>
+</trkseg>
+<trkseg>
+<trkpt lat="37.536983" lon="-76.298264">
+<time>2011-06-04T14:04:34Z</time>
+</trkpt>
+<trkpt lat="37.534897" lon="-76.294067">
+<time>2011-06-04T14:11:18Z</time>
+</trkpt>
+</trkseg>
+<trkseg>
+<trkpt lat="37.530914" lon="-76.285721">
+<time>2011-06-04T14:29:46Z</time>
+</trkpt>
+<trkpt lat="37.530888" lon="-76.284180">
+<time>2011-06-04T14:34:20Z</time>
+</trkpt>
+<trkpt lat="37.530735" lon="-76.283104">
+<time>2011-06-04T14:36:07Z</time>
+</trkpt>
+</trkseg>
+<trkseg>
+<trkpt lat="37.529449" lon="-76.278008">
+<time>2011-06-04T15:04:00Z</time>
+</trkpt>
+<trkpt lat="37.529617" lon="-76.276558">
+<time>2011-06-04T15:06:35Z</time>
+</trkpt>
+<trkpt lat="37.529579" lon="-76.276260">
+<time>2011-06-04T15:08:08Z</time>
+</trkpt>
+<trkpt lat="37.529621" lon="-76.275040">
+<time>2011-06-04T15:10:30Z</time>
+</trkpt>
+<trkpt lat="37.529613" lon="-76.273048">
+<time>2011-06-04T15:20:00Z</time>
+</trkpt>
+<trkpt lat="37.529411" lon="-76.272659">
+<time>2011-06-04T15:21:03Z</time>
+</trkpt>
+<trkpt lat="37.529140" lon="-76.272057">
+<time>2011-06-04T15:22:19Z</time>
+</trkpt>
+<trkpt lat="37.528782" lon="-76.270889">
+<time>2011-06-04T15:24:16Z</time>
+</trkpt>
+<trkpt lat="37.528477" lon="-76.269096">
+<time>2011-06-04T15:31:42Z</time>
+</trkpt>
+<trkpt lat="37.528286" lon="-76.268173">
+<time>2011-06-04T15:34:03Z</time>
+</trkpt>
+<trkpt lat="37.527790" lon="-76.266853">
+<time>2011-06-04T15:39:04Z</time>
+</trkpt>
+<trkpt lat="37.530262" lon="-76.262688">
+<time>2011-06-04T15:54:09Z</time>
+</trkpt>
+<trkpt lat="37.530727" lon="-76.261375">
+<time>2011-06-04T16:00:05Z</time>
+</trkpt>
+<trkpt lat="37.530525" lon="-76.261192">
+<time>2011-06-04T16:00:15Z</time>
+</trkpt>
+</trkseg>
+<trkseg>
+<trkpt lat="37.651051" lon="-76.432961">
+<time>2011-06-04T20:45:39Z</time>
+</trkpt>
+<trkpt lat="37.650856" lon="-76.433014">
+<time>2011-06-04T20:45:53Z</time>
+</trkpt>
+<trkpt lat="37.650818" lon="-76.432999">
+<time>2011-06-04T20:52:01Z</time>
+</trkpt>
+</trkseg>
+</trk>
+</gpx>

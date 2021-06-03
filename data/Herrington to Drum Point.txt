@@ -1,0 +1,17 @@
+Herrington to Drum Point
+Name	Herrington to Drum Point
+Depart From
+Destination
+Total distance	 22.9 NMi
+Speed (Kts)	6
+Departure Time (%x %H:%M)	05/25/2021 08:43
+Time enroute	 3H 49M
+
+Leg	To waypoint	Distance	Bearing	Latitude	Longitude	ETE	ETA	Speed	Next tide event	Description	Course	ETD
+---	Herring Bay	  2.5 NMi	165 °M	38° 44.2' N	076° 32.4' W	24M 51S	Start: 05/25/2021 08:43 (MoTwilight)	6			72 °M
+1	Kent Point	  9.4 NMi	72 °M	38° 48.7' N	076° 21.9' W	 1H 34M	05/25/2021 11:51 (Daytime)	6			66 °M
+2	Eastern Bay	  7.1 NMi	66 °M	38° 52.9' N	076° 14.5' W	 1H 11M	05/25/2021 13:02 (Daytime)	6			158 °M
+3	Wye R. Entrance	  2.9 NMi	158 °M	38° 50.5' N	076° 12.5' W	28M 31S	05/25/2021 13:31 (Daytime)	6			44 °M
+4	Bordley Pt.	  1.6 NMi	44 °M	38° 51.8' N	076° 11.4' W	16M 13S	05/25/2021 13:47 (Daytime)	6			14 °M
+5	Drum Point	  1.4 NMi	14 °M	38° 53.2' N	076° 11.3' W	13M 43S	05/25/2021 14:01 (Daytime)	6			120 °M
+6	Drum Point Anchorage	  0.5 NMi	120 °M	38° 53.0' N	076° 10.7' W	 4M 52S	05/25/2021 14:06 (Daytime)	6			Arrived

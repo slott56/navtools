@@ -1,0 +1,39 @@
+[project]
+name = "navtools"
+version = "2021.6.1"
+description = "Small Boat Navigation Tools and Data Conversions"
+readme = "README.md"
+requires-python = ">=3.9"
+keywords = ["GPS", "OpenCPN", "iNavX"]
+[[project.authors]]
+email = "slott56@gmail.com"
+
+[[project.authors]]
+name = "Steven F. Lott"
+
+[project.license]
+file = "LICENSE.txt"
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+minversion = 3.20.0
+skipsdist = True
+[testenv]
+description = "Master suite of tests for all environments."
+deps =
+	-rrequirements.txt
+	pytest==6.2.4
+	pytest-cov==2.12.0
+	mypy==0.812
+setenv =
+	PYTHONPATH = {toxinidir}/navtools
+commands =
+	python -m doctest --option ELLIPSIS navtools/analysis.py
+	python -m doctest --option ELLIPSIS navtools/igrf11.py
+	python -m doctest --option ELLIPSIS navtools/navigation.py
+	python -m doctest --option ELLIPSIS navtools/opencpn_table.py
+	python -m doctest --option ELLIPSIS navtools/planning.py
+	python -m pytest --cov=navtools --cov-report term-missing -vv
+	mypy --strict --show-error-codes navtools
+"""

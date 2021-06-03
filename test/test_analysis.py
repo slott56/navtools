@@ -1,323 +1,432 @@
-#!/usr/bin/env python3
+"""
+Test the :py:mod:`analysis` application.
+"""
 
-# ###############################################################
-# Test Analysis
-# ###############################################################
-#
-# There are a number of test cases for track analysis in
-# the :py:mod:`analysis` module.
-#
-# Overheads
-# ==========
-#
-# ::
-
-import unittest
-import sys
+from pytest import *
+from unittest.mock import Mock, call
+import datetime
+from textwrap import dedent
 from io import StringIO
-from navtools.navigation import LatLon, declination, Angle2
+from navtools.navigation import LatLon, declination, Angle
 from navtools.analysis import *
+from navtools import analysis
 
-# Test Cases
-# =============
-#
-# csv_to_LogEntry function with GPSNavX Data
-# --------------------------------------------
-#
-# ::
 
-csv_NavX_data = """\
-2011-06-04 13:12:32 +0000,37.549225,-76.330536,219,3.6,,,,,,
-2011-06-04 13:12:43 +0000,37.549084,-76.330681,186,3.0,,,,,,
-"""
+@fixture
+def mock_today(monkeypatch):
+    date_class = Mock(today=Mock(return_value=datetime.date(2021, 1, 18)))
+    mock_datetime = Mock(wraps=datetime, date=date_class)
+    monkeypatch.setattr(analysis, 'datetime', mock_datetime)
+    return mock_datetime
 
-# ::
+def test_parse_date(mock_today):
+    assert parse_date("11:12 PM") == datetime.datetime(2021, 1, 18, 23, 12)
+    assert parse_date("Sep 10 11:12 PM") == datetime.datetime(2021, 9, 10, 23, 12)
+    assert parse_date("9-10-2021 11:12 PM") == datetime.datetime(2021, 9, 10, 23, 12)
+    with raises(ValueError):
+        parse_date("9-10-2021 11:12 Nope")
 
-class Test_csv_to_LogEntry_NavX( unittest.TestCase ):
-    def setUp( self ):
-        data_file= StringIO( csv_NavX_data )
-        self.generator= csv_to_LogEntry( data_file )
-    def test_should_parse( self ):
-        points= list( self.generator )
-        self.assertEqual( 2, len(points) )
-        self.assertEqual( "2011-06-04 13:12:32 +0000", points[0].time.strftime( "%Y-%m-%d %H:%M:%S %z" ) )
-        self.assertAlmostEqual( 37.549225, points[0].point.lat.deg )
-        self.assertAlmostEqual( -76.330536, points[0].point.lon.deg )
-        self.assertEqual( "2011-06-04 13:12:43 +0000", points[1].time.strftime( "%Y-%m-%d %H:%M:%S %z" ) )
-        self.assertAlmostEqual( 37.549084, points[1].point.lat.deg )
-        self.assertAlmostEqual( -76.330681, points[1].point.lon.deg )
+@fixture
+def iNavX_csv_file():
+    navx_csv_data = dedent(
+        """\
+        2011-06-04 13:12:32 +0000,37.549225,-76.330536,219,3.6,,,,,,
+        2011-06-04 13:12:43 +0000,37.549084,-76.330681,186,3.0,,,,,,
+        """
+    )
+    return StringIO(navx_csv_data)
 
-# csv_to_LogEntry function with Manual Data
-# --------------------------------------------
-#
-# ::
+def test_csv_to_LogEntry_no_header(iNavX_csv_file):
+        generator = csv_to_LogEntry( iNavX_csv_file )
+        points = list(generator)
+        assert len(points) == 2
+        assert points[0].time.strftime( "%Y-%m-%d %H:%M:%S %z" ) == "2011-06-04 13:12:32 +0000"
+        assert points[0].point.lat.deg == approx(37.549225)
+        assert points[0].point.lon.deg == approx(-76.330536)
 
-csv_Manual_data = """\
-Time,Lat,Lon,COG,SOG,Rig,Engine,windAngle,windSpeed,Location
-9:21 AM,37 50.424N,076 16.385W,None,0,None,1200 RPM,,,Cockrell Creek
-10:06 AM,37 47.988N,076 16.056W,None,6.6,None,1500 RPM,315,7.0,
-"""
+        assert points[1].time.strftime( "%Y-%m-%d %H:%M:%S %z" ) == "2011-06-04 13:12:43 +0000"
+        assert points[1].point.lat.deg == approx(37.549084)
+        assert points[1].point.lon.deg == approx(-76.330681)
 
-# ::
 
-class Test_csv_to_LogEntry_Man( unittest.TestCase ):
-    def setUp( self ):
-        data_file= StringIO( csv_Manual_data )
-        self.generator= csv_to_LogEntry( data_file )
-    def test_should_parse( self ):
-        points= list( self.generator )
+@fixture
+def manual_csv_file():
+    manual_csv_data = dedent(
+        """\
+        Time,Lat,Lon,COG,SOG,Rig,Engine,windAngle,windSpeed,Location
+        9:21 AM,37 50.424N,076 16.385W,None,0,None,1200 RPM,,,Cockrell Creek
+        10:06 AM,37 47.988N,076 16.056W,None,6.6,None,1500 RPM,315,7.0,
+        """
+    )
+    return StringIO(manual_csv_data)
+
+
+def test_csv_to_LogEntry_header( manual_csv_file ):
+        generator = csv_to_LogEntry( manual_csv_file )
+        points = list( generator )
         #for p in points: print( repr(p) )
-        self.assertEqual( 2, len(points) )
-        self.assertEqual( "09:21", points[0].time.strftime("%H:%M") )
-        self.assertAlmostEqual( 37.8404, points[0].point.lat.deg )
-        self.assertAlmostEqual( -76.2730833, points[0].point.lon.deg )
-        self.assertEqual( "10:06", points[1].time.strftime("%H:%M")  )
-        self.assertAlmostEqual( 37.7998, points[1].point.lat.deg )
-        self.assertAlmostEqual( -76.2676, points[1].point.lon.deg )
+        assert len(points) == 2
 
-# gpx_to_LogEntry function
-# ---------------------------
-#
-# This is difficult to test because we don't have a real GPX track
-# file.
-#
-# ::
+        assert points[0].time.strftime("%H:%M") == "09:21"
+        assert points[0].point.lat.deg == approx(37.8404)
+        assert points[0].point.lon.deg == approx(-76.2730833)
 
-gpx_data = """\
-<?xml version="1.0" encoding="utf-8"?>
-<gpx version="1.1" creator="GPSNavX"
-xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
-<trk>
-<trkseg>
-<trkpt lat="37.534599" lon="-76.313622">
-<time>2010-09-06T16:50:42Z</time>
-</trkpt>
-<trkpt lat="37.535213" lon="-76.312889">
-<time>2010-09-06T16:51:34Z</time>
-</trkpt>
-</trkseg>
-</trk>
-</gpx>
-"""
+        assert points[1].time.strftime("%H:%M") == "10:06"
+        assert points[1].point.lat.deg == approx(37.7998)
+        assert points[1].point.lon.deg == approx(-76.2676)
 
-# ::
+@fixture
+def bad_manual_csv_file():
+    bad_manual_csv_data = dedent(
+        """\
+        Time,Lat,Lon,COG,SOG,Rig,Engine,windAngle,windSpeed,Location
+        9:21 AM,Nope,076 16.385W,None,0,None,1200 RPM,,,Cockrell Creek
+        10:06 AM,37 47.988N,Not Good,None,6.6,None,1500 RPM,315,7.0,
+        """
+    )
+    return StringIO(bad_manual_csv_data)
 
-class Test_gpx_to_LogEntry( unittest.TestCase ):
-    def setUp( self ):
-        data_file= StringIO( gpx_data )
-        self.generator= gpx_to_LogEntry( data_file )
-    def test_should_parse( self ):
-        points= list( self.generator )
-        self.assertEqual( 2, len(points) )
-        self.assertEqual( "2010-09-06 16:50:42 +0000", points[0].time.strftime( "%Y-%m-%d %H:%M:%S %z" ) )
-        self.assertAlmostEqual( 37.534599, points[0].point.lat.deg )
-        self.assertAlmostEqual( -76.313622, points[0].point.lon.deg )
-        self.assertEqual( "2010-09-06 16:51:34 +0000", points[1].time.strftime( "%Y-%m-%d %H:%M:%S %z" ) )
-        self.assertAlmostEqual( 37.535213, points[1].point.lat.deg )
-        self.assertAlmostEqual( -76.312889, points[1].point.lon.deg )
 
-# gen_rhumb Function
-# ------------------------
-#
-# ::
+def test_bad_csv_to_LogEntry( bad_manual_csv_file, capsys):
+    generator = csv_to_LogEntry( bad_manual_csv_file )
+    points = list( generator )
+    output, error = capsys.readouterr()
+    assert output == dedent("""\
+    {'Time': '9:21 AM', 'Lat': 'Nope', 'Lon': '076 16.385W', 'COG': 'None', 'SOG': '0', 'Rig': 'None', 'Engine': '1200 RPM', 'windAngle': '', 'windSpeed': '', 'Location': 'Cockrell Creek'}
+    Cannot parse 'Nope'
+    {'Time': '10:06 AM', 'Lat': '37 47.988N', 'Lon': 'Not Good', 'COG': 'None', 'SOG': '6.6', 'Rig': 'None', 'Engine': '1500 RPM', 'windAngle': '315', 'windSpeed': '7.0', 'Location': ''}
+    Cannot parse 'Not Good'
+    """)
+    assert error == ""
 
-class Test_gen_rhumb( unittest.TestCase ):
-    def setUp( self ):
-        route = [
-            LogEntry( datetime.datetime(2012,4,17,9,21), "37.533195", "-76.316963",
-                LatLon("37.533195N", "76.316963W"),
-                {'Engine': '1200 RPM', 'SOG': '0', 'Lon': '076 16.385W', 'windSpeed': '', 'Location': 'Cockrell Creek', 'COG': 'None', 'Time': '9:21 AM', 'Lat': '37 50.424N', 'Rig': 'None', 'windAngle': ''} ),
-            LogEntry( datetime.datetime(2012,4,17,10,6), "37.542961", "-76.319580",
-                LatLon("37.542961N", "76.319580W"),
-                {'Engine': '1500 RPM', 'SOG': '6.6', 'Lon': '076 16.056W', 'windSpeed': '7.0', 'Location': '', 'COG': 'None', 'Time': '10:06 AM', 'Lat': '37 47.988N', 'Rig': 'None', 'windAngle': '315'} ),
-        ]
-        self.generator= gen_rhumb( iter( route ) )
-    def test_should_compute_rhumb( self ):
-        points= list( self.generator )
-        self.assertEqual( 2, len(points) )
-        self.assertEqual( "09:21 AM", points[0].point.time.strftime("%I:%M %p") )
-        self.assertAlmostEqual( 0.59944686, points[0].distance )
-        self.assertAlmostEqual( 348.0038223, points[0].bearing.deg )
-        self.assertAlmostEqual( 45*60, points[0].delta_time.seconds )
+
+@fixture
+def gpx_file_1():
+    gpx_data = dedent(
+        """\
+        <?xml version="1.0" encoding="utf-8"?>
+        <gpx version="1.1" creator="GPSNavX"
+        xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+        <trk>
+        <trkseg>
+        <trkpt lat="37.534599" lon="-76.313622">
+        <time>2010-09-06T16:50:42Z</time>
+        </trkpt>
+        <trkpt lat="37.535213" lon="-76.312889">
+        <time>2010-09-06T16:51:34Z</time>
+        </trkpt>
+        </trkseg>
+        </trk>
+        </gpx>
+        """
+    )
+    return StringIO( gpx_data )
+
+def test_gpx_to_LogEntry(gpx_file_1):
+        generator= gpx_to_LogEntry( gpx_file_1 )
+        points= list( generator )
+        assert len(points) == 2
+
+        assert points[0].time.strftime( "%Y-%m-%d %H:%M:%S %z" ) == "2010-09-06 16:50:42 +0000"
+        assert points[0].point.lat.deg == approx(37.549225, rel=.01)
+        assert points[0].point.lon.deg == approx(-76.313622)
+
+        assert points[1].time.strftime( "%Y-%m-%d %H:%M:%S %z" ) == "2010-09-06 16:51:34 +0000"
+        assert points[1].point.lat.deg == approx(37.535213, rel=.01)
+        assert points[1].point.lon.deg == approx(-76.312889)
+
+@fixture
+def bad_gpx_file_1():
+    gpx_data = dedent(
+        """\
+        <?xml version="1.0" encoding="utf-8"?>
+        <gpx version="1.1" creator="GPSNavX"
+        xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+        <trk>
+        <trkseg>
+        <trkpt lat="37.534599">
+        <time>2010-09-06T16:50:42Z</time>
+        </trkpt>
+        <trkpt lat="37.535213" lon="-76.312889">
+        <time>2010-09-06T16:51:34Z</time>
+        </trkpt>
+        </trkseg>
+        </trk>
+        </gpx>
+        """
+    )
+    return StringIO( gpx_data )
+
+def test_bad_gpx_to_LogEntry_1(bad_gpx_file_1):
+    generator = gpx_to_LogEntry(bad_gpx_file_1)
+    with raises(ValueError) as error:
+        points = list(generator)
+    assert error.value.args[0] == (
+        'Can\'t process <ns0:trkpt xmlns:ns0="http://www.topografix.com/GPX/1/1" '
+        'lat="37.534599">\n'
+        '<ns0:time>2010-09-06T16:50:42Z</ns0:time>\n'
+        '</ns0:trkpt>\n'
+    )
+
+
+@fixture
+def bad_gpx_file_2():
+    gpx_data = dedent(
+        """\
+        <?xml version="1.0" encoding="utf-8"?>
+        <gpx version="1.1" creator="GPSNavX"
+        xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+        <trk>
+        <trkseg>
+        <trkpt lat="37.534599" lon="-76.313622">
+        <time>2010-09-06T16:50:42Z</time>
+        </trkpt>
+        <trkpt lat="37.535213" lon="-76.312889">
+        <time>2010-09-06 Nope This is Invalid</time>
+        </trkpt>
+        </trkseg>
+        </trk>
+        </gpx>
+        """
+    )
+    return StringIO( gpx_data )
+
+def test_bad_gpx_to_LogEntry_2(bad_gpx_file_2):
+    generator = gpx_to_LogEntry(bad_gpx_file_2)
+    with raises(ValueError) as error:
+        points = list(generator)
+    assert error.value.args[0] == (
+        "time data '2010-09-06 Nope This is Invalid' does not match format '%Y-%m-%dT%H:%M:%SZ'"
+    )
+
+
+@fixture
+def bad_gpx_file_3():
+    gpx_data = dedent(
+        """\
+        <?xml version="1.0" encoding="utf-8"?>
+        <gpx version="1.1" creator="GPSNavX"
+        xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+        <trk>
+        <trkseg>
+        <trkpt lat="37.534599" lon="-76.313622">
+        </trkpt>
+        <trkpt lat="37.535213" lon="-76.312889">
+        <time>2010-09-06 Nope This is Invalid</time>
+        </trkpt>
+        </trkseg>
+        </trk>
+        </gpx>
+        """
+    )
+    return StringIO( gpx_data )
+
+def test_bad_gpx_to_LogEntry_3(bad_gpx_file_3):
+    generator = gpx_to_LogEntry(bad_gpx_file_3)
+    with raises(ValueError) as error:
+        points = list(generator)
+    assert error.value.args[0] == (
+        'Can\'t process <ns0:trkpt xmlns:ns0="http://www.topografix.com/GPX/1/1" lat="37.534599" lon="-76.313622">\n</ns0:trkpt>\n'
+    )
+
+@fixture
+def gen_rhumb_1():
+    route = [
+        LogEntry(datetime.datetime(2012, 4, 17, 9, 21), "37.533195", "-76.316963",
+                 LatLon("37.533195N", "76.316963W"),
+                 {'Engine': '1200 RPM', 'SOG': '0', 'Lon': '076 16.385W', 'windSpeed': '', 'Location': 'Cockrell Creek',
+                  'COG': 'None', 'Time': '9:21 AM', 'Lat': '37 50.424N', 'Rig': 'None', 'windAngle': ''}),
+        LogEntry(datetime.datetime(2012, 4, 17, 10, 6), "37.542961", "-76.319580",
+                 LatLon("37.542961N", "76.319580W"),
+                 {'Engine': '1500 RPM', 'SOG': '6.6', 'Lon': '076 16.056W', 'windSpeed': '7.0', 'Location': '',
+                  'COG': 'None', 'Time': '10:06 AM', 'Lat': '37 47.988N', 'Rig': 'None', 'windAngle': '315'}),
+    ]
+    generator = gen_rhumb(iter(route))
+    return generator
+
+
+def test_gen_rhumb( gen_rhumb_1 ):
+        points = list( gen_rhumb_1 )
+        assert len(points) == 2
+
+        assert points[0].point.time.strftime( "%I:%M %p" ) == "09:21 AM"
+        assert points[0].distance == approx(0.59944686)
+        assert points[0].bearing.deg == approx(348.0038223)
+        assert points[0].delta_time.seconds == approx(45*60)
 
         # Last is always None -- no more places to go.
-        self.assertEqual( "10:06 AM", points[1].point.time.strftime("%I:%M %p") )
-        self.assertIsNone( points[1].distance )
-        self.assertIsNone( points[1].bearing )
-        self.assertIsNone( points[1].delta_time )
+        assert points[1].point.time.strftime( "%I:%M %p" ) == "10:06 AM"
+        assert points[1].distance is None
+        assert points[1].bearing is None
+        assert points[1].delta_time is None
 
-# Utility to compare CSV output
-# ------------------------------
-#
-# Because CSV column orders can't easily be controlled, we need to compare
-# the actual and expected CSV files in a way that permits column orders to
-# vary.
-#
-# We'll compare two CSV files by building the list-of-dict objects that we can
-# then compare for equality. This is a bit tricky because we're comparing
-# text values to each other, which can have some complications with floating-point
-# representation.
-#
-# ::
 
 from itertools import zip_longest
-class Test_CSV_Compare( unittest.TestCase ):
-    def assertEqualCSV( self, expected_txt, actual_txt ):
-        ex_rdr= csv.DictReader( StringIO(expected_txt) )
-        ex_data= list( ex_rdr )
-        ac_rdr= csv.DictReader( StringIO(actual_txt) )
-        ac_data= list( ac_rdr )
-        for ex_row, ac_row in zip_longest(ex_data, ac_data):
-            for k in sorted(set(ex_row.keys())|set(ac_row.keys())):
-                self.assertEqual( ex_row.get(k).strip(), ac_row.get(k).strip(),
-                    "{0}: {1} != {2}".format(k, ex_row.get(k), ac_row.get(k)) )
+def equalCSV(expected_txt, actual_txt, row_builder=None):
+    """
+    Compare CSV output files.
 
-# write_csv Function
-# ---------------------
-#
-# Do we write CSV from a track?
-#
-# ::
+    Prior to Python 3.6, CSV column orders can't easily be controlled.
+    There's no compelling reason to force a specific logical layout.
+    Instead, we'll compare the actual and expected CSV files while
+    permitting column orders to vary.
 
-class Test_write_csv( Test_CSV_Compare ):
-    def setUp( self ):
-        self.track = [
-            LogEntry_Rhumb(
-                LogEntry( datetime.datetime(2012,4,17,9,21), "37.533195", "-76.316963",
-                    LatLon("37.533195N", "76.316963W"),
-                    {'Engine': '1200 RPM', 'SOG': '0', 'Lon': '076 16.385W', 'windSpeed': '', 'Location': 'Cockrell Creek', 'COG': 'None', 'Time': '9:21 AM', 'Lat': '37 50.424N', 'Rig': 'None', 'windAngle': ''} ),
-                0.59944686,
-                Angle2.fromdegrees(348.0038223),
-                datetime.timedelta(seconds=45*60),
-                ),
-            LogEntry_Rhumb(
-                LogEntry( datetime.datetime(2012,4,17,10,6), "37.542961", "-76.319580",
-                    LatLon("37.542961N", "76.319580W"),
-                    {'Engine': '1500 RPM', 'SOG': '6.6', 'Lon': '076 16.056W', 'windSpeed': '7.0', 'Location': '', 'COG': 'None', 'Time': '10:06 AM', 'Lat': '37 47.988N', 'Rig': 'None', 'windAngle': '315'} ),
-                None,
-                None,
-                None,
-                ),
-        ]
-        self.target= StringIO()
-        self.expected= """\
-Engine,windSpeed,COG,Location,SOG,Time,Lat,Rig,Lon,windAngle,calc_distance,calc_bearing,calc_time,calc_elapsed,calc_total_dist,calc_total_time\r
-1200 RPM,,None,Cockrell Creek,0,9:21 AM,37 50.424N,None,076 16.385W,,0.59945,348.0,2012-04-17 09:21:00,0:45:00,0.59945,0:45:00\r
-1500 RPM,7.0,None,,6.6,10:06 AM,37 47.988N,None,076 16.056W,315,,,2012-04-17 10:06:00,,0.59945,0:45:00\r
-"""
-    def test_should_write( self ):
-        write_csv( iter(self.track), self.target )
-        self.assertEqualCSV( self.expected, self.target.getvalue() )
+    The number of rows must be the same. We use :py:func:`zip_longest`, to
+    inject ``None`` objects and fail the comparison.
 
-# analyze Function
-# ---------------------
-#
-# Since the CSV writer now rounds values to a sensible number of decimal places,
-# these results can be platform- and release-independent.
-#
-# ::
+    We'll compare two CSV files by building the list-of-dict objects that we can
+    then compare for equality. We're comparing text values only.
+    In the case where float values must be compared, a row-comparison
+    function must be injected to convert float fields and apply the
+    :py:func:`pytest.approx` function as needed.
 
-class Test_analyze_CSV_NavX( Test_CSV_Compare ):
-    maxDiff= None
-    def setUp( self ):
-        with open('temp1.csv', 'w', newline='') as fixture:
-            fixture.write( csv_NavX_data )
-        self.expected= """\
-comment,sog,windSpeed,longitude,latitude,depth,cog,date,speed,heading,windAngle,calc_distance,calc_bearing,calc_time,calc_elapsed,calc_total_dist,calc_total_time
-,3.6,,-76.330536,37.549225,,219,2011-06-04 13:12:32 +0000,,,,0.01092,219.0,2011-06-04 13:12:32+00:00,0:00:11,0.01092,0:00:11
-,3.0,,-76.330681,37.549084,,186,2011-06-04 13:12:43 +0000,,,,,,2011-06-04 13:12:43+00:00,,0.01092,0:00:11
-"""
-    def tearDown(self):
-        try:
-            os.unlink('temp1.csv')
-        except OSError:
-            pass
-        try:
-            os.unlink('temp1 Distance.csv')
-        except OSError:
-            pass
-    def test_should_plan( self ):
-        analyze( "temp1.csv" )
-        with open('temp1 Distance.csv') as result:
-            self.assertEqualCSV( self.expected, result.read() )
+    :param expected_txt: CSV file text
+    :param actual_txt: CSV file text
+    :return: True if the match
+    :raises: :exc:`AssertionError` if they don't match.
 
-# This has a default-date assumption.
-#
-# ::
+    ..  todo:: The :func:`equalCSV` function needs to be shared with test_planning, also.
+    """
+    if row_builder is None:
+        row_builder = lambda row: row
+    ex_rdr= csv.DictReader( StringIO(expected_txt) )
+    ex_data= list( ex_rdr )
+    ac_rdr= csv.DictReader( StringIO(actual_txt) )
+    ac_data= list( ac_rdr )
+    for ex_row, ac_row in zip_longest(ex_data, ac_data):
+        assert row_builder(ex_row) == row_builder(ac_row), f"Expected {ex_row!r} != Actual {ac_row!r}"
+    return True
 
-class Test_analyze_CSV_Manual( Test_CSV_Compare ):
-    maxDiff= None
-    def setUp( self ):
-        with open('temp2.csv', 'w', newline='') as fixture:
-            fixture.write( csv_Manual_data )
-        self.expected= """\
-Engine,SOG,Lon,windSpeed,Location,COG,Time,Lat,Rig,windAngle,calc_distance,calc_bearing,calc_time,calc_elapsed,calc_total_dist,calc_total_time
-1200 RPM,0,076 16.385W,,Cockrell Creek,None,9:21 AM,37 50.424N,None,,2.45148,174.0,2012-04-18 09:21:00,0:45:00,2.45148,0:45:00
-1500 RPM,6.6,076 16.056W,7.0,,None,10:06 AM,37 47.988N,None,315,,,2012-04-18 10:06:00,,2.45148,0:45:00
-"""
-    def tearDown(self):
-        try:
-            os.unlink('temp2.csv')
-        except OSError:
-            pass
-        try:
-            os.unlink('temp2 Distance.csv')
-        except OSError:
-            pass
-    def test_should_plan( self ):
-        analyze( "temp2.csv", date=datetime.date(2012,4,18) )
-        with open('temp2 Distance.csv') as result:
-            self.assertEqualCSV( self.expected, result.read() )
+@fixture
+def sample_track_1():
+    track = [
+        LogEntry_Rhumb(
+            LogEntry(datetime.datetime(2012, 4, 17, 9, 21), "37.533195", "-76.316963",
+                     LatLon("37.533195N", "76.316963W"),
+                     {'Engine': '1200 RPM', 'SOG': '0', 'Lon': '076 16.385W', 'windSpeed': '',
+                      'Location': 'Cockrell Creek', 'COG': 'None', 'Time': '9:21 AM', 'Lat': '37 50.424N',
+                      'Rig': 'None', 'windAngle': ''}),
+            0.59944686,
+            Angle.fromdegrees(348.0038223),
+            datetime.timedelta(seconds=45 * 60),
+        ),
+        LogEntry_Rhumb(
+            LogEntry(datetime.datetime(2012, 4, 17, 10, 6), "37.542961", "-76.319580",
+                     LatLon("37.542961N", "76.319580W"),
+                     {'Engine': '1500 RPM', 'SOG': '6.6', 'Lon': '076 16.056W', 'windSpeed': '7.0', 'Location': '',
+                      'COG': 'None', 'Time': '10:06 AM', 'Lat': '37 47.988N', 'Rig': 'None', 'windAngle': '315'}),
+            None,
+            None,
+            None,
+        ),
+    ]
+    return track
 
-# ::
+def test_write_csv(sample_track_1):
+    expected = dedent("""\
+        Engine,windSpeed,COG,Location,SOG,Time,Lat,Rig,Lon,windAngle,calc_distance,calc_bearing,calc_time,calc_elapsed,calc_total_dist,calc_total_time\r
+        1200 RPM,,None,Cockrell Creek,0,9:21 AM,37 50.424N,None,076 16.385W,,0.59945,348.0,2012-04-17 09:21:00,0:45:00,0.59945,0:45:00\r
+        1500 RPM,7.0,None,,6.6,10:06 AM,37 47.988N,None,076 16.056W,315,,,2012-04-17 10:06:00,,0.59945,0:45:00\r
+        """)
+    target = StringIO()
+    write_csv( iter(sample_track_1), target )
+    assert equalCSV( expected, target.getvalue() )
 
-class Test_analyze_GPX( Test_CSV_Compare ):
-    maxDiff= None
-    def setUp( self ):
-        with open('temp3.gpx', 'w', newline='') as fixture:
-            fixture.write( gpx_data )
-        self.expected= """\
-lat,lon,time,calc_distance,calc_bearing,calc_time,calc_elapsed,calc_total_dist,calc_total_time
-37.534599,-76.313622,2010-09-06T16:50:42Z,0.05076, 43.0,2010-09-06 16:50:42+00:00,0:00:52,0.05076,0:00:52
-37.535213,-76.312889,2010-09-06T16:51:34Z,,,2010-09-06 16:51:34+00:00,,0.05076,0:00:52
-"""
-    def tearDown(self):
-        try:
-            os.unlink('temp3.gpx')
-        except OSError:
-            pass
-        try:
-            os.unlink('temp3 Distance.csv')
-        except OSError:
-            pass
-    def test_should_plan( self ):
-        analyze( "temp3.gpx" )
-        with open('temp3 Distance.csv') as result:
-            self.assertEqualCSV( self.expected, result.read() )
+@fixture
+def sample_track_empty():
+    track = []
+    return track
+
+def test_empty_write_csv(sample_track_empty):
+    target = StringIO()
+    write_csv( iter(sample_track_empty), target )
+    assert target.getvalue() == ""
 
 
-# suite Function
-# ================
-#
-# Build a suite from the test classes.
-#
-# ::
+@fixture
+def sample_csv_1(iNavX_csv_file, tmp_path):
+    source = tmp_path/"temp1.csv"
+    with source.open('w', newline='') as fixture:
+        fixture.write(iNavX_csv_file.read())
+    yield source
+    source.unlink()
+    target = tmp_path/f"{source.stem} Distance.csv"
+    target.unlink()
 
-def suite():
-    s= unittest.TestSuite()
-    for c in Test_csv_to_LogEntry_NavX, Test_csv_to_LogEntry_Man, Test_gpx_to_LogEntry, Test_gen_rhumb, Test_write_csv, Test_analyze_CSV_NavX, Test_analyze_CSV_Manual, Test_analyze_GPX:
-        s.addTests( unittest.defaultTestLoader.loadTestsFromTestCase(c) )
-    return s
+def test_NavX_analyze_CSV( sample_csv_1 ):
+    analyze(sample_csv_1)
+    target = sample_csv_1.parent/f"{sample_csv_1.stem} Distance.csv"
+    expected = dedent("""\
+        comment,sog,windSpeed,longitude,latitude,depth,cog,date,speed,heading,windAngle,calc_distance,calc_bearing,calc_time,calc_elapsed,calc_total_dist,calc_total_time
+        ,3.6,,-76.330536,37.549225,,219,2011-06-04 13:12:32 +0000,,,,0.01092,219.0,2011-06-04 13:12:32+00:00,0:00:11,0.01092,0:00:11
+        ,3.0,,-76.330681,37.549084,,186,2011-06-04 13:12:43 +0000,,,,,,2011-06-04 13:12:43+00:00,,0.01092,0:00:11
+        """
+    )
+    with target.open() as result:
+        assert equalCSV(expected, result.read())
 
-# Main Script
-# ================
-#
-# Run the test suite from the test classes. We can use this for debugging purposes.
-#
-# ::
+@fixture
+def sample_csv_2(manual_csv_file, tmp_path):
+    source = tmp_path/"temp2.csv"
+    with source.open('w', newline='') as fixture:
+        fixture.write(manual_csv_file.read())
+    yield source
+    source.unlink()
+    target = tmp_path/f"{source.stem} Distance.csv"
+    target.unlink()
 
-if __name__ == "__main__":
-    import sys
-    print( sys.version )
-    result= unittest.TextTestRunner(verbosity=2).run(suite())
-    sys.exit(len(result.failures))
+def test_Manual_analyze_CSV( sample_csv_2 ):
+    analyze(sample_csv_2, date=datetime.date(2012,4,18) )
+    target = sample_csv_2.parent/f"{sample_csv_2.stem} Distance.csv"
+    expected = dedent("""\
+        Engine,SOG,Lon,windSpeed,Location,COG,Time,Lat,Rig,windAngle,calc_distance,calc_bearing,calc_time,calc_elapsed,calc_total_dist,calc_total_time
+        1200 RPM,0,076 16.385W,,Cockrell Creek,None,9:21 AM,37 50.424N,None,,2.45148,174.0,2012-04-18 09:21:00,0:45:00,2.45148,0:45:00
+        1500 RPM,6.6,076 16.056W,7.0,,None,10:06 AM,37 47.988N,None,315,,,2012-04-18 10:06:00,,2.45148,0:45:00
+        """
+    )
+    with target.open() as result:
+        assert equalCSV( expected, result.read() )
+
+@fixture
+def sample_gpx(gpx_file_1, tmp_path):
+    source = tmp_path/"temp3.gpx"
+    with source.open('w', newline='') as fixture:
+        fixture.write(gpx_file_1.read())
+    yield source
+    source.unlink()
+    target = tmp_path/f"{source.stem} Distance.csv"
+    target.unlink()
+
+
+def test_analyze_GPX(sample_gpx):
+    analyze(sample_gpx)
+    target = sample_gpx.parent/f"{sample_gpx.stem} Distance.csv"
+    expected = dedent("""\
+        lat,lon,time,calc_distance,calc_bearing,calc_time,calc_elapsed,calc_total_dist,calc_total_time
+        37.534599,-76.313622,2010-09-06T16:50:42Z,0.05076,43.0,2010-09-06 16:50:42+00:00,0:00:52,0.05076,0:00:52
+        37.535213,-76.312889,2010-09-06T16:51:34Z,,,2010-09-06 16:51:34+00:00,,0.05076,0:00:52
+        """
+    )
+    with target.open() as result:
+        assert equalCSV( expected, result.read() )
+
+@fixture
+def sample_invalid_format(tmp_path):
+    source = tmp_path/"invalid.format"
+    yield source
+
+def test_analyze_invalid_format(sample_invalid_format):
+    with raises(ValueError):
+        analyze(sample_invalid_format)
+
+def test_main_full(sample_gpx):
+    main([str(sample_gpx), "-d", "2021-Jan-18"])
+    target = sample_gpx.parent/f"{sample_gpx.stem} Distance.csv"
+    assert target.exists()
+    # Processing details tested in test_analyze... functions
+
+def test_main_default(sample_gpx):
+    analysis.main([str(sample_gpx)])
+    target = sample_gpx.parent/f"{sample_gpx.stem} Distance.csv"
+    assert target.exists()
+    # Processing details tested in test_analyze... functions

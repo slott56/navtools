@@ -78,12 +78,12 @@ Logging is done several ways.
 -   Electronic Chartplotter in the cockpit can record a track.  Currently,
     this is difficult to upload from the chartplotter.
 
--   GPSNavX on a MacBook Pro with its own GPS antenna.
+-   OpenCPN on a MacBook Pro with its own GPS antenna.
     This means finding a way to secure a computer and leave it running
     to accumulate a track. This is not currently feasible on *Red Ranger*:
     there's no way to secure the computer or provide power.
 
--   GPSNavX on an iPhone or iPad with a separate GPS antenna.  This also requires
+-   iNavX on an iPhone or iPad with a separate GPS antenna.  This also requires
     leaving the phone running.  The track can be extracted through
     The X-Traverse web site.
 
@@ -211,7 +211,7 @@ GPS chartplotter (or computer) during sailing.
 Solution Overview
 ======================
 
-The core planning software is GPSNavX on an iMac.
+The core planning software is OpenCPN (formerly GPSNavX) on an iMac.
 This application can export a route file in GPX or CSV notation.
 
 These GPX or CSV files can be imported and parsed by a Python application,
@@ -301,7 +301,7 @@ layers into several modules.
 Consequences
 =====================
 
-This application is not "plugged into" GPSNavX.  Consequently, planning
+This application is not "plugged into" OpenCPN or iNavX.  Consequently, planning
 involves multiple steps with multiple tools.  A route is created, the ETA's examined, and
 waypaints added to handle overnight anchorages.
 Any change to a waypoint means the schedule must be recalculated.

@@ -51,9 +51,16 @@ coverage.xml
 *.log
 
 # Sphinx documentation
-docs/_build/
+docs_orig/_build/
 
 # PyBuilder
 target/
 
+# Komodo IDE
 *.komodoproject
+
+# Pycharm
+.idea/*
+
+# Files to be ignored in the project
+docs_orig/*

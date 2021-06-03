@@ -2,18 +2,15 @@
    sphinx-quickstart on Tue Apr 17 07:46:24 2012.
 
 ================================================================
-NavTools 2.1
+NavTools 2021.06
 ================================================================
 
 NavTools helps with planning, execution and analysis of
-simple waypoint-based navigation using great-circle routes.
-The current implementation uses spreadsheets and downloaded
-waypoint files.
+simple waypoint-based navigation using rhumb-line routes.
+It's suitable for small craft making relatively short passages
+where the great circle accuracy isn't critical.
 
-This is focused on Python 3.4.
-
-With ``from __future__ import division, print_function, unicode_literals`` it may
-also work in Python 2.x.
+This is focused on Python 3.9.
 
 Introduction
 =============
@@ -32,25 +29,8 @@ Implementation
    navigation
    planning
    analysis
+   opencpn_table
    igrf11
-   navtools_init
-
-Testing
-==========
-
-.. toctree::
-   :maxdepth: 2
-
-   testing/index
-
-Other Overheads
-=================
-
-.. toctree::
-   :maxdepth: 1
-
-   build
-   installation
 
 The TODO List
 ===============

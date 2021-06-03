@@ -1,0 +1,525 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>OpenCPN Table Application &#8212; Navtools 2021.06.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="International Geomagnetic Reference Field Module" href="igrf11.html" />
+    <link rel="prev" title="Track Analysis Application" href="analysis.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="opencpn-table-application">
+<h1>OpenCPN Table Application<a class="headerlink" href="#opencpn-table-application" title="Permalink to this headline">¶</a></h1>
+<p>The <code class="xref py py-mod docutils literal notranslate"><span class="pre">opencpn_table</span></code> application is used to do extract a useful CSV
+formatted file from the OpenCPN planning display.</p>
+<p>The display is a CSV file with a great deal of supplemental formatting.
+This application strips away the formatting so the data can be more easily
+loaded into a spreadsheet.</p>
+<section id="module-navtools.opencpn_table">
+<span id="implementation"></span><h2>Implementation<a class="headerlink" href="#module-navtools.opencpn_table" title="Permalink to this headline">¶</a></h2>
+<p>Parse the OpenCPN Table format.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Herrington to Drum Point
+Name        Herrington to Drum Point
+Depart From
+Destination
+Total distance       22.9 NMi
+Speed (Kts) 6
+Departure Time (%x %H:%M)   05/25/2021 08:43
+Time enroute         3H 49M
+
+Leg To waypoint     Distance        Bearing Latitude        Longitude       ETE     ETA     Speed   Next tide event Description     Course  ETD
+--- Herring Bay       2.5 NMi       165 °M  38° 44.2&#39; N     076° 32.4&#39; W    24M 51S Start: 05/25/2021 08:43 (MoTwilight)    6                       72 °M
+1   Kent Point        9.4 NMi       72 °M   38° 48.7&#39; N     076° 21.9&#39; W     1H 34M 05/25/2021 11:51 (Daytime)      6                       66 °M
+2   Eastern Bay       7.1 NMi       66 °M   38° 52.9&#39; N     076° 14.5&#39; W     1H 11M 05/25/2021 13:02 (Daytime)      6                       158 °M
+3   Wye R. Entrance   2.9 NMi       158 °M  38° 50.5&#39; N     076° 12.5&#39; W    28M 31S 05/25/2021 13:31 (Daytime)      6                       44 °M
+4   Bordley Pt.       1.6 NMi       44 °M   38° 51.8&#39; N     076° 11.4&#39; W    16M 13S 05/25/2021 13:47 (Daytime)      6                       14 °M
+5   Drum Point        1.4 NMi       14 °M   38° 53.2&#39; N     076° 11.3&#39; W    13M 43S 05/25/2021 14:01 (Daytime)      6                       120 °M
+6   Drum Point Anchorage      0.5 NMi       120 °M  38° 53.0&#39; N     076° 10.7&#39; W     4M 52S 05/25/2021 14:06 (Daytime)      6                       Arrived
+</pre></div>
+</div>
+<p>There are three kinds of lines.</p>
+<ol class="arabic simple">
+<li><p>The title (the first line.)</p></li>
+<li><p>The top <code class="docutils literal notranslate"><span class="pre">name\tvalue</span></code> lines.</p></li>
+<li><p>Details have <code class="docutils literal notranslate"><span class="pre">\t</span></code>-separated columns.</p></li>
+</ol>
+<p>This is a pair of logical layouts in a single CSV physical format file.</p>
+<p>We have an overall <a class="reference internal" href="#navtools.opencpn_table.Route" title="navtools.opencpn_table.Route"><code class="xref py py-class docutils literal notranslate"><span class="pre">Route</span></code></a> object, and the detailed <a class="reference internal" href="#navtools.opencpn_table.Leg" title="navtools.opencpn_table.Leg"><code class="xref py py-class docutils literal notranslate"><span class="pre">Leg</span></code></a> objects.
+These, in turn, have some specialized data types, including <a class="reference internal" href="#navtools.opencpn_table.Duration" title="navtools.opencpn_table.Duration"><code class="xref py py-class docutils literal notranslate"><span class="pre">Duration</span></code></a>,
+<a class="reference internal" href="#navtools.opencpn_table.Latitude" title="navtools.opencpn_table.Latitude"><code class="xref py py-class docutils literal notranslate"><span class="pre">Latitude</span></code></a> and <a class="reference internal" href="#navtools.opencpn_table.Longitude" title="navtools.opencpn_table.Longitude"><code class="xref py py-class docutils literal notranslate"><span class="pre">Longitude</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Leg">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.opencpn_table.</span></span><span class="sig-name descname"><span class="pre">Leg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">details</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.opencpn_table.Leg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map attribute values between OpenCPN CSV, something Pythonic,
+and a more generic CSV with less fancy formatting.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Leg.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">details</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#navtools.opencpn_table.Leg.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Leg.attr_names">
+<span class="sig-name descname"><span class="pre">attr_names</span></span><em class="property"><span class="pre">:</span> <span class="pre">dict</span></em><em class="property"> <span class="pre">=</span> <span class="pre">{'Bearing':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'Course':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'Description':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'Distance':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'ETA':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'ETE':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'Latitude':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'Leg':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'Longitude':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'Next</span> <span class="pre">tide</span> <span class="pre">event':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'Speed':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'To</span> <span class="pre">waypoint':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;}</span></em><a class="headerlink" href="#navtools.opencpn_table.Leg.attr_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Leg.asdict">
+<span class="sig-name descname"><span class="pre">asdict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">dict</span><a class="headerlink" href="#navtools.opencpn_table.Leg.asdict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Leg.__annotations__">
+<span class="sig-name descname"><span class="pre">__annotations__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'attr_names':</span> <span class="pre">'dict[str,</span> <span class="pre">Callable[[Any],</span> <span class="pre">str]]'}</span></em><a class="headerlink" href="#navtools.opencpn_table.Leg.__annotations__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Leg.__dict__">
+<span class="sig-name descname"><span class="pre">__dict__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">mappingproxy({'__module__':</span> <span class="pre">'navtools.opencpn_table',</span> <span class="pre">'__annotations__':</span> <span class="pre">{'attr_names':</span> <span class="pre">'dict[str,</span> <span class="pre">Callable[[Any],</span> <span class="pre">str]]'},</span> <span class="pre">'__doc__':</span> <span class="pre">'\n</span>&#160;&#160;&#160; <span class="pre">Map</span> <span class="pre">attribute</span> <span class="pre">values</span> <span class="pre">between</span> <span class="pre">OpenCPN</span> <span class="pre">CSV,</span> <span class="pre">something</span> <span class="pre">Pythonic,\n</span>&#160;&#160;&#160; <span class="pre">and</span> <span class="pre">a</span> <span class="pre">more</span> <span class="pre">generic</span> <span class="pre">CSV</span> <span class="pre">with</span> <span class="pre">less</span> <span class="pre">fancy</span> <span class="pre">formatting.\n</span>&#160;&#160;&#160; <span class="pre">',</span> <span class="pre">'__init__':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.__init__&gt;,</span> <span class="pre">'attr_names':</span> <span class="pre">{'Leg':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'To</span> <span class="pre">waypoint':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'Distance':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'Bearing':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'Latitude':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'Longitude':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'ETE':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'ETA':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'Speed':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'Next</span> <span class="pre">tide</span> <span class="pre">event':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'Description':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;,</span> <span class="pre">'Course':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.&lt;lambda&gt;&gt;},</span> <span class="pre">'asdict':</span> <span class="pre">&lt;function</span> <span class="pre">Leg.asdict&gt;,</span> <span class="pre">'__dict__':</span> <span class="pre">&lt;attribute</span> <span class="pre">'__dict__'</span> <span class="pre">of</span> <span class="pre">'Leg'</span> <span class="pre">objects&gt;,</span> <span class="pre">'__weakref__':</span> <span class="pre">&lt;attribute</span> <span class="pre">'__weakref__'</span> <span class="pre">of</span> <span class="pre">'Leg'</span> <span class="pre">objects&gt;})</span></em><a class="headerlink" href="#navtools.opencpn_table.Leg.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Leg.__module__">
+<span class="sig-name descname"><span class="pre">__module__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'navtools.opencpn_table'</span></em><a class="headerlink" href="#navtools.opencpn_table.Leg.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Leg.__weakref__">
+<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#navtools.opencpn_table.Leg.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Route">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.opencpn_table.</span></span><span class="sig-name descname"><span class="pre">Route</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">summary</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">details</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.opencpn_table.Route" title="Permalink to this definition">¶</a></dt>
+<dd><p>The overall Route. A number of pre-computed attributes are available,
+like the estimated duration and distance.
+The values of Speed and Departure are inputs, actually.
+The Name, Depart From, and Destination attributes are the most valuable.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Route.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">summary</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">details</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#navtools.opencpn_table.Route.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Route.load">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pathlib.Path</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#navtools.opencpn_table.Route" title="navtools.opencpn_table.Route"><span class="pre">navtools.opencpn_table.Route</span></a><a class="headerlink" href="#navtools.opencpn_table.Route.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Route.__dict__">
+<span class="sig-name descname"><span class="pre">__dict__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">mappingproxy({'__module__':</span> <span class="pre">'navtools.opencpn_table',</span> <span class="pre">'__doc__':</span> <span class="pre">'\n</span>&#160;&#160;&#160; <span class="pre">The</span> <span class="pre">overall</span> <span class="pre">Route.</span> <span class="pre">A</span> <span class="pre">number</span> <span class="pre">of</span> <span class="pre">pre-computed</span> <span class="pre">attributes</span> <span class="pre">are</span> <span class="pre">available,\n</span>&#160;&#160;&#160; <span class="pre">like</span> <span class="pre">the</span> <span class="pre">estimated</span> <span class="pre">duration</span> <span class="pre">and</span> <span class="pre">distance.\n</span>&#160;&#160;&#160; <span class="pre">The</span> <span class="pre">values</span> <span class="pre">of</span> <span class="pre">Speed</span> <span class="pre">and</span> <span class="pre">Departure</span> <span class="pre">are</span> <span class="pre">inputs,</span> <span class="pre">actually.\n</span>&#160;&#160;&#160; <span class="pre">The</span> <span class="pre">Name,</span> <span class="pre">Depart</span> <span class="pre">From,</span> <span class="pre">and</span> <span class="pre">Destination</span> <span class="pre">attributes</span> <span class="pre">are</span> <span class="pre">the</span> <span class="pre">most</span> <span class="pre">valuable.\n</span>&#160;&#160;&#160; <span class="pre">',</span> <span class="pre">'__init__':</span> <span class="pre">&lt;function</span> <span class="pre">Route.__init__&gt;,</span> <span class="pre">'load':</span> <span class="pre">&lt;classmethod</span> <span class="pre">object&gt;,</span> <span class="pre">'__dict__':</span> <span class="pre">&lt;attribute</span> <span class="pre">'__dict__'</span> <span class="pre">of</span> <span class="pre">'Route'</span> <span class="pre">objects&gt;,</span> <span class="pre">'__weakref__':</span> <span class="pre">&lt;attribute</span> <span class="pre">'__weakref__'</span> <span class="pre">of</span> <span class="pre">'Route'</span> <span class="pre">objects&gt;,</span> <span class="pre">'__annotations__':</span> <span class="pre">{}})</span></em><a class="headerlink" href="#navtools.opencpn_table.Route.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Route.__module__">
+<span class="sig-name descname"><span class="pre">__module__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'navtools.opencpn_table'</span></em><a class="headerlink" href="#navtools.opencpn_table.Route.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Route.__weakref__">
+<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#navtools.opencpn_table.Route.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.opencpn_table.</span></span><span class="sig-name descname"><span class="pre">Duration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.opencpn_table.Duration" title="Permalink to this definition">¶</a></dt>
+<dd><p>A duration in days, hours, minutes, and seconds.</p>
+<p>We map between hours or minutes as float and (d, h, m, s) duration values.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.d">
+<span class="sig-name descname"><span class="pre">d</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#navtools.opencpn_table.Duration.d" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.h">
+<span class="sig-name descname"><span class="pre">h</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#navtools.opencpn_table.Duration.h" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.m">
+<span class="sig-name descname"><span class="pre">m</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#navtools.opencpn_table.Duration.m" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.s">
+<span class="sig-name descname"><span class="pre">s</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#navtools.opencpn_table.Duration.s" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.parse">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#navtools.opencpn_table.Duration" title="navtools.opencpn_table.Duration"><span class="pre">navtools.opencpn_table.Duration</span></a><a class="headerlink" href="#navtools.opencpn_table.Duration.parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.__add__">
+<span class="sig-name descname"><span class="pre">__add__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#navtools.opencpn_table.Duration" title="navtools.opencpn_table.Duration"><span class="pre">navtools.opencpn_table.Duration</span></a><a class="headerlink" href="#navtools.opencpn_table.Duration.__add__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.__sub__">
+<span class="sig-name descname"><span class="pre">__sub__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#navtools.opencpn_table.Duration" title="navtools.opencpn_table.Duration"><span class="pre">navtools.opencpn_table.Duration</span></a><a class="headerlink" href="#navtools.opencpn_table.Duration.__sub__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.days">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">days</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#navtools.opencpn_table.Duration.days" title="Permalink to this definition">¶</a></dt>
+<dd><p>Duration as a single float in days</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.hours">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">hours</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#navtools.opencpn_table.Duration.hours" title="Permalink to this definition">¶</a></dt>
+<dd><p>Duration as a single float in hours</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.minutes">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">minutes</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#navtools.opencpn_table.Duration.minutes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Duration as a single float in minutes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#navtools.opencpn_table.Duration.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Numbers-friendly tags on hours, minutes and seconds.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.__annotations__">
+<span class="sig-name descname"><span class="pre">__annotations__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'d':</span> <span class="pre">'int',</span> <span class="pre">'h':</span> <span class="pre">'int',</span> <span class="pre">'m':</span> <span class="pre">'int',</span> <span class="pre">'s':</span> <span class="pre">'int'}</span></em><a class="headerlink" href="#navtools.opencpn_table.Duration.__annotations__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.__dataclass_fields__">
+<span class="sig-name descname"><span class="pre">__dataclass_fields__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'d':</span> <span class="pre">Field(name='d',type='int',default=0,default_factory=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,init=True,repr=True,hash=None,compare=True,metadata=mappingproxy({}),_field_type=_FIELD),</span> <span class="pre">'h':</span> <span class="pre">Field(name='h',type='int',default=0,default_factory=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,init=True,repr=True,hash=None,compare=True,metadata=mappingproxy({}),_field_type=_FIELD),</span> <span class="pre">'m':</span> <span class="pre">Field(name='m',type='int',default=0,default_factory=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,init=True,repr=True,hash=None,compare=True,metadata=mappingproxy({}),_field_type=_FIELD),</span> <span class="pre">'s':</span> <span class="pre">Field(name='s',type='int',default=0,default_factory=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,init=True,repr=True,hash=None,compare=True,metadata=mappingproxy({}),_field_type=_FIELD)}</span></em><a class="headerlink" href="#navtools.opencpn_table.Duration.__dataclass_fields__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.__dataclass_params__">
+<span class="sig-name descname"><span class="pre">__dataclass_params__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">_DataclassParams(init=True,repr=True,eq=True,order=False,unsafe_hash=False,frozen=False)</span></em><a class="headerlink" href="#navtools.opencpn_table.Duration.__dataclass_params__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.__dict__">
+<span class="sig-name descname"><span class="pre">__dict__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">mappingproxy({'__module__':</span> <span class="pre">'navtools.opencpn_table',</span> <span class="pre">'__annotations__':</span> <span class="pre">{'d':</span> <span class="pre">'int',</span> <span class="pre">'h':</span> <span class="pre">'int',</span> <span class="pre">'m':</span> <span class="pre">'int',</span> <span class="pre">'s':</span> <span class="pre">'int'},</span> <span class="pre">'__doc__':</span> <span class="pre">'\n</span>&#160;&#160;&#160; <span class="pre">A</span> <span class="pre">duration</span> <span class="pre">in</span> <span class="pre">days,</span> <span class="pre">hours,</span> <span class="pre">minutes,</span> <span class="pre">and</span> <span class="pre">seconds.\n\n</span>&#160;&#160;&#160; <span class="pre">We</span> <span class="pre">map</span> <span class="pre">between</span> <span class="pre">hours</span> <span class="pre">or</span> <span class="pre">minutes</span> <span class="pre">as</span> <span class="pre">float</span> <span class="pre">and</span> <span class="pre">(d,</span> <span class="pre">h,</span> <span class="pre">m,</span> <span class="pre">s)</span> <span class="pre">duration</span> <span class="pre">values.\n</span>&#160;&#160;&#160; <span class="pre">',</span> <span class="pre">'d':</span> <span class="pre">0,</span> <span class="pre">'h':</span> <span class="pre">0,</span> <span class="pre">'m':</span> <span class="pre">0,</span> <span class="pre">'s':</span> <span class="pre">0,</span> <span class="pre">'parse':</span> <span class="pre">&lt;classmethod</span> <span class="pre">object&gt;,</span> <span class="pre">'__add__':</span> <span class="pre">&lt;function</span> <span class="pre">Duration.__add__&gt;,</span> <span class="pre">'__sub__':</span> <span class="pre">&lt;function</span> <span class="pre">Duration.__sub__&gt;,</span> <span class="pre">'days':</span> <span class="pre">&lt;property</span> <span class="pre">object&gt;,</span> <span class="pre">'hours':</span> <span class="pre">&lt;property</span> <span class="pre">object&gt;,</span> <span class="pre">'minutes':</span> <span class="pre">&lt;property</span> <span class="pre">object&gt;,</span> <span class="pre">'__str__':</span> <span class="pre">&lt;function</span> <span class="pre">Duration.__str__&gt;,</span> <span class="pre">'__dict__':</span> <span class="pre">&lt;attribute</span> <span class="pre">'__dict__'</span> <span class="pre">of</span> <span class="pre">'Duration'</span> <span class="pre">objects&gt;,</span> <span class="pre">'__weakref__':</span> <span class="pre">&lt;attribute</span> <span class="pre">'__weakref__'</span> <span class="pre">of</span> <span class="pre">'Duration'</span> <span class="pre">objects&gt;,</span> <span class="pre">'__dataclass_params__':</span> <span class="pre">_DataclassParams(init=True,repr=True,eq=True,order=False,unsafe_hash=False,frozen=False),</span> <span class="pre">'__dataclass_fields__':</span> <span class="pre">{'d':</span> <span class="pre">Field(name='d',type='int',default=0,default_factory=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,init=True,repr=True,hash=None,compare=True,metadata=mappingproxy({}),_field_type=_FIELD),</span> <span class="pre">'h':</span> <span class="pre">Field(name='h',type='int',default=0,default_factory=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,init=True,repr=True,hash=None,compare=True,metadata=mappingproxy({}),_field_type=_FIELD),</span> <span class="pre">'m':</span> <span class="pre">Field(name='m',type='int',default=0,default_factory=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,init=True,repr=True,hash=None,compare=True,metadata=mappingproxy({}),_field_type=_FIELD),</span> <span class="pre">'s':</span> <span class="pre">Field(name='s',type='int',default=0,default_factory=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,init=True,repr=True,hash=None,compare=True,metadata=mappingproxy({}),_field_type=_FIELD)},</span> <span class="pre">'__init__':</span> <span class="pre">&lt;function</span> <span class="pre">__create_fn__.&lt;locals&gt;.__init__&gt;,</span> <span class="pre">'__repr__':</span> <span class="pre">&lt;function</span> <span class="pre">__create_fn__.&lt;locals&gt;.__repr__&gt;,</span> <span class="pre">'__eq__':</span> <span class="pre">&lt;function</span> <span class="pre">__create_fn__.&lt;locals&gt;.__eq__&gt;,</span> <span class="pre">'__hash__':</span> <span class="pre">None})</span></em><a class="headerlink" href="#navtools.opencpn_table.Duration.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.opencpn_table.Duration.__eq__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return self==value.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.__hash__">
+<span class="sig-name descname"><span class="pre">__hash__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#navtools.opencpn_table.Duration.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#navtools.opencpn_table.Duration.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.__module__">
+<span class="sig-name descname"><span class="pre">__module__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'navtools.opencpn_table'</span></em><a class="headerlink" href="#navtools.opencpn_table.Duration.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navtools.opencpn_table.Duration.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return repr(self).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Duration.__weakref__">
+<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#navtools.opencpn_table.Duration.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Point">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.opencpn_table.</span></span><span class="sig-name descname"><span class="pre">Point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deg</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.opencpn_table.Point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Superclass for Latitude and Longitude.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Point.deg">
+<span class="sig-name descname"><span class="pre">deg</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#navtools.opencpn_table.Point.deg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Point.min">
+<span class="sig-name descname"><span class="pre">min</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#navtools.opencpn_table.Point.min" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Point.h">
+<span class="sig-name descname"><span class="pre">h</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#navtools.opencpn_table.Point.h" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Point.parse">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#navtools.opencpn_table.Point" title="navtools.opencpn_table.Point"><span class="pre">navtools.opencpn_table.Point</span></a><a class="headerlink" href="#navtools.opencpn_table.Point.parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Point.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#navtools.opencpn_table.Point.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return str(self).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Point.__annotations__">
+<span class="sig-name descname"><span class="pre">__annotations__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'deg':</span> <span class="pre">'int',</span> <span class="pre">'h':</span> <span class="pre">'str',</span> <span class="pre">'min':</span> <span class="pre">'float'}</span></em><a class="headerlink" href="#navtools.opencpn_table.Point.__annotations__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Point.__dataclass_fields__">
+<span class="sig-name descname"><span class="pre">__dataclass_fields__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'deg':</span> <span class="pre">Field(name='deg',type='int',default=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,default_factory=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,init=True,repr=True,hash=None,compare=True,metadata=mappingproxy({}),_field_type=_FIELD),</span> <span class="pre">'h':</span> <span class="pre">Field(name='h',type='str',default=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,default_factory=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,init=True,repr=True,hash=None,compare=True,metadata=mappingproxy({}),_field_type=_FIELD),</span> <span class="pre">'min':</span> <span class="pre">Field(name='min',type='float',default=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,default_factory=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,init=True,repr=True,hash=None,compare=True,metadata=mappingproxy({}),_field_type=_FIELD)}</span></em><a class="headerlink" href="#navtools.opencpn_table.Point.__dataclass_fields__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Point.__dataclass_params__">
+<span class="sig-name descname"><span class="pre">__dataclass_params__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">_DataclassParams(init=True,repr=True,eq=True,order=False,unsafe_hash=False,frozen=False)</span></em><a class="headerlink" href="#navtools.opencpn_table.Point.__dataclass_params__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Point.__dict__">
+<span class="sig-name descname"><span class="pre">__dict__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">mappingproxy({'__module__':</span> <span class="pre">'navtools.opencpn_table',</span> <span class="pre">'__annotations__':</span> <span class="pre">{'deg':</span> <span class="pre">'int',</span> <span class="pre">'min':</span> <span class="pre">'float',</span> <span class="pre">'h':</span> <span class="pre">'str'},</span> <span class="pre">'__doc__':</span> <span class="pre">'\n</span>&#160;&#160;&#160; <span class="pre">Superclass</span> <span class="pre">for</span> <span class="pre">Latitude</span> <span class="pre">and</span> <span class="pre">Longitude.\n</span>&#160;&#160;&#160; <span class="pre">',</span> <span class="pre">'parse':</span> <span class="pre">&lt;classmethod</span> <span class="pre">object&gt;,</span> <span class="pre">'__str__':</span> <span class="pre">&lt;function</span> <span class="pre">Point.__str__&gt;,</span> <span class="pre">'__dict__':</span> <span class="pre">&lt;attribute</span> <span class="pre">'__dict__'</span> <span class="pre">of</span> <span class="pre">'Point'</span> <span class="pre">objects&gt;,</span> <span class="pre">'__weakref__':</span> <span class="pre">&lt;attribute</span> <span class="pre">'__weakref__'</span> <span class="pre">of</span> <span class="pre">'Point'</span> <span class="pre">objects&gt;,</span> <span class="pre">'__dataclass_params__':</span> <span class="pre">_DataclassParams(init=True,repr=True,eq=True,order=False,unsafe_hash=False,frozen=False),</span> <span class="pre">'__dataclass_fields__':</span> <span class="pre">{'deg':</span> <span class="pre">Field(name='deg',type='int',default=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,default_factory=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,init=True,repr=True,hash=None,compare=True,metadata=mappingproxy({}),_field_type=_FIELD),</span> <span class="pre">'min':</span> <span class="pre">Field(name='min',type='float',default=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,default_factory=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,init=True,repr=True,hash=None,compare=True,metadata=mappingproxy({}),_field_type=_FIELD),</span> <span class="pre">'h':</span> <span class="pre">Field(name='h',type='str',default=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,default_factory=&lt;dataclasses._MISSING_TYPE</span> <span class="pre">object&gt;,init=True,repr=True,hash=None,compare=True,metadata=mappingproxy({}),_field_type=_FIELD)},</span> <span class="pre">'__init__':</span> <span class="pre">&lt;function</span> <span class="pre">__create_fn__.&lt;locals&gt;.__init__&gt;,</span> <span class="pre">'__repr__':</span> <span class="pre">&lt;function</span> <span class="pre">__create_fn__.&lt;locals&gt;.__repr__&gt;,</span> <span class="pre">'__eq__':</span> <span class="pre">&lt;function</span> <span class="pre">__create_fn__.&lt;locals&gt;.__eq__&gt;,</span> <span class="pre">'__hash__':</span> <span class="pre">None})</span></em><a class="headerlink" href="#navtools.opencpn_table.Point.__dict__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Point.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.opencpn_table.Point.__eq__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return self==value.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Point.__hash__">
+<span class="sig-name descname"><span class="pre">__hash__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#navtools.opencpn_table.Point.__hash__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Point.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deg</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#navtools.opencpn_table.Point.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Point.__module__">
+<span class="sig-name descname"><span class="pre">__module__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'navtools.opencpn_table'</span></em><a class="headerlink" href="#navtools.opencpn_table.Point.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Point.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navtools.opencpn_table.Point.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return repr(self).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Point.__weakref__">
+<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#navtools.opencpn_table.Point.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Latitude">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.opencpn_table.</span></span><span class="sig-name descname"><span class="pre">Latitude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deg</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.opencpn_table.Latitude" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Latitude.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#navtools.opencpn_table.Latitude.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return str(self).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Latitude.__module__">
+<span class="sig-name descname"><span class="pre">__module__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'navtools.opencpn_table'</span></em><a class="headerlink" href="#navtools.opencpn_table.Latitude.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Latitude.deg">
+<span class="sig-name descname"><span class="pre">deg</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#navtools.opencpn_table.Latitude.deg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Latitude.min">
+<span class="sig-name descname"><span class="pre">min</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#navtools.opencpn_table.Latitude.min" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Latitude.h">
+<span class="sig-name descname"><span class="pre">h</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#navtools.opencpn_table.Latitude.h" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Longitude">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.opencpn_table.</span></span><span class="sig-name descname"><span class="pre">Longitude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deg</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.opencpn_table.Longitude" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Longitude.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#navtools.opencpn_table.Longitude.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return str(self).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Longitude.__module__">
+<span class="sig-name descname"><span class="pre">__module__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'navtools.opencpn_table'</span></em><a class="headerlink" href="#navtools.opencpn_table.Longitude.__module__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Longitude.deg">
+<span class="sig-name descname"><span class="pre">deg</span></span><em class="property"><span class="pre">:</span> <span class="pre">int</span></em><a class="headerlink" href="#navtools.opencpn_table.Longitude.deg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Longitude.min">
+<span class="sig-name descname"><span class="pre">min</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#navtools.opencpn_table.Longitude.min" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.opencpn_table.Longitude.h">
+<span class="sig-name descname"><span class="pre">h</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#navtools.opencpn_table.Longitude.h" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="navtools.opencpn_table.to_html">
+<span class="sig-prename descclassname"><span class="pre">navtools.opencpn_table.</span></span><span class="sig-name descname"><span class="pre">to_html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">route</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#navtools.opencpn_table.Route" title="navtools.opencpn_table.Route"><span class="pre">navtools.opencpn_table.Route</span></a></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#navtools.opencpn_table.to_html" title="Permalink to this definition">¶</a></dt>
+<dd><p>Print an HTML version of the supplied OpenCPN data.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="navtools.opencpn_table.to_csv">
+<span class="sig-prename descclassname"><span class="pre">navtools.opencpn_table.</span></span><span class="sig-name descname"><span class="pre">to_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">route</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#navtools.opencpn_table.Route" title="navtools.opencpn_table.Route"><span class="pre">navtools.opencpn_table.Route</span></a></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#navtools.opencpn_table.to_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert OpenCPN to a more spreadsheet friendly format.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="navtools.opencpn_table.main">
+<span class="sig-prename descclassname"><span class="pre">navtools.opencpn_table.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#navtools.opencpn_table.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Navtools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#actors">Actors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#use-cases">Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#solution-overview">Solution Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#architecture">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#references">References</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="navigation.html">Navigation Calculations Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="planning.html">Route Planning Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Track Analysis Application</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">OpenCPN Table Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="igrf11.html">International Geomagnetic Reference Field Module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="analysis.html" title="previous chapter">Track Analysis Application</a></li>
+      <li>Next: <a href="igrf11.html" title="next chapter">International Geomagnetic Reference Field Module</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/opencpn_table.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
