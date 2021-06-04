@@ -1,5 +1,5 @@
 ###############################################################
-Track Analysis Application
+:py:mod:`navtools.analysis` -- Track Analysis Application
 ###############################################################
 
 The :py:mod:`analysis` application is used to do voyage analysis.
@@ -12,11 +12,15 @@ This additional waypoint-to-waypoint time and distance allows
 for fine-grained analysis of sailing performance.
 
 This module includes three groups of components.
+
 The `Input Parsing`_ group is the functions and a namedtuple that
 acquire input from the GPX or CSV file.
 
-Finally, the `Command-Line Interface`_ components are used
-to build a proper command-line application.
+The application processing components consume track data
+and computes derived values including distances,
+times, and rates.
+
+The :ref:`analysis.cli` components are used to build a proper command-line application.
 
 Input Parsing
 ===============
@@ -26,7 +30,7 @@ from input file sources.
 
 Manually prepared data will be a CSV in the following form
 
-..  parsed-literal::
+..  code-block:: text
 
     Time,Lat,Lon,COG,SOG,Rig,Engine,windAngle,windSpeed,Location
     9:21 AM,37 50.424N,076 16.385W,None,0,None,1200 RPM,,,Cockrell Creek
@@ -40,7 +44,7 @@ The times for the manual entry are generally local.
 
 GPSNavX track has the following format for CSV extract
 
-..  parsed-literal::
+..  code-block:: text
 
     2011-06-04 13:12:32 +0000,37.549225,-76.330536,219,3.6,,,,,,
     2011-06-04 13:12:43 +0000,37.549084,-76.330681,186,3.0,,,,,,
@@ -50,7 +54,7 @@ fields are populated unless GPSNavX (or iNavX or OpenCPN) gets an instrument fee
 
 GPSNavX track has the following format for GPX extract
 
-..  parsed-literal::
+..  code-block:: xml
 
     <?xml version="1.0" encoding="utf-8"?>
     <gpx version="1.1" creator="GPSNavX"
@@ -72,6 +76,7 @@ The iPhone iNavX can save track information via
 http://x-traverse.com/.  These are standard GPX files, and are
 identical with the tracks created directly by GPSNavX.
 
+..  _`analysis.cli`:
 
 Command-Line Interface
 ======================
@@ -95,4 +100,57 @@ Typical use cases for this module include the following:
 Implementation
 ==============
 
-..  automodule:: navtools.analysis
+..  py:module:: navtools.analysis
+
+Date parsing
+-------------
+
+..  autofunction:: parse_date
+
+Base Log Entry
+--------------
+
+..  autoclass:: LogEntry
+    :members:
+    :undoc-members:
+
+CSV input parsing
+-----------------
+
+..  autofunction:: csv_to_LogEntry
+
+GPX input parsing
+-----------------
+
+..  autofunction:: gpx_to_LogEntry
+
+..  autofunction:: xml_to_pairs
+
+Log Entry With Derived Details
+-------------------------------
+
+..  autoclass:: LogEntry_Rhumb
+    :members:
+    :undoc-members:
+
+Computing Details
+-----------------
+
+..  autofunction:: gen_rhumb
+
+Writing The CSV Output
+----------------------
+
+..  autofunction:: nround
+
+..  autofunction:: write_csv
+
+The :py:func:`analyze` application
+----------------------------------
+
+..  autofunction:: analyze
+
+The :py:func:`main` CLI
+-----------------------
+
+..  autofunction:: main

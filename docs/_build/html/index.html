@@ -67,11 +67,11 @@ where the great circle accuracy isn’t critical.</p>
 <h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="navigation.html">Navigation Calculations Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="planning.html">Route Planning Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="analysis.html">Track Analysis Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="opencpn_table.html">OpenCPN Table Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="igrf11.html">International Geomagnetic Reference Field Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="navigation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code> – Navigation Calculations Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="planning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.planning</span></code> – Route Planning Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.analysis</span></code> – Track Analysis Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opencpn_table.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.opencpn_table</span></code> – OpenCPN Table Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="igrf11.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf11</span></code> – International Geomagnetic Reference Field Module</a></li>
 </ul>
 </div>
 </section>
@@ -80,19 +80,6 @@ where the great circle accuracy isn’t critical.</p>
 <p>If you have PySerial installed, you could write applications to read common
 GPS devices and decode the messages. This would allow you to track
 waypoints, and possibly even build an anchor alarm monitor.</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>Use urllib2</p>
-<p>We can then use <code class="xref py py-mod docutils literal notranslate"><span class="pre">urllib</span></code> instead of simple
-<code class="xref py py-func docutils literal notranslate"><span class="pre">Path.open()</span></code> so that we could use
-“<a class="reference external" href="file:///path/to/file">file:///path/to/file</a>” or “<a class="reference external" href="https://server/path/to/file">https://server/path/to/file</a>”.</p>
-<p>Most use cases involve disconnected computers,
-with a statically downloaded file, it’s easy to cover
-<em>all</em> the bases by opening a URL.</p>
-<p>The official file:
-<a class="reference external" href="http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt">http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt</a></p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="igrf11.html#id1"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/navtools/igrf11.py:docstring of navtools.igrf11.IGRF11.load_coeffs, line 19.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Refactor the sniffing out of csv_to_LogEntry.</p>
@@ -111,6 +98,24 @@ and adding new headers based on values computed by the iterator.</p>
 <p>Option 2. The client provides the source_row keys, doing the sniffing for us.</p>
 </div>
 <p class="todo-source">(The <a class="reference internal" href="analysis.html#id2"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/navtools/analysis.py:docstring of navtools.analysis.write_csv, line 18.)</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Use urllib2</p>
+<p>We can then use <code class="xref py py-mod docutils literal notranslate"><span class="pre">urllib</span></code> instead of simple
+<code class="xref py py-func docutils literal notranslate"><span class="pre">Path.open()</span></code> so that we could use
+“<a class="reference external" href="file:///path/to/file">file:///path/to/file</a>” or “<a class="reference external" href="https://server/path/to/file">https://server/path/to/file</a>”.</p>
+<p>Most use cases involve disconnected computers,
+with a statically downloaded file, it’s easy to cover
+<em>all</em> the bases by opening a URL.</p>
+<p>The official file:
+<a class="reference external" href="http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt">http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt</a></p>
+</div>
+<p class="todo-source">(The <a class="reference internal" href="igrf11.html#id1"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/navtools/igrf11.py:docstring of navtools.igrf11.IGRF11.load_coeffs, line 19.)</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Refactor OpenCPN Table to reuse elements of <code class="xref py py-mod docutils literal notranslate"><span class="pre">navigation</span></code></p>
+</div>
+<p class="todo-source">(The <a class="reference internal" href="opencpn_table.html#id1"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/docs/opencpn_table.rst, line 12.)</p>
 </section>
 <section id="indices-and-tables">
 <h2>Indices and Tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
@@ -148,11 +153,11 @@ and adding new headers based on values computed by the iterator.</p>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#references">References</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="navigation.html">Navigation Calculations Module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="planning.html">Route Planning Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="analysis.html">Track Analysis Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="opencpn_table.html">OpenCPN Table Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="igrf11.html">International Geomagnetic Reference Field Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="navigation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code> – Navigation Calculations Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="planning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.planning</span></code> – Route Planning Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.analysis</span></code> – Track Analysis Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opencpn_table.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.opencpn_table</span></code> – OpenCPN Table Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="igrf11.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf11</span></code> – International Geomagnetic Reference Field Module</a></li>
 </ul>
 
 <div class="relations">

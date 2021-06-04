@@ -171,7 +171,10 @@ import pprint
 from typing import Callable, Tuple, Optional
 import warnings
 
-IGRF11_Func = Callable[[float, float, float, float, str], Tuple[float, float, float, float]]
+IGRF11_Func = Callable[
+    [float, float, float, float, str], Tuple[float, float, float, float]
+]
+
 
 class IGRF11:
     """
@@ -201,7 +204,7 @@ class IGRF11:
 
         """
         named = pathlib.Path(model)
-        installed = pathlib.Path(__file__).with_name( named.name )
+        installed = pathlib.Path(__file__).with_name(named.name)
         parent = installed.parent / named.name
         for location in named, installed, parent:
             try:
@@ -212,7 +215,11 @@ class IGRF11:
                 continue
 
     @staticmethod
-    def load_coeffs(file_path: pathlib.Path) -> tuple[dict[int, dict[tuple[int, int], float]], dict[int, dict[tuple[int, int], float]]]:
+    def load_coeffs(
+        file_path: pathlib.Path,
+    ) -> tuple[
+        dict[int, dict[tuple[int, int], float]], dict[int, dict[tuple[int, int], float]]
+    ]:
         """
         Returns two dictionaries of g and h coefficients by year and [n,m] index.
 
@@ -253,10 +260,12 @@ class IGRF11:
             line_iter = iter(source)
             # Skip initial batch of "#" lines.
             for line in line_iter:
-                if not line.startswith("#"): break
+                if not line.startswith("#"):
+                    break
             # Skip lines until we find the g/h line.
             for line in line_iter:
-                if line.startswith("g/h"): break
+                if line.startswith("g/h"):
+                    break
             headings = line.strip().split()
             years = [int(t[:-2]) for t in headings[3:-1]] + [2015]
             for y in years:
@@ -267,11 +276,11 @@ class IGRF11:
                 g_or_h = row[0]
                 n, m = map(int, row[1:3])
                 coefs = map(float, row[3:])
-                for yr, coef in zip(years,coefs):
+                for yr, coef in zip(years, coefs):
                     if g_or_h == "g":
-                        g[yr][n,m]= coef
+                        g[yr][n, m] = coef
                     elif g_or_h == "h":
-                        h[yr][n,m]= coef
+                        h[yr][n, m] = coef
                     else:  # pragma: no cover
                         raise ValueError("Bad IGRF11 Model Data")
                     if i >= 120 and yr <= 1990:
@@ -280,7 +289,9 @@ class IGRF11:
         # pprint.pprint( legacy_gh )  # confirm that we have the same structure.
         return g, h
 
-    def __call__(self, date: float, nlat: float, elong: float, alt: float = 0.0, coord: str = 'D') -> tuple[float, float, float, float]:
+    def __call__(
+        self, date: float, nlat: float, elong: float, alt: float = 0.0, coord: str = "D"
+    ) -> tuple[float, float, float, float]:
         """
         IGRF 11 model.
 
@@ -316,162 +327,166 @@ class IGRF11:
         cl: dict[int, float] = {}
         sl: dict[int, float] = {}
 
-        colat = math.pi/2-nlat
+        colat = math.pi / 2 - nlat
         x, y, z = 0.0, 0.0, 0.0
 
         ## Resolve Year and Interpolation/Extrapolation
         if date < 2010:
-            ll= int(date-1900)//5  # year index
-            t = (date-1900)/5-ll  # weighting factor
+            ll = int(date - 1900) // 5  # year index
+            t = (date - 1900) / 5 - ll  # weighting factor
             if date < 1995:
                 nmx = 10  # degrees
-                kmx = (nmx+1)*(nmx+2)//2  # total number of coefficients
+                kmx = (nmx + 1) * (nmx + 2) // 2  # total number of coefficients
 
                 # unused Fortran indexing
-                #nc = nmx*(nmx+2) # size of gh array = 120
-                #ll = nc*ll # index of year index in original massive gh array
+                # nc = nmx*(nmx+2) # size of gh array = 120
+                # ll = nc*ll # index of year index in original massive gh array
             else:
                 nmx = 13  # degrees
-                kmx = (nmx+1)*(nmx+2)//2  # total number of coefficients
+                kmx = (nmx + 1) * (nmx + 2) // 2  # total number of coefficients
 
                 # unused Fortran indexing
-                #nc = nmx*(nmx+2) # size of gh array = 195
-                #ll = 120*19 + nc*(date-1995)//5 # 19 small models, rest ore large models
-            tc= 1.0 - t  # weighting factor
+                # nc = nmx*(nmx+2) # size of gh array = 195
+                # ll = 120*19 + nc*(date-1995)//5 # 19 small models, rest ore large models
+            tc = 1.0 - t  # weighting factor
 
-            year= 1900+5*((int(date)-1900)//5)
+            year = 1900 + 5 * ((int(date) - 1900) // 5)
 
         else:
             # Extrapolating past 2010.
-            t= date - 2010
-            tc= 1.0
+            t = date - 2010
+            tc = 1.0
             nmx = 13  # degrees
-            kmx = (nmx+1)*(nmx+2)//2  # total number of coefficients
+            kmx = (nmx + 1) * (nmx + 2) // 2  # total number of coefficients
 
             # unused Fortran indexing
-            #nc = nmx*(nmx+2) # size of gh array = 195 for last two years
-            #ll = 120*19+3*195 # next-to-last year's coefficients
+            # nc = nmx*(nmx+2) # size of gh array = 195 for last two years
+            # ll = 120*19+3*195 # next-to-last year's coefficients
 
-            year= 2010
+            year = 2010
 
         ##print( "date {0}, year_key {1}, ll {2}, nc {3}".format(date, year_key, ll, nc) )
 
         ## 2
-        r     = alt  # radius for Geocentric; will be fixed for geodetic
-        ct    = math.cos(colat)
-        st    = math.sin(colat)
+        r = alt  # radius for Geocentric; will be fixed for geodetic
+        ct = math.cos(colat)
+        st = math.sin(colat)
         cl[1] = math.cos(elong)
         sl[1] = math.sin(elong)
-        cd    = 1.0
-        sd    = 0.0
+        cd = 1.0
+        sd = 0.0
 
         if coord == "D":
             ##  conversion from geodetic to geocentric coordinates
             ##  (using the WGS84 spheroid)
-            a2    = 40680631.6
-            b2    = 40408296.0
-            one   = a2*st*st
-            two   = b2*ct*ct
+            a2 = 40680631.6
+            b2 = 40408296.0
+            one = a2 * st * st
+            two = b2 * ct * ct
             three = one + two
-            rho   = math.sqrt(three)
-            r     = math.sqrt(alt*(alt + 2.0*rho) + (a2*one + b2*two)/three)
-            cd    = (alt + rho)/r
-            sd    = (a2 - b2)/rho*ct*st/r
-            one   = ct
-            ct    = ct*cd -  st*sd
-            st    = st*cd + one*sd
+            rho = math.sqrt(three)
+            r = math.sqrt(alt * (alt + 2.0 * rho) + (a2 * one + b2 * two) / three)
+            cd = (alt + rho) / r
+            sd = (a2 - b2) / rho * ct * st / r
+            one = ct
+            ct = ct * cd - st * sd
+            st = st * cd + one * sd
 
         ## 3
-        ratio = 6371.2/r # Earth Mean Radius in km
-        rr    = ratio*ratio
+        ratio = 6371.2 / r  # Earth Mean Radius in km
+        rr = ratio * ratio
 
         ## computation of Schmidt quasi-normal coefficients p and x(=q)
 
-        p[1]  = 1.0
-        p[3]  = st
-        q[1]  = 0.0
-        q[3]  =  ct
+        p[1] = 1.0
+        p[3] = st
+        q[1] = 0.0
+        q[3] = ct
 
-        #l     = 1
-        n     = 0  # Outer loop (from 1 to nmx)
-        m     = 1  # Inner loop (from 1 to n)
-        for k in range(2,kmx+1):
+        # l     = 1
+        n = 0  # Outer loop (from 1 to nmx)
+        m = 1  # Inner loop (from 1 to n)
+        for k in range(2, kmx + 1):
             if n < m:
-                m= 0
-                n= n+1
-                rr= rr*ratio
-                fn= n
-                gn= n-1
+                m = 0
+                n = n + 1
+                rr = rr * ratio
+                fn = n
+                gn = n - 1
             ## 4
-            fm= m
+            fm = m
             if m == n:
                 if k != 3:
-                    one   = math.sqrt(1.0 - 0.5/fm)
-                    j     = k - n - 1
-                    p[k]  = one*st*p[j]
-                    q[k]  = one*(st*q[j] + ct*p[j])
-                    cl[m] = cl[m-1]*cl[1] - sl[m-1]*sl[1]
-                    sl[m] = sl[m-1]*cl[1] + cl[m-1]*sl[1]
-            else: # m != n
+                    one = math.sqrt(1.0 - 0.5 / fm)
+                    j = k - n - 1
+                    p[k] = one * st * p[j]
+                    q[k] = one * (st * q[j] + ct * p[j])
+                    cl[m] = cl[m - 1] * cl[1] - sl[m - 1] * sl[1]
+                    sl[m] = sl[m - 1] * cl[1] + cl[m - 1] * sl[1]
+            else:  # m != n
                 ## 5
-                gmm    = m*m
-                one   = math.sqrt(fn*fn - gmm)
-                two   = math.sqrt(gn*gn - gmm)/one
-                three = (fn + gn)/one
-                i     = k - n
-                j     = i - n + 1
-                p[k]  = three*ct*p[i] - two*p[j]
-                q[k]  = three*(ct*q[i] - st*p[i]) - two*q[j]
+                gmm = m * m
+                one = math.sqrt(fn * fn - gmm)
+                two = math.sqrt(gn * gn - gmm) / one
+                three = (fn + gn) / one
+                i = k - n
+                j = i - n + 1
+                p[k] = three * ct * p[i] - two * p[j]
+                q[k] = three * (ct * q[i] - st * p[i]) - two * q[j]
 
             ## 6
             ## synthesis of x, y and z in geocentric coordinates
             # unused Fortran indexing
-            #lm = ll + l # Index into gh based on ll (year) + l (iteration)
-            #print( "n {0}, m {1}, gh[year][n,m] {2}".format(n,m,l) )
+            # lm = ll + l # Index into gh based on ll (year) + l (iteration)
+            # print( "n {0}, m {1}, gh[year][n,m] {2}".format(n,m,l) )
 
-            g_year= self.g[year][n,m]
-            g_next= self.g[year+5][n,m]
-            one   = (tc*g_year + t*g_next)*rr
+            g_year = self.g[year][n, m]
+            g_next = self.g[year + 5][n, m]
+            one = (tc * g_year + t * g_next) * rr
             if m != 0:
                 # m non-zero case, use h.
-                h_year= self.h[year][n,m]
-                h_next= self.h[year+5][n,m]
+                h_year = self.h[year][n, m]
+                h_next = self.h[year + 5][n, m]
 
-                two   = (tc*h_year + t*h_next)*rr
-                three = one*cl[m] + two*sl[m]
-                x     = x + three*q[k]
-                z     = z - (fn + 1.0)*three*p[k]
+                two = (tc * h_year + t * h_next) * rr
+                three = one * cl[m] + two * sl[m]
+                x = x + three * q[k]
+                z = z - (fn + 1.0) * three * p[k]
                 # Exact equality check, may not be a good idea.
-                if st != 0: # sine colat == 0  is equator?
-                    y     = y + (one*sl[m] - two*cl[m])*fm*p[k]/st
+                if st != 0:  # sine colat == 0  is equator?
+                    y = y + (one * sl[m] - two * cl[m]) * fm * p[k] / st
                 else:
                     ## 7
-                    y     = y + (one*sl[m] - two*cl[m])*q[k]*ct
+                    y = y + (one * sl[m] - two * cl[m]) * q[k] * ct
                 ## 8
-                #l     = l + 2
+                # l     = l + 2
             else:
                 # m=0 case, use g only.
                 ## 9
-                x     = x + one*q[k]
-                z     = z - (fn + 1.0)*one*p[k]
-                #l     = l + 1
+                x = x + one * q[k]
+                z = z - (fn + 1.0) * one * p[k]
+                # l     = l + 1
             ## 10
             m = m + 1
 
         # End of the coefficient loop on k
 
         ## conversion back to coordinate system specified by itype
-        one   = x
-        x     = x*cd +   z*sd
-        z     = z*cd - one*sd
-        f     = math.sqrt(x*x + y*y + z*z)
+        one = x
+        x = x * cd + z * sd
+        z = z * cd - one * sd
+        f = math.sqrt(x * x + y * y + z * z)
 
         return x, y, z, f
+
 
 # TODO: Delay loading until needed.
 igrf11syn = IGRF11("igrf11coeffs.txt")
 
-def declination(nlat: float, elong: float, date: Optional[datetime.date]=None) -> float:
+
+def declination(
+    nlat: float, elong: float, date: Optional[datetime.date] = None
+) -> float:
     """IGRF 11 model for current declination.
 
     :param nlat: north latitude as floating-point degrees
@@ -482,12 +497,16 @@ def declination(nlat: float, elong: float, date: Optional[datetime.date]=None) -
     if date is None:
         date = datetime.date.today()
     first_of_year = date.replace(month=1, day=1)
-    astro_dt_tm = date.year + (date.toordinal() - first_of_year.toordinal())/365.242
+    astro_dt_tm = date.year + (date.toordinal() - first_of_year.toordinal()) / 365.242
 
-    print(f"igrf11syn({astro_dt_tm=}, {math.radians(nlat)=}, {math.radians(elong)=}, alt=0.0, coord='D'")
-    x, y, z, f = igrf11syn(astro_dt_tm, math.radians(nlat), math.radians(elong), alt=0.0, coord='D')
+    print(
+        f"igrf11syn({astro_dt_tm=}, {math.radians(nlat)=}, {math.radians(elong)=}, alt=0.0, coord='D'"
+    )
+    x, y, z, f = igrf11syn(
+        astro_dt_tm, math.radians(nlat), math.radians(elong), alt=0.0, coord="D"
+    )
     print(f"    {x=}, {y=}, {z=}, {f=}")
-    D = math.degrees(math.atan2(y, x)) # Declination
+    D = math.degrees(math.atan2(y, x))  # Declination
     return D
 
 
@@ -502,6 +521,6 @@ def deg2dm(deg: float) -> tuple[float, float]:
     """
     sign = -1 if deg < 0 else +1
     ad = abs(deg)
-    d = sign*int(ad)
-    m = int(60*(ad-int(ad))+.5)*(sign if d == 0 else 1)
+    d = sign * int(ad)
+    m = int(60 * (ad - int(ad)) + 0.5) * (sign if d == 0 else 1)
     return d, m

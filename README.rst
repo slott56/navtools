@@ -46,10 +46,7 @@ files:
     annotates a historical log with distance and speed.
 
 -   OpenCPN Conversion: transforms an OpenCPN route planning table into
-    a more useful form for spreadsheet use.
+    more useful content for spreadsheet use.
 
 An additional use case is to import that :mod:`navtools.navigation` module
 to create your own applications.
-
-See http://slott56.github.io/navtools/navigation.html for information
-on this module.

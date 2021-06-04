@@ -43,7 +43,7 @@ from navtools.igrf11 import igrf11syn, deg2dm, declination
 from typing import NamedTuple, cast, Iterator
 
 
-sample_output= "geomag70_linux/sample_out_IGRF11.txt"
+sample_output = "geomag70_linux/sample_out_IGRF11.txt"
 
 
 class Geomag_Case(NamedTuple):
@@ -58,51 +58,51 @@ class Geomag_Case(NamedTuple):
     @classmethod
     def parse(cls, row: dict[str, str]) -> "Geomag_Case":
         return cls(
-            cls.parse_date(row['Date']),
-            cls.parse_lat_lon(row['Latitude']),
-            cls.parse_lat_lon(row['Longitude']),
-            cls.parse_altitude(row['Altitude']),
-            row['Coord-System'],
-            row['D_deg'],
-            row['D_min']
+            cls.parse_date(row["Date"]),
+            cls.parse_lat_lon(row["Latitude"]),
+            cls.parse_lat_lon(row["Longitude"]),
+            cls.parse_altitude(row["Altitude"]),
+            row["Coord-System"],
+            row["D_deg"],
+            row["D_min"],
         )
 
     @staticmethod
     def parse_date(date_str: str) -> float:
-        if ',' in date_str:
+        if "," in date_str:
             # y,m,d format.
-            dt= datetime.date( *map(int, date_str.split(',') ) )
-            first_of_year= dt.replace( month=1, day=1 )
-            date= dt.year + (dt.toordinal() - first_of_year.toordinal())/365.242
+            dt = datetime.date(*map(int, date_str.split(",")))
+            first_of_year = dt.replace(month=1, day=1)
+            date = dt.year + (dt.toordinal() - first_of_year.toordinal()) / 365.242
         else:
             # floating-point date
-            date= float(date_str)
+            date = float(date_str)
         return date
 
     @staticmethod
     def parse_altitude(alt_str: str) -> float:
         if alt_str.startswith("F"):
             # feet to km
-            alt= float(alt_str[1:])/3280.8399
+            alt = float(alt_str[1:]) / 3280.8399
         elif alt_str.startswith("M"):
             # m to km
-            alt= float(alt_str[1:])/1000
+            alt = float(alt_str[1:]) / 1000
         elif alt_str.startswith("K"):
-            alt= float(alt_str[1:])
+            alt = float(alt_str[1:])
         else:
-            raise Exception( "Unknown altitude units" )
+            raise Exception("Unknown altitude units")
         return alt
 
     @staticmethod
-    def parse_lat_lon( ll_str: str ) -> float:
-        if ',' in ll_str:
-            if ll_str.startswith('-'):
-                sign= -1
-                ll_str= ll_str[1:]
+    def parse_lat_lon(ll_str: str) -> float:
+        if "," in ll_str:
+            if ll_str.startswith("-"):
+                sign = -1
+                ll_str = ll_str[1:]
             else:
-                sign= +1
-            d, m, s = (float(x) if x else 0.0 for x in ll_str.split(','))
-            return sign*(d + (m + s/60)/60)
+                sign = +1
+            d, m, s = (float(x) if x else 0.0 for x in ll_str.split(","))
+            return sign * (d + (m + s / 60) / 60)
         else:
             return float(ll_str)
 
@@ -115,7 +115,7 @@ def case_gen() -> Iterator[Geomag_Case]:
     :return: An iterator over :py:class:`Geomag_Case` instances
     """
     with open(sample_output, "r") as expected:
-        rdr = csv.DictReader(expected, delimiter=' ', skipinitialspace=True)
+        rdr = csv.DictReader(expected, delimiter=" ", skipinitialspace=True)
         for row in rdr:
             print(
                 f"Source: {row['Date']:10s}"
@@ -129,15 +129,22 @@ def case_gen() -> Iterator[Geomag_Case]:
             case = Geomag_Case.parse(row)
             yield case
 
+
 @fixture(params=list(case_gen()), ids=str)
 def igfr11_case(request) -> Geomag_Case:
     return cast(Geomag_Case, request.param)
+
 
 def test_igrf11(igfr11_case: Geomag_Case) -> None:
     case = igfr11_case
 
     x, y, z, f = igrf11syn(
-        case.date, math.radians(case.lat), math.radians(case.lon), case.alt, coord=case.coord)
+        case.date,
+        math.radians(case.lat),
+        math.radians(case.lon),
+        case.alt,
+        coord=case.coord,
+    )
     D = math.degrees(math.atan2(y, x))  # Declination in degrees
 
     deg, min = deg2dm(D)
@@ -157,6 +164,7 @@ def test_declination():
     d = declination(date=datetime.date(2015, 1, 1), nlat=0.0, elong=0.0)
     assert deg2dm(d) == (-5, 26)
 
+
 @fixture
 def mock_datetime(monkeypatch):
     today = datetime.date(2015, 1, 1)
@@ -164,6 +172,7 @@ def mock_datetime(monkeypatch):
     mock_datetime = Mock(date=mock_date)
     monkeypatch.setattr(navtools.igrf11, "datetime", mock_datetime)
     return mock_datetime
+
 
 def test_declination_2(mock_datetime):
     """
@@ -179,6 +188,6 @@ def test_early_dates():
     Before 2010 and Before 1995
     """
     d_2009 = declination(date=datetime.date(2009, 1, 1), nlat=0.0, elong=0.0)
-    assert d_2009 == approx(-6.2256, rel=1E-4)
+    assert d_2009 == approx(-6.2256, rel=1e-4)
     d_1994 = declination(date=datetime.date(1994, 1, 1), nlat=0.0, elong=0.0)
-    assert d_1994 == approx(-8.0643, rel=1E-4)
+    assert d_1994 == approx(-8.0643, rel=1e-4)

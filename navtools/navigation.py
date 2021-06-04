@@ -211,6 +211,7 @@ import numbers
 import string
 from typing import Optional, Any, overload, Union, cast
 
+
 class AngleParser:
     """Parse a sting representation of a latitude or longitude.
 
@@ -223,9 +224,10 @@ class AngleParser:
     ...
     ValueError: Cannot parse 'Due North'
     """
-    dms_pat = re.compile( r"(\d+)\D+(\d+)\D+(\d+)[^NEWSnews]*([NEWSnews]?)" )
-    dm_pat = re.compile( r"(\d+)\D+(\d+\.\d+)[^NEWSnews]*([NEWSnews]?)" )
-    d_pat = re.compile( r"(\d+\.\d+)[^NEWSnews]*([NEWSnews]?)" )
+
+    dms_pat = re.compile(r"(\d+)\D+(\d+)\D+(\d+)[^NEWSnews]*([NEWSnews]?)")
+    dm_pat = re.compile(r"(\d+)\D+(\d+\.\d+)[^NEWSnews]*([NEWSnews]?)")
+    d_pat = re.compile(r"(\d+\.\d+)[^NEWSnews]*([NEWSnews]?)")
     # This is identical to the dm_pat, above... It may change, however, so
     # navx_dmh_pat = re.compile( r"(\d+)\D+(\d+\.\d+)[^NEWSnews]*([NEWSnews]?)" )
 
@@ -242,24 +244,28 @@ class AngleParser:
         :returns: float degrees or a :py:exc:`ValueError` exception.
         """
 
-        if d_match := AngleParser.d_pat.match( value ):
+        if d_match := AngleParser.d_pat.match(value):
             deg = float(d_match.group(1))
-            return AngleParser.sign(d_match.group(2))*deg
+            return AngleParser.sign(d_match.group(2)) * deg
 
-        elif dm_match := AngleParser.dm_pat.match( value ):
+        elif dm_match := AngleParser.dm_pat.match(value):
             d, m = int(dm_match.group(1)), float(dm_match.group(2))
-            return AngleParser.sign(dm_match.group(3))*(d + m/60)
+            return AngleParser.sign(dm_match.group(3)) * (d + m / 60)
 
-        elif dms_match := AngleParser.dms_pat.match( value ):
-            d, m, s = int(dms_match.group(1)), int(dms_match.group(2)), float(dms_match.group(3))
-            return AngleParser.sign(dms_match.group(4))*(d + m/60 + s/3600)
+        elif dms_match := AngleParser.dms_pat.match(value):
+            d, m, s = (
+                int(dms_match.group(1)),
+                int(dms_match.group(2)),
+                float(dms_match.group(3)),
+            )
+            return AngleParser.sign(dms_match.group(4)) * (d + m / 60 + s / 3600)
 
         # elif navx_match := AngleParser.navx_dmh_pat.match( value ):
         #     d_f, m_f = float(navx_match.group(1)), float(navx_match.group(2))
         #     return AngleParser.sign(navx_match.group(3))*(d_f + m_f/60)
 
         else:
-            raise ValueError( "Cannot parse {0!r}".format(value) )
+            raise ValueError("Cannot parse {0!r}".format(value))
 
 
 class Angle(float):
@@ -348,7 +354,7 @@ class Angle(float):
     parser = AngleParser
 
     @classmethod
-    def fromdegrees(cls, deg: float, hemisphere: Optional[str]=None) -> "Angle":
+    def fromdegrees(cls, deg: float, hemisphere: Optional[str] = None) -> "Angle":
         """
         Creates an :py:class:`Angle` from a numeric value,
         which must be degrees.
@@ -365,10 +371,13 @@ class Angle(float):
         >>> round(b, 4)
         0.4094
         """
-        if hemisphere in ("N", "E", None): sign=+1
-        elif hemisphere in ("S", "W"): sign=-1
-        else: raise ValueError(f"Can't create Angle from {deg!r}, {hemisphere!r}")
-        return cls(math.radians(sign*deg))
+        if hemisphere in ("N", "E", None):
+            sign = +1
+        elif hemisphere in ("S", "W"):
+            sign = -1
+        else:
+            raise ValueError(f"Can't create Angle from {deg!r}, {hemisphere!r}")
+        return cls(math.radians(sign * deg))
 
     @classmethod
     def fromstring(cls, value: str) -> "Angle":
@@ -404,62 +413,71 @@ class Angle(float):
         """
 
         try:
-            deg= float(value)
-            return cls( math.radians(deg) )
+            deg = float(value)
+            return cls(math.radians(deg))
         except ValueError:
             pass
         try:
-            deg= cls.parser.parse(value)
-            return cls( math.radians(deg) )
+            deg = cls.parser.parse(value)
+            return cls(math.radians(deg))
         except ValueError:
             pass
         raise ValueError(f"Cannot parse {value!r}")
 
     @property
     def radians(self) -> float:
+        """Angle in radians"""
         return float(self)
+
     @property
     def r(self) -> float:
+        """Angle in radians"""
         return float(self)
+
     @property
     def degrees(self) -> float:
+        """Angle in signed degrees"""
         return math.degrees(self)
+
     @property
     def sdeg(self) -> float:
+        """Angle in signed degrees"""
         return math.degrees(self)
+
     @property
     def deg(self) -> float:
+        """Angle in signed degrees"""
         return math.degrees(self)
-    @property
-    def dm( self ) -> tuple[float, float]:
-        """Returns the angle as (D, M).
 
-        :returns: (d, m) tuple of signed values
-        """
-        sign= -1 if self < 0 else +1
-        ad= abs(self.deg)
-        d= int(ad)
-        ms= 60*(ad-d)
-        if abs(ms-60)/60 < 1E-5:
+    @property
+    def dm(self) -> tuple[float, float]:
+        """:returns: (d, m) tuple of signed values"""
+        sign = -1 if self < 0 else +1
+        ad = abs(self.deg)
+        d = int(ad)
+        ms = 60 * (ad - d)
+        if abs(ms - 60) / 60 < 1e-5:
             ms = 0.0
             d += 1
-        return d*sign, ms*(sign if d == 0 else 1)
-    @property
-    def dms( self ) -> tuple[float, float, float]:
-        """Returns the angle as (D, M, S).
+        return d * sign, ms * (sign if d == 0 else 1)
 
-        :returns: (d, m, s) tuple of signed values
-        """
-        sign= -1 if self < 0 else +1
-        ad= abs(self.deg)
-        d= int(ad)
-        ms= 60*(ad-d)
-        if abs(ms-60)/60 < 1E-5:
+    @property
+    def dms(self) -> tuple[float, float, float]:
+        """:returns: (d, m, s) tuple of signed values"""
+        sign = -1 if self < 0 else +1
+        ad = abs(self.deg)
+        d = int(ad)
+        ms = 60 * (ad - d)
+        if abs(ms - 60) / 60 < 1e-5:
             ms = 0.0
             d += 1
-        m= int(ms)
-        s= round((ms-m)*60, 3)
-        return d*sign, m*(sign if d == 0 else 1), s*(sign if d==0 and m==0 else 1)
+        m = int(ms)
+        s = round((ms - m) * 60, 3)
+        return (
+            d * sign,
+            m * (sign if d == 0 else 1),
+            s * (sign if d == 0 and m == 0 else 1),
+        )
 
     @property
     def h(self) -> str:
@@ -468,12 +486,12 @@ class Angle(float):
         A subclass like :class:`Lat` and :class:`Lon` will
         override this to provide a string instead of an int value.
 
-        :return:
+        :returns: "+" or "-"
         """
         return "-" if self < 0 else "+"
 
-    spec_pat= re.compile(r"%([0-9\.#\+ -]*)([dmshr])")
-    formatter= string.Formatter()
+    spec_pat = re.compile(r"%([0-9\.#\+ -]*)([dmshr])")
+    formatter = string.Formatter()
 
     @classmethod
     def _rewrite(cls, spec: str) -> tuple[str, set[str]]:
@@ -495,23 +513,28 @@ class Angle(float):
         and determine the appropriate mix of int or float values to include.
         """
         if spec == "" or spec is None:
-            return "{d:f}", {'d'}
+            return "{d:f}", {"d"}
         else:
             used: set[str] = set()
-            m= cls.spec_pat.search(spec)
+            m = cls.spec_pat.search(spec)
             # pattern group 0 is the detailed spec
             # pattern group 1 is the 1-letter property (d, m, s, h, or r)
             while m:
                 # Rewrite this item in the spec.
                 fmt, prop = m.groups()
-                spec= cls.spec_pat.sub("{{{prop}:{fmt}{tp}}}".format(
-                    prop=prop, fmt=fmt, tp="s" if prop == "h" else "f"), spec, count=1)
-                used.add( prop )
+                spec = cls.spec_pat.sub(
+                    "{{{prop}:{fmt}{tp}}}".format(
+                        prop=prop, fmt=fmt, tp="s" if prop == "h" else "f"
+                    ),
+                    spec,
+                    count=1,
+                )
+                used.add(prop)
                 # "Recursively" check for more items.
-                m= cls.spec_pat.search(spec)
+                m = cls.spec_pat.search(spec)
         return spec, used
 
-    def __format__(self, spec: str="") -> str:
+    def __format__(self, spec: str = "") -> str:
         """
         Formatted string representation of an Angle.
 
@@ -533,80 +556,128 @@ class Angle(float):
 
         :class spec: format specification for this value.
         :returns: text representation of this :class:`Angle`.
+        :meta public:
         """
         fmt_str, prop_set = self._rewrite(spec)
-        data = dict( h= self.h, r= self.radians )
-        if {'d', 'm', 's'} <= prop_set:
-            data['d'], data['m'], data['s'] = Angle(abs(self)).dms
-        elif {'d', 'm'} <= prop_set and not {'s'} <= prop_set:
-            data['d'], data['m'] = Angle(abs(self)).dm
-        elif {'d'} <= prop_set and not {'m', 's'} <= prop_set:
-            data['d']= abs(self.degrees)
+        data = dict(h=self.h, r=self.radians)
+        if {"d", "m", "s"} <= prop_set:
+            data["d"], data["m"], data["s"] = Angle(abs(self)).dms
+        elif {"d", "m"} <= prop_set and not {"s"} <= prop_set:
+            data["d"], data["m"] = Angle(abs(self)).dm
+        elif {"d"} <= prop_set and not {"m", "s"} <= prop_set:
+            data["d"] = abs(self.degrees)
         return self.formatter.format(fmt_str, **data)
 
-    def __add__( self, other: Any ) -> "Angle":
-        return Angle( super().__add__(other) )
-    def __sub__( self, other: Any ) -> "Angle":
-        return Angle( super().__sub__(other) )
-    def __mul__( self, other: Any ) -> "Angle":
-        return Angle( super().__mul__(other) )
-    def __truediv__( self, other: Any ) -> "Angle":
-        return Angle( super().__truediv__(other) )
-    def __floordiv__( self, other: Any ) -> "Angle":
-        return Angle( super().__floordiv__(other) )
-    def __mod__( self, other: Any ) -> "Angle":
-        return Angle( super().__mod__(other) )
-    def __pow__( self, other: Any, mod: None = None) -> float:
+    def __add__(self, other: Any) -> "Angle":
+        """:meta public:"""
+        return Angle(super().__add__(other))
+
+    def __sub__(self, other: Any) -> "Angle":
+        """:meta public:"""
+        return Angle(super().__sub__(other))
+
+    def __mul__(self, other: Any) -> "Angle":
+        """:meta public:"""
+        return Angle(super().__mul__(other))
+
+    def __truediv__(self, other: Any) -> "Angle":
+        """:meta public:"""
+        return Angle(super().__truediv__(other))
+
+    def __floordiv__(self, other: Any) -> "Angle":
+        """:meta public:"""
+        return Angle(super().__floordiv__(other))
+
+    def __mod__(self, other: Any) -> "Angle":
+        """:meta public:"""
+        return Angle(super().__mod__(other))
+
+    def __pow__(self, other: Any, mod: None = None) -> float:
+        """:meta public:"""
         return super().__pow__(other)
 
-    def __radd__( self, other: Any ) -> "Angle":
-        return Angle( super().__radd__(other) )
-    def __rsub__( self, other: Any ) -> "Angle":
-        return Angle( super().__rsub__(other) )
-    def __rmul__( self, other: Any ) -> "Angle":
-        return Angle( super().__rmul__(other) )
-    def __rtruediv__( self, other: Any ) -> "Angle":
-        return Angle( super().__rtruediv__(other) )
-    def __rfloordiv__( self, other: Any ) -> "Angle":
-        return Angle( super().__rfloordiv__(other) )
-    def __rmod__( self, other: Any ) -> "Angle":
-        return Angle( super().__rmod__(other) )
-    def __rpow__( self, other: Any, mod: None = None) -> float:
+    def __radd__(self, other: Any) -> "Angle":
+        """:meta public:"""
+        return Angle(super().__radd__(other))
+
+    def __rsub__(self, other: Any) -> "Angle":
+        """:meta public:"""
+        return Angle(super().__rsub__(other))
+
+    def __rmul__(self, other: Any) -> "Angle":
+        """:meta public:"""
+        return Angle(super().__rmul__(other))
+
+    def __rtruediv__(self, other: Any) -> "Angle":
+        """:meta public:"""
+        return Angle(super().__rtruediv__(other))
+
+    def __rfloordiv__(self, other: Any) -> "Angle":
+        """:meta public:"""
+        return Angle(super().__rfloordiv__(other))
+
+    def __rmod__(self, other: Any) -> "Angle":
+        """:meta public:"""
+        return Angle(super().__rmod__(other))
+
+    def __rpow__(self, other: Any, mod: None = None) -> float:
+        """:meta public:"""
         return super().__rpow__(other)
 
-    def __abs__( self ) -> "Angle":
-        return Angle( super().__abs__() )
-    def __float__( self ) -> float:
+    def __abs__(self) -> "Angle":
+        """:meta public:"""
+        return Angle(super().__abs__())
+
+    def __float__(self) -> float:
+        """:meta public:"""
         return self
 
     @overload
-    def __round__( self, ndigits: None = None ) -> int:
+    def __round__(self, ndigits: None = None) -> int:
         ...  # pragma: no cover
+
     @overload
-    def __round__( self, ndigits: int ) -> float:
+    def __round__(self, ndigits: int) -> float:
         ...  # pragma: no cover
-    def __round__( self, ndigits: Optional[int] = None ) -> Union[int, float]:
+
+    def __round__(self, ndigits: Optional[int] = None) -> Union[int, float]:
+        """:meta public:"""
         if ndigits is None:
             return super().__round__()
         return super().__round__(ndigits)
 
-    def __neg__( self ) -> "Angle":
-        return Angle( super().__neg__() )
-    def __pos__( self ) -> "Angle":
+    def __neg__(self) -> "Angle":
+        """:meta public:"""
+        return Angle(super().__neg__())
+
+    def __pos__(self) -> "Angle":
+        """:meta public:"""
         return self
 
-    def __eq__( self, other: Any ) -> bool:
+    def __eq__(self, other: Any) -> bool:
+        """:meta public:"""
         return super().__eq__(other)
-    def __ne__( self, other: Any ) -> bool:
+
+    def __ne__(self, other: Any) -> bool:
+        """:meta public:"""
         return super().__ne__(other)
-    def __le__( self, other: Any ) -> bool:
+
+    def __le__(self, other: Any) -> bool:
+        """:meta public:"""
         return super().__le__(other)
-    def __lt__( self, other: Any ) -> bool:
+
+    def __lt__(self, other: Any) -> bool:
+        """:meta public:"""
         return super().__lt__(other)
-    def __ge__( self, other: Any ) -> bool:
+
+    def __ge__(self, other: Any) -> bool:
+        """:meta public:"""
         return super().__ge__(other)
-    def __gt__( self, other: Any ) -> bool:
+
+    def __gt__(self, other: Any) -> bool:
+        """:meta public:"""
         return super().__gt__(other)
+
 
 class Lat(Angle):
     """Latitude Angle, normal to the equator.
@@ -621,21 +692,27 @@ class Lat(Angle):
     >>> round(b.degrees,4)
     37.1234
     """
+
     @property
     def d(self) -> float:
+        """:returns: Latitude in degrees."""
         return abs(super().deg)
+
     @property
     def h(self) -> str:
+        """:returns: The hemisphere, "N" or "S"."""
         return "S" if self < 0 else "N"
+
     def __repr__(self) -> str:
         return "{0:%02.0d°%06.3m′%h}".format(self)
+
     @property
     def north(self) -> float:
-        """North latitude, positive "co-latitude".
-
-        Range is 0 to pi instead of -pi/2 to +pi/2.
         """
-        return self+math.pi/2
+        :returns: North latitude, positive "co-latitude".
+            Range is 0 to pi instead of -pi/2 to +pi/2.
+        """
+        return self + math.pi / 2
 
 
 class Lon(Angle):
@@ -651,18 +728,24 @@ class Lon(Angle):
     >>> round(b.degrees,4)
     -76.5678
     """
+
     @property
     def d(self) -> float:
+        """:returns: Longitude in degrees."""
         return abs(super().deg)
+
     @property
     def h(self) -> str:
+        """:returns: The hemisphere, "E" or "W"."""
         return "W" if self < 0 else "E"
+
     def __repr__(self) -> str:
         return "{0:%03.0d°%06.3m′%h}".format(self)
+
     @property
     def east(self) -> float:
-        """East longitude. Positive only."""
-        return (self+math.pi*2) % (math.pi*2)
+        """:returns: East longitude. Positive only."""
+        return (self + math.pi * 2) % (math.pi * 2)
 
 
 class LatLon:
@@ -670,7 +753,7 @@ class LatLon:
     This is a glorified namedtuple with additional properties to
     provide nicely-formatted results.
 
-    Numerous input and output conversions.
+    This includes input and output conversions.
 
     Output conversions as degree-minute-second, degree-minute, and degree.
     We return a tuple of two strings so that the application can use
@@ -683,32 +766,34 @@ class LatLon:
     :ivar d: A pair of D strings.
     """
 
-    def __init__( self, lat: Union[Lat, Angle, float, str], lon: Union[Lon, Angle, float, str] ) -> None:
+    def __init__(
+        self, lat: Union[Lat, Angle, float, str], lon: Union[Lon, Angle, float, str]
+    ) -> None:
         """Build a LatLon from two values.
 
         :param lat: the latitude, used to build an Angle
         :param lon: the longitude, used to build an Angle
         """
         if isinstance(lat, Lat):
-            self.lat= lat
+            self.lat = lat
         elif isinstance(lat, Angle):
-            self.lat= Lat(lat)
+            self.lat = Lat(lat)
         elif isinstance(lat, float):
-            self.lat= cast(Lat, Lat.fromdegrees(lat))
+            self.lat = cast(Lat, Lat.fromdegrees(lat))
         elif isinstance(lat, str):
-            self.lat= cast(Lat, Lat.fromstring(lat))
+            self.lat = cast(Lat, Lat.fromstring(lat))
         else:
-            raise ValueError("Can't convert {0!r}".format(lat) )
+            raise ValueError("Can't convert {0!r}".format(lat))
         if isinstance(lon, Lon):
-            self.lon= lon
+            self.lon = lon
         elif isinstance(lon, Angle):
-            self.lon= Lon(lon)
+            self.lon = Lon(lon)
         elif isinstance(lon, float):
-            self.lon= cast(Lon, Lon.fromdegrees(lon))
+            self.lon = cast(Lon, Lon.fromdegrees(lon))
         elif isinstance(lon, str):
-            self.lon= cast(Lon, Lon.fromstring(lon))
+            self.lon = cast(Lon, Lon.fromstring(lon))
         else:
-            raise ValueError("Can't convert {0!r}".format(lon) )
+            raise ValueError("Can't convert {0!r}".format(lon))
 
     lat_dms_format = "{0:%02.0d %02.0m %04.1s%h}"
     lon_dms_format = "{0:%03.0d %02.0m %04.1s%h}"
@@ -718,32 +803,34 @@ class LatLon:
     lon_d_format = "{0:%07.3d%h}"
 
     @property
-    def dms( self ) -> tuple[str, str]:
+    def dms(self) -> tuple[str, str]:
         """Long Degree Minute Second format.
 
         :returns: A pair of strings of the form :samp:`{ddd} {mm} {s.s}{h}`
         """
-        lat= LatLon.lat_dms_format.format( self.lat )
-        lon= LatLon.lon_dms_format.format( self.lon )
-        return (lat,lon)
+        lat = LatLon.lat_dms_format.format(self.lat)
+        lon = LatLon.lon_dms_format.format(self.lon)
+        return (lat, lon)
+
     @property
-    def dm( self ) -> tuple[str, str]:
+    def dm(self) -> tuple[str, str]:
         """GPS-friendly Degree Minute format.
 
         :returns: A pair of strings of the form :samp:`{ddd} {m.mmm}{h}`
         """
-        lat= LatLon.lat_dm_format.format( self.lat )
-        lon= LatLon.lon_dm_format.format( self.lon )
-        return (lat,lon)
+        lat = LatLon.lat_dm_format.format(self.lat)
+        lon = LatLon.lon_dm_format.format(self.lon)
+        return (lat, lon)
+
     @property
-    def d( self ) -> tuple[str, str]:
+    def d(self) -> tuple[str, str]:
         """GPS-friendly Degree format.
 
         :returns: A pair of strings of the form :samp:`{ddd.ddd}{h}`
         """
-        lat= LatLon.lat_d_format.format( self.lat )
-        lon= LatLon.lon_d_format.format( self.lon )
-        return (lat,lon)
+        lat = LatLon.lat_d_format.format(self.lat)
+        lon = LatLon.lon_d_format.format(self.lon)
+        return (lat, lon)
 
 
 # The International Union of Geodesy and Geophysics (IUGG) defined mean radius values
@@ -769,14 +856,18 @@ def range_bearing(p1: LatLon, p2: LatLon, R: float = NM) -> tuple[float, Angle]:
 
     """
     d_NS = R * (p2.lat.radians - p1.lat.radians)
-    d_EW = R * math.cos((p2.lat.radians+p1.lat.radians)/2) * (p2.lon.radians - p1.lon.radians)
+    d_EW = (
+        R
+        * math.cos((p2.lat.radians + p1.lat.radians) / 2)
+        * (p2.lon.radians - p1.lon.radians)
+    )
     d = math.hypot(d_NS, d_EW)
-    tc = math.atan2(d_EW, d_NS) % (2*math.pi)
+    tc = math.atan2(d_EW, d_NS) % (2 * math.pi)
     theta = Angle(tc)
     return d, theta
 
 
-def destination( p1: LatLon, range: float, bearing: float, R: float=NM) -> LatLon:
+def destination(p1: LatLon, range: float, bearing: float, R: float = NM) -> LatLon:
     """Rhumb line destination given point, range and bearing.
 
     See :ref:`calc.destination`.
@@ -790,28 +881,30 @@ def destination( p1: LatLon, range: float, bearing: float, R: float=NM) -> LatLo
         :py:data:`MI` for statute miles and :py:data:`NM` for nautical miles.
     :returns: a :py:class:`LatLon` with the ending point.
     """
-    d = range/R
+    d = range / R
     theta = math.radians(bearing)
     lat1 = p1.lat.radians
     lon1 = p1.lon.radians
-    lat2 = lat1 + d*math.cos(theta)
+    lat2 = lat1 + d * math.cos(theta)
     # check for some daft bugger going past the pole, normalize latitude if so
-    if abs(lat2) > math.pi/2:
-        lat2 = math.pi-lat2 if lat2>0 else -(math.pi-lat2)
+    if abs(lat2) > math.pi / 2:
+        lat2 = math.pi - lat2 if lat2 > 0 else -(math.pi - lat2)
     dLat = lat2 - lat1
-    if abs(dLat) < 1.0E-6:
+    if abs(dLat) < 1.0e-6:
         q = math.cos(lat1)
     else:
-        dPhi = math.log(math.tan(lat2 / 2 + math.pi / 4) / math.tan(lat1 / 2 + math.pi / 4))
+        dPhi = math.log(
+            math.tan(lat2 / 2 + math.pi / 4) / math.tan(lat1 / 2 + math.pi / 4)
+        )
         q = dLat / dPhi
 
-    dLon = d*math.sin(theta)/q
-    lon2 = ( (lon1+dLon+math.pi) % (2*math.pi) ) - math.pi
+    dLon = d * math.sin(theta) / q
+    lon2 = ((lon1 + dLon + math.pi) % (2 * math.pi)) - math.pi
 
     return LatLon(Lat(lat2), Lon(lon2))
 
 
-def declination( point: LatLon, date: Optional[datetime.date]=None ) -> float:
+def declination(point: LatLon, date: Optional[datetime.date] = None) -> float:
     """Computes standard declination for a given :py:class:`LatLon`
     point.
 
@@ -829,9 +922,9 @@ def declination( point: LatLon, date: Optional[datetime.date]=None ) -> float:
 
     if date is None:
         date = datetime.date.today()
-    first_of_year= date.replace( month=1, day=1 )
-    astro_dt_tm= date.year + (date.toordinal() - first_of_year.toordinal())/365.242
+    first_of_year = date.replace(month=1, day=1)
+    astro_dt_tm = date.year + (date.toordinal() - first_of_year.toordinal()) / 365.242
 
-    x, y, z, f = igrf11.igrf11syn( astro_dt_tm, point.lat, point.lon.east )
-    decl =  math.atan2(y, x) # Declination
+    x, y, z, f = igrf11.igrf11syn(astro_dt_tm, point.lat, point.lon.east)
+    decl = math.atan2(y, x)  # Declination
     return decl

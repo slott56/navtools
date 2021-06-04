@@ -26,9 +26,11 @@ deps =
 	pytest==6.2.4
 	pytest-cov==2.12.0
 	mypy==0.812
+	black==19.10b0
 setenv =
 	PYTHONPATH = {toxinidir}/navtools
 commands =
+	black navtools
 	python -m doctest --option ELLIPSIS navtools/analysis.py
 	python -m doctest --option ELLIPSIS navtools/igrf11.py
 	python -m doctest --option ELLIPSIS navtools/navigation.py

@@ -1,5 +1,5 @@
 ###############################################################
-Route Planning Application
+:py:mod:`navtools.planning` -- Route Planning Application
 ###############################################################
 
 ..  py:module:: planning
@@ -30,11 +30,11 @@ This module includes three groups of components.
 The `Input Parsing`_ group is the functions and a namedtuple that
 acquire input from the GPX or CSV file.
 
-The `Application Processing`_ functions and namedtuples
-compute range and true bearing, magnetic bearing, total distance run,
+The functions and namedtuples
+support computations of range and true bearing, magnetic bearing, total distance run,
 elapsed time in minutes and hours.
 
-Finally, the `Command-Line Interface`_ components are used
+Finally, the :ref:`planning-cli` components are used
 to build a proper command-line application.
 
 Input Parsing
@@ -53,6 +53,8 @@ This can make CSV parsing a bit more complex because there will be
 Unicode characters that the CSV module doesn't always handle gracefully.
 However, the patterns used for parsing tolerate the extraneous bytes
 that appear in the midst of degree-minute values.
+
+..  _`planning.cli`:
 
 Command-Line Interface
 ======================
@@ -78,6 +80,8 @@ The bearing is rounded to zero places.
     The width of your fist at arm's length is 10°. If you extend index finger and pinky,
     that's 15°. That's about as close as you can steer by hand.
 
+..  _`planning-cli`:
+
 Command-Line Interface
 ======================
 
@@ -100,4 +104,69 @@ Typical use cases for this module include the following.
 Implementation
 ==============
 
-..  automodule:: navtools.planning
+..  py:module:: navtools.planning
+
+A waypoint on a route
+---------------------
+
+..  autoclass:: RoutePoint
+    :members:
+    :undoc-members:
+
+CSV input parsing
+-----------------
+
+..  autofunction:: csv_to_RoutePoint
+
+GPX input parsing
+-----------------
+
+..  autofunction:: gpx_to_RoutePoint
+
+Point with Distance and Bearing
+-------------------------------
+
+..  autoclass:: RoutePoint_Rhumb
+
+Creating the point with distance and bearing
+--------------------------------------------
+
+..  autofunction:: gen_rhumb
+
+Point with Distance, Bearing, and Declination
+---------------------------------------------
+
+..  autoclass:: RoutePoint_Rhumb_Magnetic
+
+Creating declination
+--------------------------------------------
+
+..  autofunction:: gen_mag_bearing
+
+A Waypoint with Schedule Details
+--------------------------------
+
+..  autoclass:: SchedulePoint
+
+Building a schedule
+-------------------
+
+..  autofunction:: gen_schedule
+
+
+Writing The CSV Output
+----------------------
+
+..  autofunction:: nround
+
+..  autofunction:: write_csv
+
+The :py:func:`plan` application
+----------------------------------
+
+..  autofunction:: plan
+
+The :py:func:`main` CLI
+-----------------------
+
+..  autofunction:: main

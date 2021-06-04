@@ -32,6 +32,18 @@ This is a pair of logical layouts in a single CSV physical format file.
 We have an overall :class:`Route` object, and the detailed :class:`Leg` objects.
 These, in turn, have some specialized data types, including :class:`Duration`,
 :class:`Latitude` and :class:`Longitude`.
+
+Command-Line Interface
+=======================
+
+This writes to stdout.
+Most of the time, you'll use it like this
+
+::
+
+    python navtools/opencpn_table.py my_input.csv >more_useful.csv
+
+
 """
 from __future__ import annotations
 import abc
@@ -52,21 +64,48 @@ class Leg:
     """
 
     def __init__(self, details: dict[str, str]) -> None:
+        """Transform a line of CSV data from the input document into a Leg."""
         try:
             self.leg = int(details["Leg"]) if details["Leg"] != "---" else 0
             self.to_waypoint = details["To waypoint"]
-            self.distance = float(m.group(1)) if (m:=re.match(r"\s*(\d+\.?\d*)\s\w+", details["Distance"])) is not None else None
-            self.bearing = float(m.group(1)) if (m:=re.match(r"\s*(\d+)\s.\w+", details["Bearing"])) is not None else None
+            self.distance = (
+                float(m.group(1))
+                if (m := re.match(r"\s*(\d+\.?\d*)\s\w+", details["Distance"]))
+                is not None
+                else None
+            )
+            self.bearing = (
+                float(m.group(1))
+                if (m := re.match(r"\s*(\d+)\s.\w+", details["Bearing"])) is not None
+                else None
+            )
             self.lat = Latitude.parse(details["Latitude"])
             self.lon = Longitude.parse(details["Longitude"])
             self.ETE = Duration.parse(details["ETE"])
-            eta_time, eta_summary = m.groups() if (m:=re.match(r"(?:Start: )?(.{16})\s\((\w+)\)", details["ETA"])) is not None else ("", "")
-            self.ETA = datetime.datetime.strptime(eta_time, "%m/%d/%Y %H:%M") if eta_time else None
+            eta_time, eta_summary = (
+                m.groups()
+                if (m := re.match(r"(?:Start: )?(.{16})\s\((\w+)\)", details["ETA"]))
+                is not None
+                else ("", "")
+            )
+            self.ETA = (
+                datetime.datetime.strptime(eta_time, "%m/%d/%Y %H:%M")
+                if eta_time
+                else None
+            )
             self.ETA_summary = eta_summary
             self.speed = float(details["Speed"])
             self.tide = details["Next tide event"]
             self.description = details["Description"]
-            self.course = (float(m.group(1)) if (m:=re.match(r"\s*(\d+)\s.\w+", details["Course"])) is not None else None) if details["Course"] != "Arrived" else None
+            self.course = (
+                (
+                    float(m.group(1))
+                    if (m := re.match(r"\s*(\d+)\s.\w+", details["Course"])) is not None
+                    else None
+                )
+                if details["Course"] != "Arrived"
+                else None
+            )
         except (KeyError, ValueError) as ex:
             print(f"Invalid {details} {ex!r}")
             raise
@@ -87,11 +126,10 @@ class Leg:
     }
 
     def asdict(self) -> dict[str, str]:
-        r = {
-            k: str(attr_func(self))
-            for k, attr_func in self.attr_names.items()
-        }
+        """Emits a Leg as a dictionary."""
+        r = {k: str(attr_func(self)) for k, attr_func in self.attr_names.items()}
         return r
+
 
 class Route:
     """
@@ -100,12 +138,30 @@ class Route:
     The values of Speed and Departure are inputs, actually.
     The Name, Depart From, and Destination attributes are the most valuable.
     """
-    def __init__(self, summary: dict[str, str], details: Iterable[dict[str, str]]) -> None:
+
+    def __init__(
+        self, summary: dict[str, str], details: Iterable[dict[str, str]]
+    ) -> None:
+        """Parse the heading dictionary and the sequence of legs into a Route document."""
         self.summary = summary
         self.legs = [Leg(d) for d in details]
 
     @classmethod
     def load(cls, path: Path) -> "Route":
+        """
+        Loads a Route from a given CSV file.
+        This breaks the CSV into three parts:
+
+        - The heading rows. These one or two columns.
+
+        - A blank row.
+
+        - The leg rows, which have a large number of columns.
+
+
+        :param path: the Path to a CSV file.
+        :returns: Route
+        """
         with path.open("r") as source:
             rdr = csv.reader(source, delimiter="\t")
             title = next(rdr)
@@ -125,10 +181,9 @@ class Route:
                     # We may want to "\t".join(line[1:])
                     raise ValueError("Unparsable summary line {line!r}")
             details_header = next(rdr)
-            details = (
-                dict(zip(details_header, row)) for row in rdr
-            )
+            details = (dict(zip(details_header, row)) for row in rdr)
             return Route(summary, details)
+
 
 @dataclass
 class Duration:
@@ -136,7 +191,11 @@ class Duration:
     A duration in days, hours, minutes, and seconds.
 
     We map between hours or minutes as float and (d, h, m, s) duration values.
+
+    To an extent, this is similar to :py:class:`datetime.timedelta`.
+    It supports simple math to add and subtract durations.
     """
+
     d: int = 0
     h: int = 0
     m: int = 0
@@ -144,21 +203,29 @@ class Duration:
 
     @classmethod
     def parse(cls, text: str) -> "Duration":
-        raw = {match.group(2).lower(): int(match.group(1))
-               for match in re.finditer("(\d+)([dHMS])", text)}
+        """
+        Parses a duration field into days, hours, minutes, and seconds.
+
+        :param text: a string with digits and unit labels of "d", "H", "M", or "S".
+        :returns: Duration
+        """
+        raw = {
+            match.group(2).lower(): int(match.group(1))
+            for match in re.finditer("(\d+)([dHMS])", text)
+        }
         return cls(**raw)
 
     def __add__(self, other: Any) -> "Duration":
-        m1 = ((self.d*24+self.h)*60+self.m)*60+self.s
-        m2 = ((other.d*24+other.h)*60+other.m)*60+other.s
+        m1 = ((self.d * 24 + self.h) * 60 + self.m) * 60 + self.s
+        m2 = ((other.d * 24 + other.h) * 60 + other.m) * 60 + other.s
         d_h_m, s = divmod(m1 + m2, 60)
         d_h, m = divmod(d_h_m, 60)
         d, h = divmod(d_h, 24)
         return Duration(d, h, m, s)
 
     def __sub__(self, other: Any) -> "Duration":
-        m1 = ((self.d*24+self.h)*60+self.m)*60+self.s
-        m2 = ((other.d*24+other.h)*60+other.m)*60+other.s
+        m1 = ((self.d * 24 + self.h) * 60 + self.m) * 60 + self.s
+        m2 = ((other.d * 24 + other.h) * 60 + other.m) * 60 + other.s
         d_h_m, s = divmod(m1 - m2, 60)
         d_h, m = divmod(d_h_m, 60)
         d, h = divmod(d_h, 24)
@@ -166,35 +233,47 @@ class Duration:
 
     @property
     def days(self) -> float:
-        """Duration as a single float in days"""
-        return self.d + self.h/24 + self.m/24/60 + self.s/24/60/60
+        """:returns: a single float in days"""
+        return self.d + self.h / 24 + self.m / 24 / 60 + self.s / 24 / 60 / 60
 
     @property
     def hours(self) -> float:
-        """Duration as a single float in hours"""
-        return self.d*24 + self.h + self.m/60 + self.m/60/60
+        """:returns: a single float in hours"""
+        return self.d * 24 + self.h + self.m / 60 + self.m / 60 / 60
 
     @property
     def minutes(self) -> float:
-        """Duration as a single float in minutes"""
-        return (self.d*24 + self.h)*60 + self.m + self.s/60
+        """:returns: a single float in minutes"""
+        return (self.d * 24 + self.h) * 60 + self.m + self.s / 60
 
     def __str__(self) -> str:
         """Numbers-friendly tags on hours, minutes and seconds."""
         return f"{self.d:d}d {self.h:02d}h {self.m:02d}m {self.s:02d}s"
+
 
 @dataclass
 class Point:
     """
     Superclass for Latitude and Longitude.
     """
+
     deg: int
     min: float
     h: str
 
     @classmethod
     def parse(cls, text: str) -> "Point":
-        deg, min, hem = m.groups() if (m:=re.match(r"\s*(\d+)\D\s(\d+\.?\d*)\D\s([EWNS])", text)) is not None else ("0", "0", "?")
+        """
+        Parses text in one OpenCPN format: int ° float ' hemisphere.
+
+        :param text: Latitude or Longitude text
+        :returns: Point
+        """
+        deg, min, hem = (
+            m.groups()
+            if (m := re.match(r"\s*(\d+)\D\s(\d+\.?\d*)\D\s([EWNS])", text)) is not None
+            else ("0", "0", "?")
+        )
         return cls(int(deg), float(min), hem)
 
     def __str__(self) -> str:
@@ -213,7 +292,9 @@ class Longitude(Point):
 
 def to_html(route: Route) -> None:
     """
-    Print an HTML version of the supplied OpenCPN data.
+    Prints an HTML version of the supplied OpenCPN data.
+
+    :param route: a Route object.
     """
     print(f"<table>")
     for k, v in route.summary.items():
@@ -232,26 +313,40 @@ def to_html(route: Route) -> None:
         print()
     print(f"</table>")
 
+
 def to_csv(route: Route) -> None:
-    """Convert OpenCPN to a more spreadsheet friendly format."""
+    """
+    Converts OpenCPN to a more spreadsheet friendly format.
+    Writes to stdout.
+
+    :param route: a Route object.
+    """
     writer = csv.DictWriter(sys.stdout, list(Leg.attr_names.keys()))
     writer.writeheader()
     writer.writerows(row.asdict() for row in route.legs)
 
+
 def main(argv: list[str]) -> None:
-    parser= argparse.ArgumentParser()
-    parser.add_argument('-f', '--format', choices=("csv", "html"), action='store', default='csv')
-    parser.add_argument( 'source', nargs='*', type=Path )
+    """
+    Reads an OpenCPN route plan, and reformats it
+    so it's easier to load into a spreadsheet.
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-f", "--format", choices=("csv", "html"), action="store", default="csv"
+    )
+    parser.add_argument("source", nargs="*", type=Path)
     args = parser.parse_args(argv)
 
     for file in args.source:
         route = Route.load(file)
-        if args.format == 'csv':
+        if args.format == "csv":
             to_csv(route)
-        elif args.format == 'html':
+        elif args.format == "html":
             to_html(route)
         else:  # pragma: no cover
             raise RuntimeError("Faulty if")
 
+
 if __name__ == "__main__":  # pragma: no cover
-    main([str(Path.cwd()/"data" / "beaufort to st marys.txt")])
+    main([str(Path.cwd() / "data" / "beaufort to st marys.txt")])

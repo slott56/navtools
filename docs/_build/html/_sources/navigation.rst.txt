@@ -1,15 +1,16 @@
 ###############################################################
-Navigation Calculations Module
+:mod:`navtools.navigation` -- Navigation Calculations Module
 ###############################################################
 .. include:: <isonum.txt>
 
-The :mod:`navigation` module computes range and bearing between two points.
-It leverages the :mod:`igrf11` module to compute compass bearing from
+The :py:mod:`navtools.navigation` module computes range and bearing between two points.
+It leverages the :py:mod:`navtools.igrf11` module to compute compass bearing from
 true bearing.
 
-See the Aviation Formulary: http://edwilliams.org/avform147.htm
+See the Aviation Formulary: http://edwilliams.org/avform147.htm for a number of useful formulae
+and examples.
 
-Also see http://www.movable-type.co.uk/scripts/latlong.html, |copy| 2002-2010 Chris Veness
+Also see http://www.movable-type.co.uk/scripts/latlong.html, |copy| 2002-2010 Chris Veness.
 
 ..  _`calc.range_bearing`:
 
@@ -27,6 +28,8 @@ the :math:`\phi` values are N-S latitude, and :math:`\lambda` values are E-W lon
 This means :math:`(\phi_0, \lambda_0)` and :math:`(\phi_1, \lambda_1)`
 are the two points we're navigating between.
 
+The distance, :math:`d`, is given by the following computation:
+
 ..  math::
 
     x &= R \times \Delta \lambda \times \cos \frac{\Delta \phi}{2} \\
@@ -34,7 +37,11 @@ are the two points we're navigating between.
     d &= \sqrt{x^2 + y^2}
 
 We *could* fine-tune this with :math:`R_y` and :math:`R_x` radius
-of curvature values. We don't need answers closer than 10%, so we skip this.
+of curvature values. We don't need answers closer than 10%, so we skip this
+in the implementation.
+
+The implementation does not compute the :math:`R_y`  flattening effect on the north-south component of a distance;
+nor does it compute the :math:`R_x` flattening effect on east-west component of a distance.
 
 ..  math::
 
@@ -47,10 +54,10 @@ Where
 
 - a=6378.137000 km for WGS84
 - a=3958.761 miles
-- a=3440.069 nautical miles, but 180*60/pi is more useful.
+- a=3440.069 nautical miles, but 180*60/pi can be more useful.
 
 
-``e^2=f*(2-f)`` with the flattening, f=1/298.257223563 for WGS84.
+``e^2=f*(2-f)`` is a function of the flattening factor, f=1/298.257223563, for WGS84.
 
 ..  math::
 
@@ -66,7 +73,9 @@ Example
 ----------
 
 Suppose point 1 is LAX: (33deg 57min N, 118deg 24min W)
+
 Suppose point 2 is JFK: (40deg 38min N,  73deg 47min W)
+
 d = 0.629650 radians = 2164.6 nm
 theta = 1.384464 radians = 79.32 degrees
 
@@ -119,10 +128,61 @@ The steps:
 Implementation
 ==============
 
-..  automodule:: navtools.navigation
-    :members:
-    :special-members:
+..  py:module:: navtools.navigation
 
+AngleParser
+-----------
+
+..  autoclass:: AngleParser
+    :members:
+    :undoc-members:
+
+Angle class hierarchy
+---------------------
+
+The superclass, :py:class:`navtools.navigation.Angle`.
+
+..  autoclass:: Angle
+    :members:
+    :undoc-members:
+
+The Latitude subclass, :py:class:`navtools.navigation.Lat`.
+
+..  autoclass:: Lat
+    :members:
+
+The Longitude subclass, :py:class:`navtools.navigation.Lon`.
+
+..  autoclass:: Lon
+    :members:
+
+LatLon point
+------------
+
+..  autoclass:: LatLon
+    :members:
+
+Globals
+-------
+
+..  py:data:: KM
+..  py:data:: MI
+..  py:data:: NM
+
+range and bearing
+-----------------
+
+..  autofunction:: range_bearing
+
+destination
+-----------
+
+..  autofunction:: destination
+
+declination (or variance)
+-------------------------
+
+..  autofunction:: declination
 
 
 Historical Archive
