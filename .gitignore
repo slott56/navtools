@@ -64,3 +64,7 @@ target/
 
 # Files to be ignored in the project
 docs_orig/*
+data/2021 opencpn waypoints.gpx
+data/2021 opencpn waypoints.gpx
+data/WaypointsRoutesTracks-2021.gpx
+data/WaypointsRoutesTracks.usr

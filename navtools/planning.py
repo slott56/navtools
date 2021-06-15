@@ -59,7 +59,17 @@ def csv_to_RoutePoint(source: TextIO) -> Iterator[RoutePoint]:
 
 def gpx_to_RoutePoint(source: TextIO) -> Iterator[RoutePoint]:
     """
-    Generate an iterable sequence of :py:class:`RoutePoint` objects an XML doc.
+    Generates :py:class:`RoutePoint` onjects from a GPX doc.
+
+    We assume a minimal schema:
+
+    -   ``<rte>`` contains
+
+        -   ``<rtept lat="" lon="">`` contains
+
+            -   ``<name>``
+
+            -   ``<desc>``
 
     :param source: an open XML file.
     :returns: An iterator over :py:class:`RoutePoint` objects.

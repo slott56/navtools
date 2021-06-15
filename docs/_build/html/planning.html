@@ -213,7 +213,20 @@ that appear in the midst of degree-minute values.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="navtools.planning.gpx_to_RoutePoint">
 <span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">gpx_to_RoutePoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">TextIO</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.planning.RoutePoint" title="navtools.planning.RoutePoint"><span class="pre">navtools.planning.RoutePoint</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.planning.gpx_to_RoutePoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate an iterable sequence of <a class="reference internal" href="#navtools.planning.RoutePoint" title="navtools.planning.RoutePoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutePoint</span></code></a> objects an XML doc.</p>
+<dd><p>Generates <a class="reference internal" href="#navtools.planning.RoutePoint" title="navtools.planning.RoutePoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutePoint</span></code></a> onjects from a GPX doc.</p>
+<p>We assume a minimal schema:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;rte&gt;</span></code> contains</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;rtept</span> <span class="pre">lat=&quot;&quot;</span> <span class="pre">lon=&quot;&quot;&gt;</span></code> contains</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;desc&gt;</span></code></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>source</strong> – an open XML file.</p>
@@ -591,6 +604,9 @@ output file with the detailed schedule.</p>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.planning</span></code> – Route Planning Application</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.analysis</span></code> – Track Analysis Application</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opencpn_table.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.opencpn_table</span></code> – OpenCPN Table Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lowrance_usr.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.lowrance_usr</span></code> – Lowrance USR File Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="olc.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.olc</span></code> – OLC Geocoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.waypoint_merge</span></code> – Waypoint and Route Merge</a></li>
 <li class="toctree-l1"><a class="reference internal" href="igrf11.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf11</span></code> – International Geomagnetic Reference Field Module</a></li>
 </ul>
 

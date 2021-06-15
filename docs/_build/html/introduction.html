@@ -55,7 +55,7 @@ tide and current are accounted for, as well as adverse weather.</p>
 <li><p>Paper charts.  A mixture of old and new.</p></li>
 <li><p>The Jeppesen C-Map charts (<a class="reference external" href="http://www.c-map.com/">http://www.c-map.com/</a>) on an
 electronic chart plotter.</p></li>
-<li><p>Several copies of and GPSNavX (<a class="reference external" href="http://www.gpsnavx.com/">http://www.gpsnavx.com/</a>) and iNavX with the latest charts
+<li><p>Several copies of and OpenCPN (<a class="reference external" href="https://opencpn.org">https://opencpn.org</a>) and iNavX (<a class="reference external" href="http://www.inavx.com">http://www.inavx.com</a>) with the latest charts
 downloaded  from NOAA.  (<a class="reference external" href="http://www.charts.noaa.gov/RNCs/RNCs.shtml">http://www.charts.noaa.gov/RNCs/RNCs.shtml</a>)</p></li>
 </ul>
 <p>It’s not simple to sketch a route on an electronic chart and transform this into
@@ -71,11 +71,12 @@ that she is on course.</p>
 <li><p>Paper charts and standard piloting techniques like dead reckoning,
 lines of position and course lines.</p></li>
 <li><p>Electronic Chartplotter in the cockpit.
+(B&amp;G <a class="reference external" href="https://www.bandg.com/bg/type/chartplotter/bg-zeus3-9-mfdinsight">Zeus2</a>)</p></li>
+<li><p>Backup Chartplotter at the nav station.
 (Standard Horizon <a class="reference external" href="http://www.standardhorizon.com/indexVS.cfm?cmd=DisplayProducts&amp;ProdCatID=84&amp;encProdID=491E084FB06B41812BEEF96C77A4A8E2&amp;DivisionID=3&amp;isArchived=1">CP180i</a>)</p></li>
-<li><p>GPSNavX on a MacBook Pro with its own GPS antenna (entirely separate from
-the chartplotter). (<a class="reference external" href="http://www.gpsnavx.com">http://www.gpsnavx.com</a>)</p></li>
 <li><p>iNavX on a iPhones and iPad (<a class="reference external" href="http://www.inavx.com">http://www.inavx.com</a>).
-This uses a separate Dual XGPS 150 antenna (<a class="reference external" href="http://gps.dualav.com/explore-by-product/xgps150a/">http://gps.dualav.com/explore-by-product/xgps150a/</a>).</p></li>
+These use a separate Dual XGPS 150 antenna (<a class="reference external" href="http://gps.dualav.com/explore-by-product/xgps150a/">http://gps.dualav.com/explore-by-product/xgps150a/</a>).</p></li>
+<li><p>OpenCPN on a MacBook Pro. (<a class="reference external" href="http://opencpn.org">http://opencpn.org</a>)</p></li>
 </ul>
 <p>All this tells where S/V <em>Red Ranger</em> is.
 The important gap here is in contingency planning: knowing where
@@ -306,10 +307,14 @@ passed along the track as well as lights near each waypoint is challenging.</p>
 magnetic declination.</p>
 <p>The International Union of Geodesy and Geophysics (IUGG) defines mean radius values.
 This is used to convert angles to distances.</p>
-<p>GPX format is described here: <a class="reference external" href="http://www.topografix.com/gpx.asp">http://www.topografix.com/gpx.asp</a></p>
-<p>Here’s the official GPX schema: <a class="reference external" href="http://www.topografix.com/GPX/1/1/">http://www.topografix.com/GPX/1/1/</a></p>
-<p>See <a class="reference external" href="http://williams.best.vwh.net/avform.htm">http://williams.best.vwh.net/avform.htm</a></p>
+<p>GPX format is described here: <a class="reference external" href="http://www.topografix.com/gpx.asp">http://www.topografix.com/gpx.asp</a>
+Here’s the official GPX schema: <a class="reference external" href="http://www.topografix.com/GPX/1/1/">http://www.topografix.com/GPX/1/1/</a></p>
+<p>See the Aviation Formulary: <a class="reference external" href="http://edwilliams.org/avform147.htm">http://edwilliams.org/avform147.htm</a> for a number of useful formulae
+and examples.</p>
 <p>See <a class="reference external" href="http://www.movable-type.co.uk/scripts/latlong.html">http://www.movable-type.co.uk/scripts/latlong.html</a>, © 2002-2010 Chris Veness</p>
+<p>The Lowrance USR file format is described
+by the working GPSBabel code. See <a class="reference external" href="https://www.gpsbabel.org/htmldoc-1.7.0/fmt_lowranceusr.html">https://www.gpsbabel.org/htmldoc-1.7.0/fmt_lowranceusr.html</a></p>
+<p>The OLC Geocoding is described here: See <a class="reference external" href="https://github.com/google/open-location-code/blob/main/docs/specification.md">https://github.com/google/open-location-code/blob/main/docs/specification.md</a></p>
 </section>
 
 
@@ -353,6 +358,9 @@ This is used to convert angles to distances.</p>
 <li class="toctree-l1"><a class="reference internal" href="planning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.planning</span></code> – Route Planning Application</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.analysis</span></code> – Track Analysis Application</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opencpn_table.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.opencpn_table</span></code> – OpenCPN Table Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lowrance_usr.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.lowrance_usr</span></code> – Lowrance USR File Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="olc.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.olc</span></code> – OLC Geocoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.waypoint_merge</span></code> – Waypoint and Route Merge</a></li>
 <li class="toctree-l1"><a class="reference internal" href="igrf11.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf11</span></code> – International Geomagnetic Reference Field Module</a></li>
 </ul>
 

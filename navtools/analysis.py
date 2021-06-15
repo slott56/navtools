@@ -111,11 +111,18 @@ def parse_date(date: str, default: Optional[datetime.date] = None) -> datetime.d
 
 
 class LogEntry(NamedTuple):
+    """
+    A point on a track.
+
+    The source_row is the source data. For CSV files, it's untouched.
+    For GPX files, it's lightly massaged to flatten out the attributes of the ``<trkpt>`` tag.
+    """
+
     time: datetime.datetime
     lat: Union[str, navigation.Angle]
     lon: Union[str, navigation.Angle]
     point: navigation.LatLon
-    source_row: dict[str, Any]  # The original source row!
+    source_row: dict[str, Any]
 
 
 def csv_to_LogEntry(
@@ -202,7 +209,9 @@ def csv_to_LogEntry(
 
 
 def gpx_to_LogEntry(source: TextIO) -> Iterator[LogEntry]:
-    """Generate LogEntry from an GPX doc.
+    """
+    Generates :py:class:`LogEntry` onjects from a GPX doc.
+    These should perhaps be called "TrackPoints" to better match the GPX tags.
 
     We assume a minimal schema:
 
@@ -219,6 +228,29 @@ def gpx_to_LogEntry(source: TextIO) -> Iterator[LogEntry]:
     :param source: an open XML file.
     :returns: An iterator over :py:class:`LogEntry` objects.
     """
+
+    def xml_to_tuples(pt: xml.etree.ElementTree.Element) -> Iterator[tuple[str, str]]:
+        """
+        Walks elements within an XML container tag, transforming all
+        ``<tag attr="avalue">text</tag>`` into a Python ``('tag', 'text'), ('attr', 'avalue')``.
+
+        This flattens an XML structure into a dict[str, str], suitable for CSV processing.
+
+        This is **not** recursive. It is intentionally flat, and is used to collect
+        simple structures into a Pythonic structure.
+
+        :param pt: an XML structure with a number of children to process.
+        :returns: iterable over (tag, text) tuples and (attr, value) tuples.
+        """
+        for e in pt.iter():
+            ns, _, tag = e.tag.partition("}")
+            text = e.text.strip() if e.text else ""
+            if text:
+                yield tag, text
+            else:
+                for name, value in e.items():
+                    yield name, value
+
     gpx_ns = "http://www.topografix.com/GPX/1/1"
     path = "/".join(
         n.text
@@ -244,29 +276,10 @@ def gpx_to_LogEntry(source: TextIO) -> Iterator[LogEntry]:
         dt = datetime.datetime.strptime(raw_dt, "%Y-%m-%dT%H:%M:%SZ").replace(
             tzinfo=datetime.timezone.utc
         )
-        row_dict = dict(xml_to_pairs(pt))
+        row_dict = dict(xml_to_tuples(pt))
         yield LogEntry(
             dt, lat, lon, point, row_dict,
         )
-
-
-def xml_to_pairs(pt: xml.etree.ElementTree.Element) -> Iterator[tuple[str, str]]:
-    """
-    Transforms a sequence of XML ``<tag>value</tag>`` into a Python ``('tag', 'value')``
-    sequence. This can be used to build a dictionary with a ``{'tag': 'value'}``
-    structure.
-
-    :param pt: an XML structure with a number of children to process.
-    :returns: iterable over (tag, text) tuples.
-    """
-    for e in pt.iter():
-        ns, _, tag = e.tag.partition("}")
-        text = e.text.strip() if e.text else ""
-        if text:
-            yield tag, text
-        else:
-            for attr in e.items():
-                yield attr
 
 
 class LogEntry_Rhumb(NamedTuple):

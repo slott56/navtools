@@ -26,7 +26,7 @@ For route planning, S/V *Red Ranger* carries three copies of the NOAA charts.
 -   The Jeppesen C-Map charts (http://www.c-map.com/) on an
     electronic chart plotter.
 
--   Several copies of and GPSNavX (http://www.gpsnavx.com/) and iNavX with the latest charts
+-   Several copies of and OpenCPN (https://opencpn.org) and iNavX (http://www.inavx.com) with the latest charts
     downloaded  from NOAA.  (http://www.charts.noaa.gov/RNCs/RNCs.shtml)
 
 It's not simple to sketch a route on an electronic chart and transform this into
@@ -47,13 +47,15 @@ that she is on course.
     lines of position and course lines.
 
 -   Electronic Chartplotter in the cockpit.
+    (B&G `Zeus2 <https://www.bandg.com/bg/type/chartplotter/bg-zeus3-9-mfdinsight>`_)
+
+-   Backup Chartplotter at the nav station.
     (Standard Horizon `CP180i <http://www.standardhorizon.com/indexVS.cfm?cmd=DisplayProducts&ProdCatID=84&encProdID=491E084FB06B41812BEEF96C77A4A8E2&DivisionID=3&isArchived=1>`_)
 
--   GPSNavX on a MacBook Pro with its own GPS antenna (entirely separate from
-    the chartplotter). (http://www.gpsnavx.com)
-
 -   iNavX on a iPhones and iPad (http://www.inavx.com).
-    This uses a separate Dual XGPS 150 antenna (http://gps.dualav.com/explore-by-product/xgps150a/).
+    These use a separate Dual XGPS 150 antenna (http://gps.dualav.com/explore-by-product/xgps150a/).
+
+-   OpenCPN on a MacBook Pro. (http://opencpn.org)
 
 All this tells where S/V *Red Ranger* is.
 The important gap here is in contingency planning: knowing where
@@ -332,9 +334,15 @@ The International Union of Geodesy and Geophysics (IUGG) defines mean radius val
 This is used to convert angles to distances.
 
 GPX format is described here: http://www.topografix.com/gpx.asp
-
 Here's the official GPX schema: http://www.topografix.com/GPX/1/1/
 
-See http://williams.best.vwh.net/avform.htm
+See the Aviation Formulary: http://edwilliams.org/avform147.htm for a number of useful formulae
+and examples.
 
 See http://www.movable-type.co.uk/scripts/latlong.html, |copy| 2002-2010 Chris Veness
+
+The Lowrance USR file format is described
+by the working GPSBabel code. See https://www.gpsbabel.org/htmldoc-1.7.0/fmt_lowranceusr.html
+
+The OLC Geocoding is described here: See https://github.com/google/open-location-code/blob/main/docs/specification.md
+

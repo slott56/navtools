@@ -11,12 +11,12 @@ Installation
 
 The NavTools distribution includes the following.
 
--   :file:`navtools`. The Python code which gets installed.
+-   ``navtools``. The Python code which gets installed.
 
--   :file:`igrf11coeffs.txt`. Data used to compute magnetic deviation.
+-   ``igrf11coeffs.txt``. Data used to compute magnetic deviation.
     This is from http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt
 
--   :file:`docs`.  The RST-formatted documentation files.
+-   ``docs``.  The RST-formatted documentation files.
 
 Clone the Git repository (or download the .zip archive).
 
@@ -39,10 +39,10 @@ Use
 There are three sample applications that process ``.gpx`` or ``.csv``
 files:
 
--   Route Planning: http://slott56.github.io/navtools/planning.html
+-   Route Planning: https://slott56.github.io/navtools/_build/html/planning.html>`_
     computes a schedule for arrival at the various waypoints.
 
--   Track Analysis: http://slott56.github.io/navtools/analysis.html
+-   Track Analysis: https://slott56.github.io/navtools/_build/html/analysis.html
     annotates a historical log with distance and speed.
 
 -   OpenCPN Conversion: transforms an OpenCPN route planning table into

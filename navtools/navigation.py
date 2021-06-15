@@ -212,6 +212,12 @@ import string
 from typing import Optional, Any, overload, Union, cast
 
 
+# The International Union of Geodesy and Geophysics (IUGG) defined mean radius values
+KM = 6371.009  # R in km
+MI = 3958.761  # R in mi
+NM = 3440.069  # R in nm, better value is 60*180/pi
+
+
 class AngleParser:
     """Parse a sting representation of a latitude or longitude.
 
@@ -512,7 +518,7 @@ class Angle(float):
         To make this work, we note the pattern of  ``{'d', 'm', 's'}``, or ``{'d', 'm'}``, or ``{'d'}``
         and determine the appropriate mix of int or float values to include.
         """
-        if spec == "" or spec is None:
+        if spec is None or spec == "" or spec == "s":
             return "{d:f}", {"d"}
         else:
             used: set[str] = set()
@@ -693,6 +699,14 @@ class Lat(Angle):
     37.1234
     """
 
+    @classmethod
+    def fromdegrees(cls, deg: float, hemisphere: Optional[str] = None) -> "Lat":
+        return Lat(super().fromdegrees(deg, hemisphere))
+
+    @classmethod
+    def fromstring(cls, value: str) -> "Lat":
+        return Lat(super().fromstring(value))
+
     @property
     def d(self) -> float:
         """:returns: Latitude in degrees."""
@@ -728,6 +742,14 @@ class Lon(Angle):
     >>> round(b.degrees,4)
     -76.5678
     """
+
+    @classmethod
+    def fromdegrees(cls, deg: float, hemisphere: Optional[str] = None) -> "Lon":
+        return Lon(super().fromdegrees(deg, hemisphere))
+
+    @classmethod
+    def fromstring(cls, value: str) -> "Lon":
+        return Lon(super().fromstring(value))
 
     @property
     def d(self) -> float:
@@ -779,9 +801,9 @@ class LatLon:
         elif isinstance(lat, Angle):
             self.lat = Lat(lat)
         elif isinstance(lat, float):
-            self.lat = cast(Lat, Lat.fromdegrees(lat))
+            self.lat = Lat.fromdegrees(lat)
         elif isinstance(lat, str):
-            self.lat = cast(Lat, Lat.fromstring(lat))
+            self.lat = Lat.fromstring(lat)
         else:
             raise ValueError("Can't convert {0!r}".format(lat))
         if isinstance(lon, Lon):
@@ -789,9 +811,9 @@ class LatLon:
         elif isinstance(lon, Angle):
             self.lon = Lon(lon)
         elif isinstance(lon, float):
-            self.lon = cast(Lon, Lon.fromdegrees(lon))
+            self.lon = Lon.fromdegrees(lon)
         elif isinstance(lon, str):
-            self.lon = cast(Lon, Lon.fromstring(lon))
+            self.lon = Lon.fromstring(lon)
         else:
             raise ValueError("Can't convert {0!r}".format(lon))
 
@@ -832,11 +854,20 @@ class LatLon:
         lon = LatLon.lon_d_format.format(self.lon)
         return (lat, lon)
 
+    def __str__(self) -> str:
+        return f"{self.lat!s} {self.lon!s}"
 
-# The International Union of Geodesy and Geophysics (IUGG) defined mean radius values
-KM = 6371.009  # R in km
-MI = 3958.761  # R in mi
-NM = 3440.069  # R in nm, better value is 60*180/pi
+    def __repr__(self) -> str:
+        return f"LatLon({self.lat!r}, {self.lon!r})"
+
+    def near(self, other: "LatLon", R: float = NM) -> float:
+        """
+        Distance from another point.
+        This can be expensive to compute, a geocode
+        to do proximity tests can be more efficient.
+        """
+        r, b = range_bearing(self, other, R=R)
+        return r
 
 
 def range_bearing(p1: LatLon, p2: LatLon, R: float = NM) -> tuple[float, Angle]:

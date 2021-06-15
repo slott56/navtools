@@ -57,11 +57,14 @@ Where
 - a=3440.069 nautical miles, but 180*60/pi can be more useful.
 
 
-``e^2=f*(2-f)`` is a function of the flattening factor, f=1/298.257223563, for WGS84.
+``e^2=f*(2-f)`` is the eccentricity, a function of the flattening factor, f=1/298.257223563, for WGS84.
 
 ..  math::
 
     e^2 = f\times(2-f) = 0.0066943799901413165
+
+See https://en.wikipedia.org/wiki/World_Geodetic_System for more details.
+
 
 The bearing, :math:`\theta` is given by this formula.
 

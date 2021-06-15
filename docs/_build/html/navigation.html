@@ -71,9 +71,10 @@ R_x &amp;= a \times \frac{1}{\sqrt{1 - e^2 \times \sin(\phi_0)^2}}\end{split}\]<
 <li><p>a=3958.761 miles</p></li>
 <li><p>a=3440.069 nautical miles, but 180*60/pi can be more useful.</p></li>
 </ul>
-<p><code class="docutils literal notranslate"><span class="pre">e^2=f*(2-f)</span></code> is a function of the flattening factor, f=1/298.257223563, for WGS84.</p>
+<p><code class="docutils literal notranslate"><span class="pre">e^2=f*(2-f)</span></code> is the eccentricity, a function of the flattening factor, f=1/298.257223563, for WGS84.</p>
 <div class="math notranslate nohighlight">
 \[e^2 = f\times(2-f) = 0.0066943799901413165\]</div>
+<p>See <a class="reference external" href="https://en.wikipedia.org/wiki/World_Geodetic_System">https://en.wikipedia.org/wiki/World_Geodetic_System</a> for more details.</p>
 <p>The bearing, <span class="math notranslate nohighlight">\(\theta\)</span> is given by this formula.</p>
 <div class="math notranslate nohighlight">
 \[\theta = \arctan \frac{x} {y} \mod 2 \pi\]</div>
@@ -432,6 +433,72 @@ Two digits as the default format for degrees.</p>
 <span class="go">37.1234</span>
 </pre></div>
 </div>
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.navigation.Lat.fromdegrees">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">fromdegrees</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deg</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hemisphere</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#navtools.navigation.Lat" title="navtools.navigation.Lat"><span class="pre">navtools.navigation.Lat</span></a><a class="headerlink" href="#navtools.navigation.Lat.fromdegrees" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an <a class="reference internal" href="#navtools.navigation.Angle" title="navtools.navigation.Angle"><code class="xref py py-class docutils literal notranslate"><span class="pre">Angle</span></code></a> from a numeric value,
+which must be degrees.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>deg</strong> – numeric degrees value.</p></li>
+<li><p><strong>hemisphere</strong> – sign value, which can be encoded as
+“N”, “S”, “E”, or “W”. If omitted, it’s positive.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference internal" href="#navtools.navigation.Angle" title="navtools.navigation.Angle"><code class="xref py py-class docutils literal notranslate"><span class="pre">Angle</span></code></a> object.</p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">Angle</span><span class="o">.</span><span class="n">fromdegrees</span><span class="p">(</span><span class="mi">45</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="go">0.7854</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">Angle</span><span class="o">.</span><span class="n">fromdegrees</span><span class="p">(</span><span class="mf">23.456</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="go">0.4094</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.navigation.Lat.fromstring">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">fromstring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#navtools.navigation.Lat" title="navtools.navigation.Lat"><span class="pre">navtools.navigation.Lat</span></a><a class="headerlink" href="#navtools.navigation.Lat.fromstring" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an <a class="reference internal" href="#navtools.navigation.Angle" title="navtools.navigation.Angle"><code class="xref py py-class docutils literal notranslate"><span class="pre">Angle</span></code></a> from a string value,
+which must be represent degrees, either as a simple
+string value, or as a more complex value recognized by
+the <a class="reference internal" href="#navtools.navigation.AngleParser" title="navtools.navigation.AngleParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">AngleParser</span></code></a> class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>deg</strong> – string degrees value.</p></li>
+<li><p><strong>hemisphere</strong> – sign value, which can be encoded as
+“N”, “S”, “E”, or “W”. If omitted, it’s positive.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference internal" href="#navtools.navigation.Angle" title="navtools.navigation.Angle"><code class="xref py py-class docutils literal notranslate"><span class="pre">Angle</span></code></a> object.</p>
+</dd>
+</dl>
+<p>We start by assuming the text value is simply
+a string representation of a float.
+If it isn’t, we use the <a class="reference internal" href="#navtools.navigation.AngleParser" title="navtools.navigation.AngleParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">AngleParser</span></code></a> class to parse the string.</p>
+<p>A subclass might change the <code class="xref py py-data docutils literal notranslate"><span class="pre">parser</span></code> reference to use a different parser.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a0</span> <span class="o">=</span> <span class="n">Angle</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="s2">&quot;-77.4325&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">a0</span><span class="o">.</span><span class="n">degrees</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">-77.4325</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a1</span> <span class="o">=</span> <span class="n">Angle</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="s2">&quot;37°28&#39;8</span><span class="se">\&quot;</span><span class="s2">N&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">a1</span><span class="o">.</span><span class="n">degrees</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">37.4689</span>
+</pre></div>
+</div>
+<p>Note use of prime and double-prime which are preferred over ‘ and “</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a2</span> <span class="o">=</span> <span class="n">Angle</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="s2">&quot;77°25′57″W&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">a2</span><span class="o">.</span><span class="n">degrees</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">-77.4325</span>
+</pre></div>
+</div>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="navtools.navigation.Lat.d">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">d</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#navtools.navigation.Lat.d" title="Permalink to this definition">¶</a></dt>
@@ -480,6 +547,72 @@ Three digits as the default format for degrees.</p>
 <span class="go">-76.5678</span>
 </pre></div>
 </div>
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.navigation.Lon.fromdegrees">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">fromdegrees</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deg</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hemisphere</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#navtools.navigation.Lon" title="navtools.navigation.Lon"><span class="pre">navtools.navigation.Lon</span></a><a class="headerlink" href="#navtools.navigation.Lon.fromdegrees" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an <a class="reference internal" href="#navtools.navigation.Angle" title="navtools.navigation.Angle"><code class="xref py py-class docutils literal notranslate"><span class="pre">Angle</span></code></a> from a numeric value,
+which must be degrees.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>deg</strong> – numeric degrees value.</p></li>
+<li><p><strong>hemisphere</strong> – sign value, which can be encoded as
+“N”, “S”, “E”, or “W”. If omitted, it’s positive.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference internal" href="#navtools.navigation.Angle" title="navtools.navigation.Angle"><code class="xref py py-class docutils literal notranslate"><span class="pre">Angle</span></code></a> object.</p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">Angle</span><span class="o">.</span><span class="n">fromdegrees</span><span class="p">(</span><span class="mi">45</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="go">0.7854</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">Angle</span><span class="o">.</span><span class="n">fromdegrees</span><span class="p">(</span><span class="mf">23.456</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="go">0.4094</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.navigation.Lon.fromstring">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">fromstring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#navtools.navigation.Lon" title="navtools.navigation.Lon"><span class="pre">navtools.navigation.Lon</span></a><a class="headerlink" href="#navtools.navigation.Lon.fromstring" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an <a class="reference internal" href="#navtools.navigation.Angle" title="navtools.navigation.Angle"><code class="xref py py-class docutils literal notranslate"><span class="pre">Angle</span></code></a> from a string value,
+which must be represent degrees, either as a simple
+string value, or as a more complex value recognized by
+the <a class="reference internal" href="#navtools.navigation.AngleParser" title="navtools.navigation.AngleParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">AngleParser</span></code></a> class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>deg</strong> – string degrees value.</p></li>
+<li><p><strong>hemisphere</strong> – sign value, which can be encoded as
+“N”, “S”, “E”, or “W”. If omitted, it’s positive.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><a class="reference internal" href="#navtools.navigation.Angle" title="navtools.navigation.Angle"><code class="xref py py-class docutils literal notranslate"><span class="pre">Angle</span></code></a> object.</p>
+</dd>
+</dl>
+<p>We start by assuming the text value is simply
+a string representation of a float.
+If it isn’t, we use the <a class="reference internal" href="#navtools.navigation.AngleParser" title="navtools.navigation.AngleParser"><code class="xref py py-class docutils literal notranslate"><span class="pre">AngleParser</span></code></a> class to parse the string.</p>
+<p>A subclass might change the <code class="xref py py-data docutils literal notranslate"><span class="pre">parser</span></code> reference to use a different parser.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a0</span> <span class="o">=</span> <span class="n">Angle</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="s2">&quot;-77.4325&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">a0</span><span class="o">.</span><span class="n">degrees</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">-77.4325</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a1</span> <span class="o">=</span> <span class="n">Angle</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="s2">&quot;37°28&#39;8</span><span class="se">\&quot;</span><span class="s2">N&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">a1</span><span class="o">.</span><span class="n">degrees</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">37.4689</span>
+</pre></div>
+</div>
+<p>Note use of prime and double-prime which are preferred over ‘ and “</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a2</span> <span class="o">=</span> <span class="n">Angle</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="s2">&quot;77°25′57″W&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">a2</span><span class="o">.</span><span class="n">degrees</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="go">-77.4325</span>
+</pre></div>
+</div>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="navtools.navigation.Lon.d">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">d</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#navtools.navigation.Lon.d" title="Permalink to this definition">¶</a></dt>
@@ -597,6 +730,14 @@ these values to populate separate spreadsheet columns.</p>
 <dd class="field-odd"><p>A pair of strings of the form <code class="samp docutils literal notranslate"><em><span class="pre">ddd.ddd</span></em><em><span class="pre">h</span></em></code></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.navigation.LatLon.near">
+<span class="sig-name descname"><span class="pre">near</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#navtools.navigation.LatLon" title="navtools.navigation.LatLon"><span class="pre">navtools.navigation.LatLon</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">R</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">3440.069</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="headerlink" href="#navtools.navigation.LatLon.near" title="Permalink to this definition">¶</a></dt>
+<dd><p>Distance from another point.
+This can be expensive to compute, a geocode
+to do proximity tests can be more efficient.</p>
 </dd></dl>
 
 </dd></dl>
@@ -1074,6 +1215,9 @@ isn’t important enough to use.</p>
 <li class="toctree-l1"><a class="reference internal" href="planning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.planning</span></code> – Route Planning Application</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.analysis</span></code> – Track Analysis Application</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opencpn_table.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.opencpn_table</span></code> – OpenCPN Table Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lowrance_usr.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.lowrance_usr</span></code> – Lowrance USR File Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="olc.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.olc</span></code> – OLC Geocoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.waypoint_merge</span></code> – Waypoint and Route Merge</a></li>
 <li class="toctree-l1"><a class="reference internal" href="igrf11.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf11</span></code> – International Geomagnetic Reference Field Module</a></li>
 </ul>
 

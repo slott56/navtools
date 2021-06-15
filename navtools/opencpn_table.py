@@ -1,5 +1,5 @@
 """
-Parse the OpenCPN Table format.
+Parses the OpenCPN Table format.
 
 Example::
 

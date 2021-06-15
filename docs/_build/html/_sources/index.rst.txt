@@ -30,6 +30,9 @@ Implementation
    planning
    analysis
    opencpn_table
+   lowrance_usr
+   olc
+   waypoint_merge
    igrf11
 
 The TODO List

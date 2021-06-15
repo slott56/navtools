@@ -4,7 +4,7 @@
 
 The :py:mod:`analysis` application is used to do voyage analysis.
 This can make a more useful log from manually prepared log data or
-tracks dumped from GPSNavX (or iNavX or OpenCPN.)
+tracks dumped from OpenCPN (or iNavX.)
 It's helpful to add the distance run between waypoints as well as the
 elapsed time between waypoints.
 
@@ -42,7 +42,7 @@ additional notes on the location.
 
 The times for the manual entry are generally local.
 
-GPSNavX track has the following format for CSV extract
+iNavX track has the following format for CSV extract
 
 ..  code-block:: text
 
@@ -50,14 +50,14 @@ GPSNavX track has the following format for CSV extract
     2011-06-04 13:12:43 +0000,37.549084,-76.330681,186,3.0,,,,,,
 
 The columns with data include date, latitude, longitude, cog, sog, heading, speed, depth, windAngle, windSpeed, comment.  Not all of these
-fields are populated unless GPSNavX (or iNavX or OpenCPN) gets an instrument feed.
+fields are populated unless OpenCPN (or iNavX) gets an instrument feed.
 
-GPSNavX track has the following format for GPX extract
+iNavX track has the following format for GPX extract
 
 ..  code-block:: xml
 
     <?xml version="1.0" encoding="utf-8"?>
-    <gpx version="1.1" creator="GPSNavX"
+    <gpx version="1.1" creator="iNavX"
     xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
     <trk>
     <name>TRACK_041812</name>
@@ -74,7 +74,7 @@ GPSNavX track has the following format for GPX extract
 
 The iPhone iNavX can save track information via
 http://x-traverse.com/.  These are standard GPX files, and are
-identical with the tracks created directly by GPSNavX.
+identical with the tracks created directly by iNavX.
 
 ..  _`analysis.cli`:
 
@@ -123,8 +123,6 @@ GPX input parsing
 -----------------
 
 ..  autofunction:: gpx_to_LogEntry
-
-..  autofunction:: xml_to_pairs
 
 Log Entry With Derived Details
 -------------------------------
