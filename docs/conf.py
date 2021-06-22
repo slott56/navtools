@@ -58,6 +58,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.autodoc',
     'sphinx.ext.mathjax',
+    'sphinxcontrib.plantuml',
 ]
 todo_include_todos = True
 
@@ -67,4 +68,6 @@ autodoc_default_options = {
     'undoc-members': True,
     'private-members': True,
 }
+
+plantuml = 'java -jar /Users/slott/miniconda3/envs/navtools/share/plantuml.1.2021.7.jar -Sshadowing=false -Shandwritten=true -progress'
 

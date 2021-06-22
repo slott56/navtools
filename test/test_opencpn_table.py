@@ -6,6 +6,7 @@ from pytest import *
 import re
 from textwrap import dedent
 from navtools.opencpn_table import *
+from navtools.navigation import Waypoint
 
 
 def test_leg():
@@ -23,18 +24,18 @@ def test_leg():
         "Description": "Entrance to the fairway",
         "Course": "223 °M",
     }
-    leg_0 = Leg(r_0)
+    leg_0 = Leg.fromdict(r_0)
+    assert leg_0.waypoint.name == "Beafort, NC"
+    assert leg_0.waypoint.lat == navigation.Lat.fromdegmin(34, 34.8, "N")
+    assert leg_0.waypoint.lon == navigation.Lon.fromdegmin(76, 41.4, "W")
+    assert leg_0.waypoint.description == "Entrance to the fairway"
     assert leg_0.leg == 0
-    assert leg_0.to_waypoint == "Beafort, NC"
     assert leg_0.distance == approx(251.7)
     assert leg_0.bearing == approx(192.0)
-    assert leg_0.lat == Latitude(34, 34.8, "N")
-    assert leg_0.lon == Longitude(76, 41.4, "W")
     assert leg_0.ETE == Duration(d=1, h=17, m=57, s=0)
     assert leg_0.ETA == datetime.datetime(2021, 5, 26, 4, 47)
     assert leg_0.speed == approx(6.0)
     assert leg_0.tide == ""
-    assert leg_0.description == "Entrance to the fairway"
     assert leg_0.course == approx(223.0)
     expected_dict = {
         "Bearing": "192.0",
@@ -64,9 +65,10 @@ def test_leg_bad(capsys):
         "ETE": "1d 17H 57M",
         "ETA": "Start: 05/26/2021 04:47 (Nighttime)",
         "Speed": "6",
+        "Description": "",
     }
     with raises(KeyError) as error:
-        leg_0 = Leg(r_bad)
+        leg_0 = Leg.fromdict(r_bad)
     assert error.value.args[0] == "Distance"
     out, err = capsys.readouterr()
     assert out == f"Invalid {r_bad} KeyError('Distance')\n"
@@ -108,8 +110,8 @@ def test_route(route_file):
     assert r.summary["Total distance"] == "22.9 NMi"
     assert r.summary["Time enroute"] == "3H 49M"
     assert len(r.legs) == 7
-    assert r.legs[0].to_waypoint == "Herring Bay"
-    assert r.legs[6].to_waypoint == "Drum Point Anchorage"
+    assert r.legs[0].waypoint.name == "Herring Bay"
+    assert r.legs[6].waypoint.name == "Drum Point Anchorage"
 
 
 def test_duration():
@@ -120,26 +122,14 @@ def test_duration():
     assert d_0.days == approx(5 / 24 + 7 / 24 / 60)
     assert d_0.hours == approx(5 + 7 / 60, rel=1e-2)
     assert d_0.minutes == approx(5 * 60 + 7)
-
-
-def test_point():
-    p = Point.parse("38° 44.2' N")
-    assert str(p) == "38° 44.2′ N"
-    assert repr(p) == "Point(deg=38, min=44.2, h='N')"
-
-
-def test_latitude():
-    p = Latitude.parse("38° 48.7' N")
-    assert repr(p) == "Latitude(deg=38, min=48.7, h='N')"
-
-
-def test_longitude():
-    p = Longitude.parse("076° 21.9' W")
-    assert repr(p) == "Longitude(deg=76, min=21.9, h='W')"
-    # The leading zero? Will it be confused with the old Octal notation?
-    p_zero = Longitude.parse("088° 21.9' W")
-    assert repr(p_zero) == "Longitude(deg=88, min=21.9, h='W')"
-
+    d_2 = Duration.fromfloat(hours=2.5)
+    assert d_2.d == 0
+    assert d_2.h == 2
+    assert d_2.m == 30
+    assert d_2.s == 0
+    assert d_2.days == approx(2.5 / 24)
+    assert d_2.hours == approx(2.5)
+    assert d_2.minutes == approx(2.5*60)
 
 @fixture
 def route_file_2(tmp_path):

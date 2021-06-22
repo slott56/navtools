@@ -1,10 +1,10 @@
 [project]
 name = "navtools"
-version = "2021.6.1"
+version = "2021.6.2"
 description = "Small Boat Navigation Tools and Data Conversions"
 readme = "README.md"
 requires-python = ">=3.9"
-keywords = ["GPS", "OpenCPN", "iNavX"]
+keywords = ["GPS", "OpenCPN", "iNavX", "Navigation"]
 [[project.authors]]
 email = "slott56@gmail.com"
 
@@ -32,7 +32,7 @@ setenv =
 commands =
 	black navtools
 	python -m doctest --option ELLIPSIS navtools/analysis.py
-	python -m doctest --option ELLIPSIS navtools/igrf11.py
+	python -m doctest --option ELLIPSIS navtools/igrf.py
 	python -m doctest --option ELLIPSIS navtools/navigation.py
 	python -m doctest --option ELLIPSIS navtools/opencpn_table.py
 	python -m doctest --option ELLIPSIS navtools/planning.py

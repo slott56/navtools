@@ -37,7 +37,8 @@ Command-Line Interface
 =======================
 
 This writes to stdout.
-Most of the time, you'll use it like this
+Most of the time, it's used like this to reformat
+a CSV report.
 
 ::
 
@@ -46,7 +47,6 @@ Most of the time, you'll use it like this
 
 """
 from __future__ import annotations
-import abc
 import argparse
 import csv
 from dataclasses import dataclass
@@ -54,80 +54,116 @@ import datetime
 from pathlib import Path
 import re
 import sys
-from typing import Iterable, NamedTuple, Callable, Any
+from typing import Iterable, Callable, Any, Optional, ClassVar, cast
+from navtools import navigation
+from navtools.navigation import Waypoint
 
 
+@dataclass(eq=True)
 class Leg:
     """
     Map attribute values between OpenCPN CSV, something Pythonic,
     and a more generic CSV with less fancy formatting.
+
+    A Leg is the space between two Waypoints. One Waypoint is assumed (it's the "current" waypoint.)
+    The other is stated explicitly as the end-point for this leg.
+
+    This is a composite of a Waypoint
+    plus some derived values.
     """
 
-    def __init__(self, details: dict[str, str]) -> None:
+    waypoint: Waypoint
+    leg: int
+    ETE: Optional["Duration"]
+    ETA: Optional[datetime.datetime]
+    ETA_summary: Optional[str]
+    speed: float
+    tide: Optional[str]
+    distance: Optional[float]
+    bearing: Optional[float]
+    course: Optional[float] = None
+
+    # Static data; part of the class.
+    attr_names: ClassVar[tuple[tuple[str, Callable[[Any], str]], ...]] = (
+        ("Leg", lambda l: f"{l.leg}"),
+        ("To waypoint", lambda l: f"{l.waypoint.name}"),
+        ("Distance", lambda l: f"{l.distance}"),
+        ("Bearing", lambda l: f"{l.bearing}"),
+        ("Latitude", lambda l: f"{l.waypoint.lat:%02.0d° %4.1m′ %h}"),
+        ("Longitude", lambda l: f"{l.waypoint.lon:%03.0d° %4.1m′ %h}"),
+        ("ETE", lambda l: f"{l.ETE}"),
+        ("ETA", lambda l: f"{l.ETA} ({l.ETA_summary})"),
+        ("Speed", lambda l: f"{l.speed}"),
+        ("Next tide event", lambda l: f"{l.tide}"),
+        ("Description", lambda l: f"{l.waypoint.description}"),
+        ("Course", lambda l: f"{l.course}"),
+    )
+
+    @classmethod
+    def fromdict(cls, details: dict[str, str]) -> "Leg":
         """Transform a line of CSV data from the input document into a Leg."""
         try:
-            self.leg = int(details["Leg"]) if details["Leg"] != "---" else 0
-            self.to_waypoint = details["To waypoint"]
-            self.distance = (
-                float(m.group(1))
-                if (m := re.match(r"\s*(\d+\.?\d*)\s\w+", details["Distance"]))
-                is not None
-                else None
-            )
-            self.bearing = (
-                float(m.group(1))
-                if (m := re.match(r"\s*(\d+)\s.\w+", details["Bearing"])) is not None
-                else None
-            )
-            self.lat = Latitude.parse(details["Latitude"])
-            self.lon = Longitude.parse(details["Longitude"])
-            self.ETE = Duration.parse(details["ETE"])
             eta_time, eta_summary = (
                 m.groups()
                 if (m := re.match(r"(?:Start: )?(.{16})\s\((\w+)\)", details["ETA"]))
                 is not None
                 else ("", "")
             )
-            self.ETA = (
-                datetime.datetime.strptime(eta_time, "%m/%d/%Y %H:%M")
-                if eta_time
-                else None
+            wpt = Waypoint(
+                name=details["To waypoint"],
+                lat=navigation.Lat.fromstring(details["Latitude"]),
+                lon=navigation.Lon.fromstring(details["Longitude"]),
+                description=details["Description"],
             )
-            self.ETA_summary = eta_summary
-            self.speed = float(details["Speed"])
-            self.tide = details["Next tide event"]
-            self.description = details["Description"]
-            self.course = (
-                (
+            return cls(
+                waypoint=wpt,
+                leg=int(details["Leg"]) if details["Leg"] != "---" else 0,
+                # name=details["To waypoint"],
+                distance=(
                     float(m.group(1))
-                    if (m := re.match(r"\s*(\d+)\s.\w+", details["Course"])) is not None
+                    if (m := re.match(r"\s*(\d+\.?\d*)\s\w+", details["Distance"]))
+                    is not None
                     else None
-                )
-                if details["Course"] != "Arrived"
-                else None
+                ),
+                bearing=(
+                    float(m.group(1))
+                    if (m := re.match(r"\s*(\d+)\s.\w+", details["Bearing"]))
+                    is not None
+                    else None
+                ),
+                # lat=navigation.Lat.fromstring(details["Latitude"]),
+                # lon=navigation.Lon.fromstring(details["Longitude"]),
+                ETE=Duration.parse(details["ETE"]),
+                ETA=(
+                    datetime.datetime.strptime(eta_time, "%m/%d/%Y %H:%M")
+                    if eta_time
+                    else None
+                ),
+                ETA_summary=eta_summary,
+                speed=float(details["Speed"]),
+                tide=details["Next tide event"],
+                # description=details["Description"],
+                course=(
+                    (
+                        float(m.group(1))
+                        if (m := re.match(r"\s*(\d+)\s.\w+", details["Course"]))
+                        is not None
+                        else None
+                    )
+                    if details["Course"] != "Arrived"
+                    else None
+                ),
             )
         except (KeyError, ValueError) as ex:
             print(f"Invalid {details} {ex!r}")
             raise
 
-    attr_names: dict[str, Callable[[Any], str]] = {
-        "Leg": lambda l: f"{l.leg}",
-        "To waypoint": lambda l: f"{l.to_waypoint}",
-        "Distance": lambda l: f"{l.distance}",
-        "Bearing": lambda l: f"{l.bearing}",
-        "Latitude": lambda l: f"{l.lat}",
-        "Longitude": lambda l: f"{l.lon}",
-        "ETE": lambda l: f"{l.ETE}",
-        "ETA": lambda l: f"{l.ETA} ({l.ETA_summary})",
-        "Speed": lambda l: f"{l.speed}",
-        "Next tide event": lambda l: f"{l.tide}",
-        "Description": lambda l: f"{l.description}",
-        "Course": lambda l: f"{l.course}",
-    }
-
     def asdict(self) -> dict[str, str]:
-        """Emits a Leg as a dictionary."""
-        r = {k: str(attr_func(self)) for k, attr_func in self.attr_names.items()}
+        """
+        Emits a Leg as a dictionary.
+        Uses the attr_names mapping to original CSV attribute names.
+        """
+        r = {k: str(attr_func(self)) for k, attr_func in self.attr_names}
         return r
 
 
@@ -144,7 +180,7 @@ class Route:
     ) -> None:
         """Parse the heading dictionary and the sequence of legs into a Route document."""
         self.summary = summary
-        self.legs = [Leg(d) for d in details]
+        self.legs = [Leg.fromdict(d) for d in details]
 
     @classmethod
     def load(cls, path: Path) -> "Route":
@@ -185,7 +221,7 @@ class Route:
             return Route(summary, details)
 
 
-@dataclass
+@dataclass(eq=True, order=True, frozen=True)
 class Duration:
     """
     A duration in days, hours, minutes, and seconds.
@@ -194,6 +230,21 @@ class Duration:
 
     To an extent, this is similar to :py:class:`datetime.timedelta`.
     It supports simple math to add and subtract durations.
+
+    We need to also support the following for full rate-time-distance computations:
+
+    - duration * float = float (rate*time = distance)
+
+    - float * duration = float
+
+    - float / duration = float (distance / time = rate)
+
+    - duration / float = duration
+
+    There's no trivial way to handle distance / rate = time.
+    This must be done explicitly as Duration.fromfloat(minutes=60*distance/rate)
+
+    Dataclass provides hash, equality, and ordering for us.
     """
 
     d: int = 0
@@ -216,20 +267,10 @@ class Duration:
         return cls(**raw)
 
     def __add__(self, other: Any) -> "Duration":
-        m1 = ((self.d * 24 + self.h) * 60 + self.m) * 60 + self.s
-        m2 = ((other.d * 24 + other.h) * 60 + other.m) * 60 + other.s
-        d_h_m, s = divmod(m1 + m2, 60)
-        d_h, m = divmod(d_h_m, 60)
-        d, h = divmod(d_h, 24)
-        return Duration(d, h, m, s)
+        return self.normalized(self.seconds + cast(Duration, other).seconds)
 
     def __sub__(self, other: Any) -> "Duration":
-        m1 = ((self.d * 24 + self.h) * 60 + self.m) * 60 + self.s
-        m2 = ((other.d * 24 + other.h) * 60 + other.m) * 60 + other.s
-        d_h_m, s = divmod(m1 - m2, 60)
-        d_h, m = divmod(d_h_m, 60)
-        d, h = divmod(d_h, 24)
-        return Duration(d, h, m, s)
+        return self.normalized(self.seconds - cast(Duration, other).seconds)
 
     @property
     def days(self) -> float:
@@ -239,55 +280,44 @@ class Duration:
     @property
     def hours(self) -> float:
         """:returns: a single float in hours"""
-        return self.d * 24 + self.h + self.m / 60 + self.m / 60 / 60
+        return self.d * 24 + self.h + self.m / 60 + self.s / 60 / 60
 
     @property
     def minutes(self) -> float:
         """:returns: a single float in minutes"""
         return (self.d * 24 + self.h) * 60 + self.m + self.s / 60
 
+    @property
+    def seconds(self) -> int:
+        """:returns: a single int in seconds"""
+        return ((self.d * 24 + self.h) * 60 + self.m) * 60 + self.s
+
     def __str__(self) -> str:
         """Numbers-friendly tags on hours, minutes and seconds."""
         return f"{self.d:d}d {self.h:02d}h {self.m:02d}m {self.s:02d}s"
 
-
-@dataclass
-class Point:
-    """
-    Superclass for Latitude and Longitude.
-    """
-
-    deg: int
-    min: float
-    h: str
+    @classmethod
+    def fromfloat(
+        cls,
+        *,
+        days: Optional[float] = 0,
+        hours: Optional[float] = 0,
+        minutes: Optional[float] = 0,
+        seconds: Optional[float] = 0,
+    ) -> "Duration":
+        """Normalize to seconds."""
+        total_s = int(
+            (((days or 0) * 24 + (hours or 0)) * 60 + (minutes or 0)) * 60
+            + (seconds or 0)
+        )
+        return cls.normalized(total_s)
 
     @classmethod
-    def parse(cls, text: str) -> "Point":
-        """
-        Parses text in one OpenCPN format: int ° float ' hemisphere.
-
-        :param text: Latitude or Longitude text
-        :returns: Point
-        """
-        deg, min, hem = (
-            m.groups()
-            if (m := re.match(r"\s*(\d+)\D\s(\d+\.?\d*)\D\s([EWNS])", text)) is not None
-            else ("0", "0", "?")
-        )
-        return cls(int(deg), float(min), hem)
-
-    def __str__(self) -> str:
-        return f"{self.deg:d}° {self.min:.1f}′ {self.h}"
-
-
-class Latitude(Point):
-    def __str__(self) -> str:
-        return f"{self.deg:02d}° {self.min:4.1f}′ {self.h}"
-
-
-class Longitude(Point):
-    def __str__(self) -> str:
-        return f"{self.deg:03d}° {self.min:4.1f}′ {self.h}"
+    def normalized(cls, seconds: int) -> "Duration":
+        d_h_m, s = divmod(seconds, 60)
+        d_h, m = divmod(d_h_m, 60)
+        d, h = divmod(d_h, 24)
+        return cls(d, h, m, s)
 
 
 def to_html(route: Route) -> None:
@@ -302,13 +332,13 @@ def to_html(route: Route) -> None:
     print(f"</table>")
     print(f"<table>")
     print(f"<tr>")
-    for k in Leg.attr_names.keys():
+    for k, f in Leg.attr_names:
         print(f"<th>{k}</th>", end="")
     print()
     print(f"</tr>")
     for row in route.legs:
         data = row.asdict()
-        for k in Leg.attr_names.keys():
+        for k, f in Leg.attr_names:
             print(f"<td>{data[k]}</td>", end="")
         print()
     print(f"</table>")
@@ -321,7 +351,8 @@ def to_csv(route: Route) -> None:
 
     :param route: a Route object.
     """
-    writer = csv.DictWriter(sys.stdout, list(Leg.attr_names.keys()))
+    headers = [k for k, f in Leg.attr_names]
+    writer = csv.DictWriter(sys.stdout, headers)
     writer.writeheader()
     writer.writerows(row.asdict() for row in route.legs)
 

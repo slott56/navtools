@@ -45,7 +45,7 @@ The above formula combine two things.
 
     \lambda = \frac{x}{s_b} \times \frac{180}{\pi}
 
-The :math:``\frac{x}{s_b}`` term converts millimeters to radians.
+The :math:`\frac{x}{s_b}` term converts millimeters to radians.
 These are then converted to degrees.
 
 ..  math::
@@ -71,7 +71,7 @@ See the ``lowranceusr4_parse_waypt()`` function for the decoding of a waypoint.
     this millimeter mercator value.
 
 Field Extraction
-================
+======================
 
 The general approach is to leverage :py:mod:`struct`
 to handle decoding little-endian values.
@@ -82,8 +82,8 @@ repeat factor is a field.
 
 For example::
 
-    Field("count", "<i"),
-    Field("data", "<{count}f"),
+    AtomicField("count", "<i"),
+    AtomicField("data", "<{count}f"),
 
 The first field has the four-byte count.
 The second field depends on this count
@@ -92,12 +92,67 @@ to define an array of floats.
 Implementation
 ==============
 
+Here's the UML overview of this module.
+
+..  uml::
+
+    @startuml
+    'navtools.lowrance_usr'
+    allow_mixing
+
+    component lowrance_usr {
+        abstract class Field {
+            name: str
+            extract(UnpackContext)
+        }
+
+        class AtomicField {
+            encoding: str
+        }
+        class FieldList {
+            field_list: List[Field]
+        }
+        class FieldRepeat {
+            name: str
+            field_list: Field
+            count: str
+        }
+
+        Field <|-- AtomicField
+        Field <|-- FieldList
+        Field <|-- FieldRepeat
+
+        FieldList *-- "*" Field
+        FieldRepeat *-- Field
+
+        class UnpackContext {
+            source: BinaryIO
+            fields: dict[str, Any]
+            extract(Field)
+        }
+
+        class Lowrance_USR {
+            {static} load(BinaryIO): Lowrance_USR
+        }
+
+        AtomicField ..> UnpackContext
+
+        Lowrance_USR *-- "*" Field
+        Lowrance_USR -- "1" UnpackContext
+    }
+
+    @enduml
+
+
 ..  py:module:: navtools.lowrance_usr
+
+..  automodule:: navtools.lowrance_usr
+    :noindex:
 
 Atomic Field
 ------------
 
-..  autoclass:: Field
+..  autoclass:: AtomicField
     :members:
     :undoc-members:
 
@@ -108,15 +163,18 @@ Collection of Fields
     :members:
     :undoc-members:
 
-Repeated of Field or Collection
+Repeated of Field
 -------------------------------
 
 ..  autoclass:: FieldRepeat
     :members:
     :undoc-members:
 
-A Context
--------------------
+The Stateful Context
+---------------------
+
+This is where we maintain state, reading the binary file.
+This allows fields to be defined independently, only sharing this context object.
 
 ..  autoclass:: UnpackContext
     :members:

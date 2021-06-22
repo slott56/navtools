@@ -15,7 +15,7 @@
     <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Overview" href="introduction.html" />
+    <link rel="next" title="Overview and Context" href="introduction.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -43,54 +43,54 @@ where the great circle accuracy isn’t critical.</p>
 <h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview and Context</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#actors">Actors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#use-cases">Use Cases</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#execution-use-case">Execution Use Case</a></li>
 <li class="toctree-l2"><a class="reference internal" href="introduction.html#planning-use-case">Planning Use Case</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#float-plan-use-case">Float Plan Use Case</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#analysis-use-case">Analysis Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#float-plan-document-use-case">Float Plan Document Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#route-document-use-case">Route Document Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#execution-use-case">Execution Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#notifications-use-case">Notifications Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#analysis-summary-use-case">Analysis: Summary Use Case</a></li>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#analysis-waypoint-reconciliation-use-case">Analysis: Waypoint Reconciliation Use Case</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#solution-overview">Solution Overview</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#container-overview">Container Overview</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="introduction.html#data-interface">Data Interface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="introduction.html#user-interface">User Interface</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#architecture">Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#component-architecture">Component Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#other-notes">Other Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#references">References</a></li>
 </ul>
 </div>
 </section>
 <section id="implementation">
 <h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
+<p>Each of the following sections describes the implementation
+details for each module.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="navigation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code> – Navigation Calculations Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="planning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.planning</span></code> – Route Planning Application</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.analysis</span></code> – Track Analysis Application</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opencpn_table.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.opencpn_table</span></code> – OpenCPN Table Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.waypoint_merge</span></code> – Waypoint and Route Merge Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="navigation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code> – Navigation Calculations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lowrance_usr.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.lowrance_usr</span></code> – Lowrance USR File Parser</a></li>
 <li class="toctree-l1"><a class="reference internal" href="olc.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.olc</span></code> – OLC Geocoding</a></li>
-<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.waypoint_merge</span></code> – Waypoint and Route Merge</a></li>
-<li class="toctree-l1"><a class="reference internal" href="igrf11.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf11</span></code> – International Geomagnetic Reference Field Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="igrf.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf</span></code> – International Geomagnetic Reference Field</a></li>
 </ul>
 </div>
 </section>
 <section id="the-todo-list">
 <h2>The TODO List<a class="headerlink" href="#the-todo-list" title="Permalink to this headline">¶</a></h2>
-<p>If you have PySerial installed, you could write applications to read common
-GPS devices and decode the messages. This would allow you to track
-waypoints, and possibly even build an anchor alarm monitor.</p>
+<p>This is a list of all “TODO” items from the documentation.</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Refactor the sniffing out of csv_to_LogEntry.</p>
-<p>There should be two, separate, csv readers for files with headers
-and a separate one for files without headers, where a default header
-is assumed or the analysis main program provides a header.</p>
+<p>Refactor to merge with <code class="xref py py-func docutils literal notranslate"><span class="pre">opencpn_table.parse_datetime()</span></code></p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="analysis.html#id1"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/navtools/analysis.py:docstring of navtools.analysis.csv_to_LogEntry, line 16.)</p>
+<p class="todo-source">(The <a class="reference internal" href="analysis.html#id1"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/navtools/analysis.py:docstring of navtools.analysis.parse_date, line 9.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Refactor to eliminate (if possible) sniffing the source_row keys to create CSV headers.</p>
@@ -103,22 +103,52 @@ and adding new headers based on values computed by the iterator.</p>
 <p class="todo-source">(The <a class="reference internal" href="analysis.html#id2"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/navtools/analysis.py:docstring of navtools.analysis.write_csv, line 18.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
+<p>Refactor to extract the <code class="docutils literal notranslate"><span class="pre">source_row</span></code> keys from the first row.</p>
+<p>This should be done outside <a class="reference internal" href="analysis.html#navtools.analysis.gen_rhumb" title="navtools.analysis.gen_rhumb"><code class="xref py py-func docutils literal notranslate"><span class="pre">gen_rhumb()</span></code></a> and provided to <a class="reference internal" href="analysis.html#navtools.analysis.write_csv" title="navtools.analysis.write_csv"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_csv()</span></code></a>.</p>
+</div>
+<p class="todo-source">(The <a class="reference internal" href="analysis.html#id3"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/navtools/analysis.py:docstring of navtools.analysis.analyze, line 6.)</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
 <p>Use urllib2</p>
 <p>We can then use <code class="xref py py-mod docutils literal notranslate"><span class="pre">urllib</span></code> instead of simple
 <code class="xref py py-func docutils literal notranslate"><span class="pre">Path.open()</span></code> so that we could use
 “<a class="reference external" href="file:///path/to/file">file:///path/to/file</a>” or “<a class="reference external" href="https://server/path/to/file">https://server/path/to/file</a>”.</p>
-<p>Most use cases involve disconnected computers,
-with a statically downloaded file, it’s easy to cover
-<em>all</em> the bases by opening a URL.</p>
+<p>Even though most use cases involve disconnected computers,
+and rely on a statically downloaded file. It’s easy to cover
+<em>all</em> the bases by opening a URL instead of assuming a local file.</p>
 <p>The official file:
 <a class="reference external" href="http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt">http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt</a></p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="igrf11.html#id1"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/navtools/igrf11.py:docstring of navtools.igrf11.IGRF11.load_coeffs, line 19.)</p>
+<p class="todo-source">(The <a class="reference internal" href="igrf.html#id1"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/navtools/igrf.py:docstring of navtools.igrf.IGRF.load_coeffs, line 20.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Refactor OpenCPN Table to reuse elements of <code class="xref py py-mod docutils literal notranslate"><span class="pre">navigation</span></code></p>
+<p>Refactor magnetic bearing computation</p>
+<p>Include variance directly, not as a separate step.</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="opencpn_table.html#id1"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/docs/opencpn_table.rst, line 12.)</p>
+<p class="todo-source">(The <a class="reference internal" href="planning.html#id2"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/docs/planning.rst, line 200.)</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Locate the sunrise equation and include anticipated time-of-day for an ETA</p>
+<p>See <a class="reference external" href="https://gml.noaa.gov/grad/solcalc/solareqns.PDF">https://gml.noaa.gov/grad/solcalc/solareqns.PDF</a></p>
+</div>
+<p class="todo-source">(The <a class="reference internal" href="planning.html#id3"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/docs/planning.rst, line 204.)</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Compute the locations at noon of each day.</p>
+<p>This requires looking at waypoints before and after local noon, Splitting the segment
+to find noon, and adding a waypoint with no course change.</p>
+</div>
+<p class="todo-source">(The <a class="reference internal" href="planning.html#id4"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/docs/planning.rst, line 208.)</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Refactor to merge with <code class="xref py py-func docutils literal notranslate"><span class="pre">analysis.parse_date()</span></code></p>
+</div>
+<p class="todo-source">(The <a class="reference internal" href="waypoint_merge.html#id1"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/navtools/waypoint_merge.py:docstring of navtools.waypoint_merge.parse_datetime, line 7.)</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>parameterize the distance or geocode options.</p>
+</div>
+<p class="todo-source">(The <a class="reference internal" href="waypoint_merge.html#id2"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/navtools/waypoint_merge.py:docstring of navtools.waypoint_merge.main, line 4.)</p>
 </section>
 <section id="indices-and-tables">
 <h2>Indices and Tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
@@ -147,30 +177,30 @@ with a statically downloaded file, it’s easy to cover
 
 <h3>Navigation</h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview and Context</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#actors">Actors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#use-cases">Use Cases</a></li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#solution-overview">Solution Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#architecture">Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#container-overview">Container Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#component-architecture">Component Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#other-notes">Other Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#references">References</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="navigation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code> – Navigation Calculations Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="planning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.planning</span></code> – Route Planning Application</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.analysis</span></code> – Track Analysis Application</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opencpn_table.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.opencpn_table</span></code> – OpenCPN Table Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.waypoint_merge</span></code> – Waypoint and Route Merge Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="navigation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code> – Navigation Calculations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lowrance_usr.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.lowrance_usr</span></code> – Lowrance USR File Parser</a></li>
 <li class="toctree-l1"><a class="reference internal" href="olc.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.olc</span></code> – OLC Geocoding</a></li>
-<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.waypoint_merge</span></code> – Waypoint and Route Merge</a></li>
-<li class="toctree-l1"><a class="reference internal" href="igrf11.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf11</span></code> – International Geomagnetic Reference Field Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="igrf.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf</span></code> – International Geomagnetic Reference Field</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="introduction.html" title="next chapter">Overview</a></li>
+      <li>Next: <a href="introduction.html" title="next chapter">Overview and Context</a></li>
   </ul></li>
 </ul>
 </div>

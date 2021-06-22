@@ -4,10 +4,10 @@
         <time>2021-06-04T16:55:38Z</time>
     </metadata>
     {% for wp in waypoints %}
-    <wpt lon="{{wp.lon.sdeg}}" lat="{{wp.lat.sdeg}}">
-        <time>{{wp.time}}</time>
-        <name>{{wp.name}}</name>
-        <desc>{{wp.description}}</desc>
+    <wpt lon="{{wp.waypoint.lon.sdeg}}" lat="{{wp.waypoint.lat.sdeg}}">
+        <time>{{wp.last_updated}}</time>
+        <name>{{wp.waypoint.name}}</name>
+        <description>{{wp.waypoint.description}}</description>
         <sym>{{wp.sym}}</sym>
         {% if wp.type is none %}<type>WPT</type>{% else %}<type>{{wp.type}}</type>{% endif %}
         <extensions>

@@ -43,16 +43,32 @@ It’s helpful to add the distance run between waypoints as well as the
 elapsed time between waypoints.</p>
 <p>This additional waypoint-to-waypoint time and distance allows
 for fine-grained analysis of sailing performance.</p>
-<p>This module includes three groups of components.</p>
-<p>The <a class="reference internal" href="#input-parsing">Input Parsing</a> group is the functions and a namedtuple that
-acquire input from the GPX or CSV file.</p>
-<p>The application processing components consume track data
-and computes derived values including distances,
-times, and rates.</p>
-<p>The <a class="reference internal" href="#analysis-cli"><span class="std std-ref">Command-Line Interface</span></a> components are used to build a proper command-line application.</p>
-<section id="input-parsing">
-<h2>Input Parsing<a class="headerlink" href="#input-parsing" title="Permalink to this headline">¶</a></h2>
-<p>The purpose of input parsing is to create <code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry</span></code> objects
+<p>Here’s the structure of this application</p>
+<p class="plantuml">
+<img src="_images/plantuml-4bb4a33e5e70277934438556b99782626c4a05a8.png" alt="&#64;startuml
+component analysis {
+    class LogEntry {
+    }
+    class LogEntry_Rhumb {
+        point : LogEntry
+    }
+    LogEntry_Rhumb *-&gt; LogEntry
+}
+&#64;enduml"/>
+</p>
+<p>This module includes several groups of components.</p>
+<ul class="simple">
+<li><p>The <a class="reference internal" href="#analysis-input"><span class="std std-ref">Input Parsing</span></a> group is the functions and classes that
+acquire input from the GPX or CSV file.</p></li>
+<li><p>The <a class="reference internal" href="#analysis-computations"><span class="std std-ref">Computations</span></a> functions work out range and bearing, magnetic bearing, total distance run,
+and elapsed time in minutes and hours.</p></li>
+<li><p>The <a class="reference internal" href="#analysis-output"><span class="std std-ref">Output Writing</span></a> group is the functions to write the CSV result.</p></li>
+<li><p>Finally, the <a class="reference internal" href="#analysis-cli"><span class="std std-ref">Command-Line Interface</span></a> components are used
+to build a proper command-line application.</p></li>
+</ul>
+<span class="target" id="module-navtools.analysis"></span><section id="input-parsing">
+<span id="analysis-input"></span><h2>Input Parsing<a class="headerlink" href="#input-parsing" title="Permalink to this headline">¶</a></h2>
+<p>The purpose of input parsing is to create <a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry</span></code></a> objects
 from input file sources.</p>
 <p>Manually prepared data will be a CSV in the following form</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Time,Lat,Lon,COG,SOG,Rig,Engine,windAngle,windSpeed,Location
@@ -92,26 +108,6 @@ fields are populated unless OpenCPN (or iNavX) gets an instrument feed.</p>
 <p>The iPhone iNavX can save track information via
 <a class="reference external" href="http://x-traverse.com/">http://x-traverse.com/</a>.  These are standard GPX files, and are
 identical with the tracks created directly by iNavX.</p>
-</section>
-<section id="command-line-interface">
-<span id="analysis-cli"></span><h2>Command-Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline">¶</a></h2>
-<p>Typical use cases for this module include the following:</p>
-<ul class="simple">
-<li><p>Command Line:</p></li>
-</ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">navtools</span><span class="o">.</span><span class="n">analysis</span> <span class="s1">&#39;../../Sailing/Cruise History/2011 Reedville/reedville.csv&#39;</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><p>Within a Python Script:</p></li>
-</ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navtools.analysis</span> <span class="kn">import</span> <span class="n">analyze</span>
-<span class="n">analyze</span><span class="p">(</span> <span class="s1">&#39;../../Sailing/Cruise History/2011 Reedville/jackson.csv&#39;</span><span class="p">,</span> <span class="mf">5.0</span> <span class="p">)</span>
-</pre></div>
-</div>
-</section>
-<section id="module-navtools.analysis">
-<span id="implementation"></span><h2>Implementation<a class="headerlink" href="#module-navtools.analysis" title="Permalink to this headline">¶</a></h2>
 <section id="date-parsing">
 <h3>Date parsing<a class="headerlink" href="#date-parsing" title="Permalink to this headline">¶</a></h3>
 <dl class="py function">
@@ -123,6 +119,21 @@ date-time stamps in the log) this function isn’t quite appropriate.
 This assumes a single date field is sufficient to fill in all attributes of a date.
 In some cases, we might have timestamps that roll past midnight without an obvious
 indicator of date change. Or, we might have some notation like “d1, d2” or “+1d, +2d”.</p>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>Refactor to merge with <code class="xref py py-func docutils literal notranslate"><span class="pre">opencpn_table.parse_datetime()</span></code></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>date</strong> – string in some known format</p></li>
+<li><p><strong>default</strong> – default date to use when only a time is given.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>datetime</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -130,67 +141,52 @@ indicator of date change. Or, we might have some notation like “d1, d2” or �
 <h3>Base Log Entry<a class="headerlink" href="#base-log-entry" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="navtools.analysis.LogEntry">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">LogEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">datetime.datetime</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">navigation.Angle</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">navigation.Angle</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">navigation.LatLon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_row</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.analysis.LogEntry" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">LogEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">time:</span> <span class="pre">datetime.datetime</span></em>, <em class="sig-param"><span class="pre">lat:</span> <span class="pre">navtools.navigation.Lat</span></em>, <em class="sig-param"><span class="pre">lon:</span> <span class="pre">navtools.navigation.Lon</span></em>, <em class="sig-param"><span class="pre">name:</span> <span class="pre">Optional[str]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">description:</span> <span class="pre">Optional[str]</span> <span class="pre">=</span> <span class="pre">None</span></em>, <em class="sig-param"><span class="pre">source_row:</span> <span class="pre">dict</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.analysis.LogEntry" title="Permalink to this definition">¶</a></dt>
 <dd><p>A point on a track.</p>
 <p>The source_row is the source data. For CSV files, it’s untouched.
 For GPX files, it’s lightly massaged to flatten out the attributes of the <code class="docutils literal notranslate"><span class="pre">&lt;trkpt&gt;</span></code> tag.</p>
+<p>This is similar to a Waypoint in a plan. The differences are minor.
+Log Entries generally lack names; they’re not named points, they’re just a piece of data
+at a point in time. Consequently, log entries always have a timestamp.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="navtools.analysis.LogEntry.time">
 <span class="sig-name descname"><span class="pre">time</span></span><em class="property"><span class="pre">:</span> <span class="pre">datetime.datetime</span></em><a class="headerlink" href="#navtools.analysis.LogEntry.time" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 0</p>
-</dd></dl>
+<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="navtools.analysis.LogEntry.lat">
-<span class="sig-name descname"><span class="pre">lat</span></span><em class="property"><span class="pre">:</span> <span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.analysis.LogEntry.lat" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 1</p>
-</dd></dl>
+<span class="sig-name descname"><span class="pre">lat</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="navigation.html#navtools.navigation.Lat" title="navtools.navigation.Lat"><span class="pre">navtools.navigation.Lat</span></a></em><a class="headerlink" href="#navtools.analysis.LogEntry.lat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="navtools.analysis.LogEntry.lon">
-<span class="sig-name descname"><span class="pre">lon</span></span><em class="property"><span class="pre">:</span> <span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.analysis.LogEntry.lon" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 2</p>
-</dd></dl>
+<span class="sig-name descname"><span class="pre">lon</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="navigation.html#navtools.navigation.Lon" title="navtools.navigation.Lon"><span class="pre">navtools.navigation.Lon</span></a></em><a class="headerlink" href="#navtools.analysis.LogEntry.lon" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.analysis.LogEntry.point">
-<span class="sig-name descname"><span class="pre">point</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="navigation.html#navtools.navigation.LatLon" title="navtools.navigation.LatLon"><span class="pre">navtools.navigation.LatLon</span></a></em><a class="headerlink" href="#navtools.analysis.LogEntry.point" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 3</p>
-</dd></dl>
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#navtools.analysis.LogEntry.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry.description">
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#navtools.analysis.LogEntry.description" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="navtools.analysis.LogEntry.source_row">
 <span class="sig-name descname"><span class="pre">source_row</span></span><em class="property"><span class="pre">:</span> <span class="pre">dict</span></em><a class="headerlink" href="#navtools.analysis.LogEntry.source_row" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 4</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="navtools.analysis.LogEntry._asdict">
-<span class="sig-name descname"><span class="pre">_asdict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navtools.analysis.LogEntry._asdict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a new dict which maps field names to their values.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.analysis.LogEntry._field_defaults">
-<span class="sig-name descname"><span class="pre">_field_defaults</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{}</span></em><a class="headerlink" href="#navtools.analysis.LogEntry._field_defaults" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.analysis.LogEntry._fields">
-<span class="sig-name descname"><span class="pre">_fields</span></span><em class="property"> <span class="pre">=</span> <span class="pre">('time',</span> <span class="pre">'lat',</span> <span class="pre">'lon',</span> <span class="pre">'point',</span> <span class="pre">'source_row')</span></em><a class="headerlink" href="#navtools.analysis.LogEntry._fields" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry.point">
+<span class="sig-name descname"><span class="pre">point</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="navigation.html#navtools.navigation.LatLon" title="navtools.navigation.LatLon"><span class="pre">navtools.navigation.LatLon</span></a></em><a class="headerlink" href="#navtools.analysis.LogEntry.point" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="navtools.analysis.LogEntry._make">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">_make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.analysis.LogEntry._make" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make a new LogEntry object from a sequence or iterable</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="navtools.analysis.LogEntry._replace">
-<span class="sig-name descname"><span class="pre">_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.analysis.LogEntry._replace" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a new LogEntry object replacing specified fields with new values</p>
-</dd></dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.analysis.LogEntry.geocode">
+<span class="sig-name descname"><span class="pre">geocode</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#navtools.analysis.LogEntry.geocode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -198,28 +194,42 @@ For GPX files, it’s lightly massaged to flatten out the attributes of the <cod
 <section id="csv-input-parsing">
 <h3>CSV input parsing<a class="headerlink" href="#csv-input-parsing" title="Permalink to this headline">¶</a></h3>
 <dl class="py function">
-<dt class="sig sig-object py" id="navtools.analysis.csv_to_LogEntry">
-<span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">csv_to_LogEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><span class="pre">navtools.analysis.LogEntry</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.analysis.csv_to_LogEntry" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parses a CSV file to yield an iterable sequence
-of <a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry</span></code></a> objects.</p>
-<p>There are two formats:</p>
+<dt class="sig sig-object py" id="navtools.analysis.csv_sniff_header">
+<span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">csv_sniff_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">TextIO</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#navtools.analysis.csv_sniff_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>There are two formats:</p>
 <ul>
-<li><p>Standard (i.e., GPSNavX). These files have no header. We assume a set of headings.</p></li>
+<li><p>Standard (i.e., OpenCPN). These files have no header.
+This function returns False. An assumed header must be provided to build a <code class="docutils literal notranslate"><span class="pre">DictReader</span></code>.</p></li>
 <li><p>Manual. These files <strong>must</strong> include a heading row for it to be processed.
-The heading row <strong>must</strong> use labels like the following:</p>
+This function returns True. A <code class="docutils literal notranslate"><span class="pre">DictReader</span></code> can then use the headers that are found.
+A heading row <strong>must</strong> use labels like the following:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s2">&quot;date&quot;</span><span class="p">,</span> <span class="s2">&quot;latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;cog&quot;</span><span class="p">,</span> <span class="s2">&quot;sog&quot;</span><span class="p">,</span> <span class="s2">&quot;heading&quot;</span><span class="p">,</span> <span class="s2">&quot;speed&quot;</span><span class="p">,</span>
 <span class="s2">&quot;depth&quot;</span><span class="p">,</span> <span class="s2">&quot;windAngle&quot;</span><span class="p">,</span> <span class="s2">&quot;windSpeed&quot;</span><span class="p">,</span> <span class="s2">&quot;comment&quot;</span>
 </pre></div>
 </div>
 </li>
 </ul>
-<div class="admonition-todo admonition" id="id1">
-<p class="admonition-title">Todo</p>
-<p>Refactor the sniffing out of csv_to_LogEntry.</p>
-<p>There should be two, separate, csv readers for files with headers
-and a separate one for files without headers, where a default header
-is assumed or the analysis main program provides a header.</p>
-</div>
+<p>This leads to two, separate, csv readers for</p>
+<ul class="simple">
+<li><p>OpenCPN files without headers;  a default header is assumed</p></li>
+<li><p>Manual files with headers</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>source</strong> – Open File</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True (which means there are headers a DictReader can use.)
+Or. False (which means external headers must be provided.)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="navtools.analysis.csv_internheader_to_LogEntry">
+<span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">csv_internheader_to_LogEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><span class="pre">navtools.analysis.LogEntry</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.analysis.csv_internheader_to_LogEntry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses a CSV file to yield an iterable sequence
+of <a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry</span></code></a> objects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -230,6 +240,23 @@ values for incomplete dates. By default, it’s “now”.</p></li>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>An iterator over <a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry</span></code></a> objects.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="navtools.analysis.csv_externheader_to_LogEntry">
+<span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">csv_externheader_to_LogEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><span class="pre">navtools.analysis.LogEntry</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.analysis.csv_externheader_to_LogEntry" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source</strong> – </p></li>
+<li><p><strong>header</strong> – </p></li>
+<li><p><strong>date</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
 </dd>
 </dl>
 </dd></dl>
@@ -270,6 +297,11 @@ These should perhaps be called “TrackPoints” to better match the GPX tags.</
 </dd></dl>
 
 </section>
+</section>
+<section id="computations">
+<span id="analysis-computations"></span><h2>Computations<a class="headerlink" href="#computations" title="Permalink to this headline">¶</a></h2>
+<p>There aren’t many: it’s essentially deducing of range and bearing from log entries.
+These are part of <code class="xref py py-mod docutils literal notranslate"><span class="pre">navigation</span></code>.</p>
 <section id="log-entry-with-derived-details">
 <h3>Log Entry With Derived Details<a class="headerlink" href="#log-entry-with-derived-details" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
@@ -345,7 +377,7 @@ The last point as no range and bearing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>log_entry_iter</strong> – iterable sequence of <a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry</span></code></a> instances.
-This can be produced by <a class="reference internal" href="#navtools.analysis.gpx_to_LogEntry" title="navtools.analysis.gpx_to_LogEntry"><code class="xref py py-func docutils literal notranslate"><span class="pre">gpx_to_LogEntry()</span></code></a> or <a class="reference internal" href="#navtools.analysis.csv_to_LogEntry" title="navtools.analysis.csv_to_LogEntry"><code class="xref py py-func docutils literal notranslate"><span class="pre">csv_to_LogEntry()</span></code></a>.</p>
+This can be produced by <a class="reference internal" href="#navtools.analysis.gpx_to_LogEntry" title="navtools.analysis.gpx_to_LogEntry"><code class="xref py py-func docutils literal notranslate"><span class="pre">gpx_to_LogEntry()</span></code></a> or <code class="xref py py-func docutils literal notranslate"><span class="pre">csv_to_LogEntry()</span></code>.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>iterable sequence of  <a class="reference internal" href="#navtools.analysis.LogEntry_Rhumb" title="navtools.analysis.LogEntry_Rhumb"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry_Rhumb</span></code></a> instances.</p>
@@ -354,8 +386,10 @@ This can be produced by <a class="reference internal" href="#navtools.analysis.g
 </dd></dl>
 
 </section>
-<section id="writing-the-csv-output">
-<h3>Writing The CSV Output<a class="headerlink" href="#writing-the-csv-output" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="output-writing">
+<span id="analysis-output"></span><h2>Output Writing<a class="headerlink" href="#output-writing" title="Permalink to this headline">¶</a></h2>
+<p>The waypoints with range and bearing information are written to a CSV file.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="navtools.analysis.nround">
 <span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">nround</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.analysis.nround" title="Permalink to this definition">¶</a></dt>
@@ -396,6 +430,24 @@ and adding new headers based on values computed by the iterator.</p>
 </dd></dl>
 
 </section>
+<section id="command-line-interface">
+<span id="analysis-cli"></span><h2>Command-Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline">¶</a></h2>
+<p>Typical use cases for this module include the following:</p>
+<ul>
+<li><p>Command Line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python -m navtools.analysis <span class="s1">&#39;../../Sailing/Cruise History/2011 Reedville/reedville.csv&#39;</span>
+</pre></div>
+</div>
+</li>
+<li><p>Within a Python Script:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navtools.analysis</span> <span class="kn">import</span> <span class="n">analyze</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="n">history</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/path/to/history&quot;</span><span class="p">)</span>
+<span class="n">analyze</span><span class="p">(</span><span class="n">history</span><span class="o">/</span><span class="s2">&quot;2011 Reedville&quot;</span><span class="o">/</span><span class="s2">&quot;jackson.csv&quot;</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
 <section id="the-analyze-application">
 <h3>The <a class="reference internal" href="#navtools.analysis.analyze" title="navtools.analysis.analyze"><code class="xref py py-func docutils literal notranslate"><span class="pre">analyze()</span></code></a> application<a class="headerlink" href="#the-analyze-application" title="Permalink to this headline">¶</a></h3>
 <dl class="py function">
@@ -404,6 +456,11 @@ and adding new headers based on values computed by the iterator.</p>
 <dd><p>Analyze a log file, writing a new log file with additional
 calculated values.</p>
 <p>The <a class="reference internal" href="#navtools.analysis.gen_rhumb" title="navtools.analysis.gen_rhumb"><code class="xref py py-func docutils literal notranslate"><span class="pre">gen_rhumb()</span></code></a> calculation is applied to each row.</p>
+<div class="admonition-todo admonition" id="id3">
+<p class="admonition-title">Todo</p>
+<p>Refactor to extract the <code class="docutils literal notranslate"><span class="pre">source_row</span></code> keys from the first row.</p>
+<p>This should be done outside <a class="reference internal" href="#navtools.analysis.gen_rhumb" title="navtools.analysis.gen_rhumb"><code class="xref py py-func docutils literal notranslate"><span class="pre">gen_rhumb()</span></code></a> and provided to <a class="reference internal" href="#navtools.analysis.write_csv" title="navtools.analysis.write_csv"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_csv()</span></code></a>.</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -451,23 +508,23 @@ output file with the detailed analysis.</p>
 
 <h3>Navigation</h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview and Context</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#actors">Actors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#use-cases">Use Cases</a></li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#solution-overview">Solution Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#architecture">Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#container-overview">Container Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#component-architecture">Component Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#other-notes">Other Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#references">References</a></li>
 </ul>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="navigation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code> – Navigation Calculations Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="planning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.planning</span></code> – Route Planning Application</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.analysis</span></code> – Track Analysis Application</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opencpn_table.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.opencpn_table</span></code> – OpenCPN Table Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.waypoint_merge</span></code> – Waypoint and Route Merge Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="navigation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code> – Navigation Calculations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lowrance_usr.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.lowrance_usr</span></code> – Lowrance USR File Parser</a></li>
 <li class="toctree-l1"><a class="reference internal" href="olc.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.olc</span></code> – OLC Geocoding</a></li>
-<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.waypoint_merge</span></code> – Waypoint and Route Merge</a></li>
-<li class="toctree-l1"><a class="reference internal" href="igrf11.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf11</span></code> – International Geomagnetic Reference Field Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="igrf.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf</span></code> – International Geomagnetic Reference Field</a></li>
 </ul>
 
 <div class="relations">

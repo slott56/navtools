@@ -9,14 +9,14 @@ import csv
 from io import StringIO
 import datetime
 import os
-from navtools.navigation import LatLon, declination, Angle
+from navtools.navigation import LatLon, declination, Angle, Lat, Lon
 from navtools.planning import (
-    RoutePoint,
-    RoutePoint_Rhumb,
-    RoutePoint_Rhumb_Magnetic,
+    Waypoint,
+    Waypoint_Rhumb,
+    Waypoint_Rhumb_Magnetic,
     SchedulePoint,
-    csv_to_RoutePoint,
-    gpx_to_RoutePoint,
+    csv_to_Waypoint,
+    gpx_to_Waypoint,
     gen_rhumb,
     gen_mag_bearing,
     gen_schedule,
@@ -40,7 +40,7 @@ def csv_file_1():
 
 
 def test_csv_to_RoutePoint(csv_file_1):
-    generator = csv_to_RoutePoint(csv_file_1)
+    generator = csv_to_Waypoint(csv_file_1)
     points = list(generator)
     assert len(points) == 2
 
@@ -80,7 +80,7 @@ def gpx_file_1():
 
 
 def test_gpx_to_RoutePoint(gpx_file_1):
-    generator = gpx_to_RoutePoint(gpx_file_1)
+    generator = gpx_to_Waypoint(gpx_file_1)
     points = list(generator)
     assert len(points) == 2
 
@@ -120,7 +120,7 @@ def gpx_file_bad():
 
 
 def test_gpx_bad(gpx_file_bad):
-    generator = gpx_to_RoutePoint(gpx_file_bad)
+    generator = gpx_to_Waypoint(gpx_file_bad)
     with raises(ValueError):
         points = list(generator)
 
@@ -128,19 +128,17 @@ def test_gpx_bad(gpx_file_bad):
 @fixture
 def gen_rhumb_1():
     route = [
-        RoutePoint(
-            "Piankatank 6",
-            "37.533195",
-            "-76.316963",
-            "",
-            LatLon("37.533195N", "76.316963W"),
+        Waypoint(
+            name="Piankatank 6",
+            lat=Lat.fromstring("37.533195"),
+            lon=Lon.fromstring("-76.316963"),
+            description="",
         ),
-        RoutePoint(
-            "Jackson Creek Entrance",
-            "37.542961",
-            "-76.319580",
-            "",
-            LatLon("37.542961N", "76.319580W"),
+        Waypoint(
+            name="Jackson Creek Entrance",
+            lat=Lat.fromstring("37.542961"),
+            lon=Lon.fromstring("-76.319580"),
+            description="",
         ),
     ]
     generator = gen_rhumb(iter(route))
@@ -152,39 +150,37 @@ def test_gen_rhumb(gen_rhumb_1):
     assert len(points) == 2
 
     assert points[0].point.name == "Piankatank 6"
-    assert points[0].distance == approx(0.59944686)
-    assert points[0].bearing.deg == approx(348.0038223)
+    assert points[0].distance is 0
+    assert points[0].bearing is None
 
     # Last is always None -- no more places to go.
     assert points[1].point.name == "Jackson Creek Entrance"
-    assert points[1].distance is None
-    assert points[1].bearing is None
+    assert points[1].distance == approx(0.59944686)
+    assert points[1].bearing.deg == approx(348.0038223)
 
 
 @fixture
 def gen_mag_bearing_1():
     route = [
-        RoutePoint_Rhumb(
-            RoutePoint(
-                "Piankatank 6",
-                "37.533195",
-                "-76.316963",
-                "",
-                LatLon("37.533195N", "76.316963W"),
+        Waypoint_Rhumb(
+            Waypoint(
+                name="Piankatank 6",
+                lat=Lat.fromstring("37.533195"),
+                lon=Lat.fromstring("-76.316963"),
+                description="",
             ),
-            0.59944686,
-            Angle.fromdegrees(348.0038223),
+            distance=0.59944686,
+            bearing=Angle.fromdegrees(348.0038223),
         ),
-        RoutePoint_Rhumb(
-            RoutePoint(
-                "Jackson Creek Entrance",
-                "37.542961",
-                "-76.319580",
-                "",
-                LatLon("37.542961N", "76.319580W"),
+        Waypoint_Rhumb(
+            Waypoint(
+                name="Jackson Creek Entrance",
+                lat=Lat.fromstring("37.542961"),
+                lon=Lon.fromstring("-76.319580"),
+                description="",
             ),
-            None,
-            None,
+            distance=None,
+            bearing=None,
         ),
     ]
     generator = gen_mag_bearing(
@@ -199,8 +195,8 @@ def test_gen_mag_bearing(gen_mag_bearing_1):
 
     assert points[0].point.point.name == "Piankatank 6", f"Unexpected {points[0]!r}"
     assert points[0].distance == approx(0.59944686)
-    assert points[0].true_bearing.deg == approx(348.0038223)
-    assert points[0].magnetic.deg == approx(337.0867231)
+    assert points[0].true_bearing.deg == approx(348.00, rel=1E-2)
+    assert points[0].magnetic.deg == approx(337.09, rel=1E-2)
 
     # Last is always None -- no more places to go.
     assert points[1].point.point.name == "Jackson Creek Entrance"
@@ -212,37 +208,35 @@ def test_gen_mag_bearing(gen_mag_bearing_1):
 @fixture
 def gen_schedule_1():
     route = [
-        RoutePoint_Rhumb_Magnetic(
-            RoutePoint_Rhumb(
-                RoutePoint(
-                    "Piankatank 6",
-                    "37.533195",
-                    "-76.316963",
-                    "",
-                    LatLon("37.533195N", "76.316963W"),
+        Waypoint_Rhumb_Magnetic(
+            Waypoint_Rhumb(
+                Waypoint(
+                    name="Piankatank 6",
+                    lat=Lat.fromstring("37.533195"),
+                    lon=Lon.fromstring("-76.316963"),
+                    description="",
                 ),
-                0.59944686,
-                Angle.fromdegrees(348.0038223),
+                distance=0.59944686,
+                bearing=Angle.fromdegrees(348.0038223),
             ),
-            0.59944686,
-            Angle.fromdegrees(348.0038223),
-            Angle.fromdegrees(337.0867607),
+            distance=0.59944686,
+            true_bearing=Angle.fromdegrees(348.0038223),
+            magnetic=Angle.fromdegrees(337.0867607),
         ),
-        RoutePoint_Rhumb_Magnetic(
-            RoutePoint_Rhumb(
-                RoutePoint(
-                    "Jackson Creek Entrance",
-                    "37.542961",
-                    "-76.319580",
-                    "",
-                    LatLon("37.542961N", "76.319580W"),
+        Waypoint_Rhumb_Magnetic(
+            Waypoint_Rhumb(
+                Waypoint(
+                    name="Jackson Creek Entrance",
+                    lat=Lat.fromstring("37.542961"),
+                    lon=Lon.fromstring("-76.319580"),
+                    description="",
                 ),
-                None,
-                None,
+                distance=None,
+                bearing=None,
             ),
-            None,
-            None,
-            None,
+            distance=None,
+            true_bearing=None,
+            magnetic=None,
         ),
     ]
     generator = gen_schedule(iter(route), speed=5)
@@ -257,60 +251,58 @@ def test_gen_schedule(gen_schedule_1):
     assert points[0].distance == approx(0.59944686)
     assert points[0].true_bearing.deg == approx(348.0038223)
     assert points[0].magnetic.deg == approx(337.0867231)
-    assert points[0].running == approx(0.59944686)
-    assert points[0].elapsed_min == approx(7.19336232)
-    assert points[0].elapsed_hm == "00h 07m"
+    assert points[0].cumulative_distance == approx(0.59944686)
+    assert points[0].enroute_min == approx(7.19336232)
+    assert points[0].enroute_hm == "00h 07m"
 
     # Last is always None -- no more places to go.
     assert points[1].point.point.name == "Jackson Creek Entrance"
     assert points[1].distance is None
     assert points[1].true_bearing is None
     assert points[1].magnetic is None
-    assert points[0].running == approx(0.59944686)
-    assert points[0].elapsed_min == approx(7.19336232)
-    assert points[0].elapsed_hm == "00h 07m"
+    assert points[0].cumulative_distance == approx(0.59944686)
+    assert points[0].enroute_min == approx(7.19336232)
+    assert points[0].enroute_hm == "00h 07m"
 
 
 @fixture
 def schedule_1():
     schedule = [
         SchedulePoint(
-            RoutePoint_Rhumb(
-                RoutePoint(
-                    "Piankatank 6",
-                    "37.533195",
-                    "-76.316963",
-                    "",
-                    LatLon("37.533195N", "76.316963W"),
+            Waypoint_Rhumb(
+                Waypoint(
+                    name="Piankatank 6",
+                    lat=Lat.fromstring("37.533195"),
+                    lon=Lon.fromstring("-76.316963"),
+                    description="",
                 ),
-                0.59944686,
-                Angle.fromdegrees(348.0038223),
+                distance=0.59944686,
+                bearing=Angle.fromdegrees(348.0038223),
             ),
-            0.59944686,
-            Angle.fromdegrees(348.0038223),
-            Angle.fromdegrees(337.0867607),
-            0.59944686,
-            7.19336232,
-            "00h 07m",
+            distance=0.59944686,
+            true_bearing=Angle.fromdegrees(348.0038223),
+            magnetic=Angle.fromdegrees(337.0867607),
+            cumulative_distance=0.59944686,
+            enroute_min=7.19336232,
+            enroute_hm="00h 07m",
         ),
         SchedulePoint(
-            RoutePoint_Rhumb(
-                RoutePoint(
-                    "Jackson Creek Entrance",
-                    "37.542961",
-                    "-76.319580",
-                    "",
-                    LatLon("37.542961N", "76.319580W"),
+            Waypoint_Rhumb(
+                Waypoint(
+                    name="Jackson Creek Entrance",
+                    lat=Lat.fromstring("37.542961"),
+                    lon=Lat.fromstring("-76.319580"),
+                    description="",
                 ),
-                None,
-                None,
+                distance=None,
+                bearing=None,
             ),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
+            distance=None,
+            true_bearing=None,
+            magnetic=None,
+            cumulative_distance=None,
+            enroute_min=None,
+            enroute_hm=None,
         ),
     ]
     return schedule
@@ -346,8 +338,8 @@ def test_plan_csv(sample_csv_1):
     expected = dedent(
         """\
     Name,Lat,Lon,Desc,Distance (nm),True Bearing,Magnetic Bearing,Distance Run,Elapsed HH:MM
-    Piankatank 6,37 31.990N,076 19.020W,,0.60228,349.0,338.0,0.60228,00h 07m
-    Jackson Creek Entrance,37 32.580N,076 19.170W,,,,,,
+    Piankatank 6,37 31.990N,076 19.020W,,0,,,0.0,0h 0m
+    Jackson Creek Entrance,37 32.580N,076 19.170W,,0.60228,349.0,338.0,0.60228,00h 07m
     """
     )
     with target.open() as result:
@@ -370,8 +362,8 @@ def test_plan_GPX(sample_gpx_1):
     expected = dedent(
         """\
     Name,Lat,Lon,Desc,Distance (nm),True Bearing,Magnetic Bearing,Distance Run,Elapsed HH:MM
-    Piankatank 6,37 31.992N,076 19.018W,,0.59945,348.0,337.0,0.59945,00h 07m
-    Jackson Creek Entrance,37 32.578N,076 19.175W,,,,,,
+    Piankatank 6,37 31.992N,076 19.018W,,0,,,0.0,0h 0m
+    Jackson Creek Entrance,37 32.578N,076 19.175W,,0.59945,348.0,337.0,0.59945,00h 07m
     """
     )
     target = sample_gpx_1.parent / f"{sample_gpx_1.stem} Schedule.csv"

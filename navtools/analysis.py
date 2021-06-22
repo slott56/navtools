@@ -14,16 +14,19 @@ for fine-grained analysis of sailing performance.
 
 from __future__ import annotations
 
-import csv
-import xml.etree.ElementTree
-from xml.etree.ElementTree import QName
-import sys
-import os
-import datetime
 import argparse
+import csv
+from dataclasses import dataclass, field
+import datetime
+from math import degrees, radians
+import os
 from pathlib import Path
 from typing import Any, Optional, TextIO, Iterator, Iterable, Union, NamedTuple
+import sys
+import xml.etree.ElementTree
+from xml.etree.ElementTree import QName
 from navtools import navigation
+from navtools import olc
 
 
 default_date_formats = [
@@ -84,6 +87,12 @@ def parse_date(date: str, default: Optional[datetime.date] = None) -> datetime.d
     This assumes a single date field is sufficient to fill in all attributes of a date.
     In some cases, we might have timestamps that roll past midnight without an obvious
     indicator of date change. Or, we might have some notation like "d1, d2" or "+1d, +2d".
+
+    ..  todo:: Refactor to merge with :py:func:`opencpn_table.parse_datetime`
+
+    :param date: string in some known format
+    :param default: default date to use when only a time is given.
+    :returns: datetime
     """
     if default is None:
         default = datetime.date.today()
@@ -110,99 +119,140 @@ def parse_date(date: str, default: Optional[datetime.date] = None) -> datetime.d
     raise ValueError(f"Cannot parse {date!r}")
 
 
-class LogEntry(NamedTuple):
+@dataclass(eq=True)
+class LogEntry:
     """
     A point on a track.
 
     The source_row is the source data. For CSV files, it's untouched.
     For GPX files, it's lightly massaged to flatten out the attributes of the ``<trkpt>`` tag.
+
+    This is similar to a Waypoint in a plan. The differences are minor.
+    Log Entries generally lack names; they're not named points, they're just a piece of data
+    at a point in time. Consequently, log entries always have a timestamp.
     """
 
     time: datetime.datetime
-    lat: Union[str, navigation.Angle]
-    lon: Union[str, navigation.Angle]
-    point: navigation.LatLon
-    source_row: dict[str, Any]
+    lat: navigation.Lat
+    lon: navigation.Lon
+    name: Optional[str] = None
+    description: Optional[str] = None
+    source_row: dict[str, Any] = field(default_factory=dict)
+    point: navigation.LatLon = field(init=False, compare=False)
+    geocode: str = field(init=False, compare=True)
+
+    def __post_init__(self) -> None:
+        self.point = navigation.LatLon(self.lat, self.lon)
+        self.geocode = olc.OLC().encode(degrees(self.lat), degrees(self.lon))
 
 
-def csv_to_LogEntry(
-    source: TextIO, date: Optional[datetime.date] = None
-) -> Iterator[LogEntry]:
+def csv_sniff_header(source: TextIO) -> bool:
     """
-    Parses a CSV file to yield an iterable sequence
-    of :py:class:`LogEntry` objects.
-
     There are two formats:
 
-    -   Standard (i.e., GPSNavX). These files have no header. We assume a set of headings.
+    -   Standard (i.e., OpenCPN). These files have no header.
+        This function returns False. An assumed header must be provided to build a ``DictReader``.
 
     -   Manual. These files **must** include a heading row for it to be processed.
-        The heading row **must** use labels like the following:
+        This function returns True. A ``DictReader`` can then use the headers that are found.
+        A heading row **must** use labels like the following:
 
         ::
 
             "date", "latitude", "longitude", "cog", "sog", "heading", "speed",
             "depth", "windAngle", "windSpeed", "comment"
 
-    ..  todo:: Refactor the sniffing out of csv_to_LogEntry.
+    This leads to two, separate, csv readers for
 
-        There should be two, separate, csv readers for files with headers
-        and a separate one for files without headers, where a default header
-        is assumed or the analysis main program provides a header.
+    -   OpenCPN files without headers;  a default header is assumed
+
+    -   Manual files with headers
+
+    :param source: Open File
+    :return: True (which means there are headers a DictReader can use.)
+        Or. False (which means external headers must be provided.)
+    """
+    sample = source.read(512)
+    source.seek(0)
+    hdr = csv.Sniffer().has_header(sample)
+    return hdr
+
+
+def csv_internheader_to_LogEntry(
+    source: TextIO, date: Optional[datetime.date] = None
+) -> Iterator[LogEntry]:
+    """
+    Parses a CSV file to yield an iterable sequence
+    of :py:class:`LogEntry` objects.
 
     :param source: Open file or file-like object that can be read.
     :param date: :py:class:`datetime.datetime` object used to fill in default
         values for incomplete dates. By default, it's "now".
     :returns: An iterator over :py:class:`LogEntry` objects.
     """
+
     if date is None:
         date = datetime.date.today()
-    hdr = csv.Sniffer().has_header(source.read(512))
-    source.seek(0)
-    if hdr:
-        trk = csv.DictReader(source)
-        if trk.fieldnames and set(trk.fieldnames) < set(
-            "Time,Lat,Lon,COG,SOG,Rig,Engine,windAngle,windSpeed,Location".split(",")
-        ):
-            raise TypeError("Column Headings aren't valid")  # pragma: no cover
 
-        def extract(row: dict[str, str]) -> tuple[datetime.datetime, str, str]:
-            # Handle local time formats
+    trk = csv.DictReader(source)
+    if trk.fieldnames and set(trk.fieldnames) < set(
+        "Time,Lat,Lon,COG,SOG,Rig,Engine,windAngle,windSpeed,Location".split(",")
+    ):
+        raise TypeError("Column Headings aren't valid")  # pragma: no cover
+
+    for row in trk:
+        try:
             dt = parse_date(row["Time"], default=date)
-            return dt, row["Lat"], row["Lon"]
+            lat = navigation.Lat.fromstring(row["Lat"])
+            lon = navigation.Lon.fromstring(row["Lon"])
+            yield LogEntry(time=dt, lat=lat, lon=lon, source_row=row)
+        except ValueError as e:
+            print(row)
+            print(e)
 
-    else:
-        # GPSNavX CSV file columns.
-        trk = csv.DictReader(
-            source,
-            fieldnames=[
-                "date",
-                "latitude",
-                "longitude",
-                "cog",
-                "sog",
-                "heading",
-                "speed",
-                "depth",
-                "windAngle",
-                "windSpeed",
-                "comment",
-            ],
-        )
 
-        def extract(row: dict[str, str]) -> tuple[datetime.datetime, str, str]:
-            lat, lon = row["latitude"], row["longitude"]
+def csv_externheader_to_LogEntry(
+    source: TextIO,
+    header: Optional[list[str]] = None,
+    date: Optional[datetime.date] = None,
+) -> Iterator[LogEntry]:
+    """
+
+    :param source:
+    :param header:
+    :param date:
+    :return:
+    """
+    if date is None:
+        date = datetime.date.today()
+
+    if header is None:
+        header = [
+            "date",
+            "latitude",
+            "longitude",
+            "cog",
+            "sog",
+            "heading",
+            "speed",
+            "depth",
+            "windAngle",
+            "windSpeed",
+            "comment",
+        ]
+
+    # GPSNavX CSV file columns.
+    trk = csv.DictReader(source, header)
+
+    for row in trk:
+        try:
+            lat = navigation.Lat.fromstring(row["latitude"])
+            lon = navigation.Lon.fromstring(row["longitude"])
             # Typical time: 2011-06-04 13:12:32 +0000
             dt = datetime.datetime.strptime(
                 row["date"], "%Y-%m-%d %H:%M:%S +0000"
             ).replace(tzinfo=datetime.timezone.utc)
-            return dt, lat, lon
-
-    for row in trk:
-        time, lat, lon = extract(row)
-        try:
-            point = navigation.LatLon(lat, lon)
-            yield LogEntry(time, lat, lon, point, row)
+            yield LogEntry(time=dt, lat=lat, lon=lon, source_row=row)
         except ValueError as e:
             print(row)
             print(e)
@@ -264,9 +314,8 @@ def gpx_to_LogEntry(source: TextIO) -> Iterator[LogEntry]:
             raise ValueError(
                 f"Can't process {xml.etree.ElementTree.tostring(pt, encoding='unicode', method='xml')}"
             )
-        lat = navigation.Angle.fromdegrees(float(lat_text))
-        lon = navigation.Angle.fromdegrees(float(lon_text))
-        point = navigation.LatLon(lat, lon)
+        lat = navigation.Lat.fromdegrees(float(lat_text))
+        lon = navigation.Lon.fromdegrees(float(lon_text))
         # Typical time: 2011-06-04T15:21:03Z
         raw_dt = pt.findtext(time_tag.text)
         if not raw_dt:
@@ -278,7 +327,7 @@ def gpx_to_LogEntry(source: TextIO) -> Iterator[LogEntry]:
         )
         row_dict = dict(xml_to_tuples(pt))
         yield LogEntry(
-            dt, lat, lon, point, row_dict,
+            time=dt, lat=lat, lon=lon, source_row=row_dict,
         )
 
 
@@ -412,6 +461,10 @@ def analyze(log_filepath: Path, date: Optional[datetime.date] = None) -> None:
 
     The :py:func:`gen_rhumb` calculation is applied to each row.
 
+    ..  todo:: Refactor to extract the ``source_row`` keys from the first row.
+
+        This should be done outside :py:func:`gen_rhumb` and provided to :py:func:`write_csv`.
+
     :param log_filepath: Path of a log file to analyze.
         If the input is :samp:`{some_name}.csv` or :samp:`{some_name}.gpx`
         the output will be :samp:`{some_name} Distance.csv`.
@@ -427,16 +480,18 @@ def analyze(log_filepath: Path, date: Optional[datetime.date] = None) -> None:
 
     # print( distance_path )
     if ext == ".csv":
-        # TODO: Refactor header sniffing here from ``csv_to_LogEntry``.
         with log_filepath.open() as source:
             with distance_path.open("w", newline="") as target:
-                # TODO: Emit source_row keys, also.
-                track = gen_rhumb(csv_to_LogEntry(source, date))
+                header = csv_sniff_header(source)
+                if header:
+                    log_iter = csv_internheader_to_LogEntry(source, date)
+                else:
+                    log_iter = csv_externheader_to_LogEntry(source, None, date)
+                track = gen_rhumb(log_iter)
                 write_csv(track, target)
     elif ext == ".gpx":
         with log_filepath.open() as source:
             with distance_path.open("w", newline="") as target:
-                # TODO: Emit source_row keys, also.
                 track = gen_rhumb(gpx_to_LogEntry(source))
                 write_csv(track, target)
     else:

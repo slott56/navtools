@@ -1,10 +1,10 @@
 ###############################################################
-:mod:`navtools.navigation` -- Navigation Calculations Module
+:mod:`navtools.navigation` -- Navigation Calculations
 ###############################################################
 .. include:: <isonum.txt>
 
 The :py:mod:`navtools.navigation` module computes range and bearing between two points.
-It leverages the :py:mod:`navtools.igrf11` module to compute compass bearing from
+It leverages the :py:mod:`navtools.igrf` module to compute compass bearing from
 true bearing.
 
 See the Aviation Formulary: http://edwilliams.org/avform147.htm for a number of useful formulae
@@ -131,6 +131,53 @@ The steps:
 Implementation
 ==============
 
+Here's the UML overview of this module.
+
+..  uml::
+
+    @startuml
+    'navtools.navigation'
+    allow_mixing
+
+    component navigation {
+
+        class AngleParser {
+            {static} sign(str) : int
+            {static} parse(str) : str
+        }
+
+        class float
+
+        class Angle {
+            {static} fromstring(str) : str
+        }
+
+        float <|-- Angle
+
+        Angle --> AngleParser
+
+        class Lat
+
+        class Lon
+
+        Angle <|-- Lat
+        Angle <|-- Lon
+
+        class LatLon {
+            lat : Lat
+            lon : Lon
+        }
+
+        LatLon::lat -- Lat
+        LatLon::lon -- Lon
+    }
+
+    component igrf
+
+    navigation ..> igrf
+
+    @enduml
+
 ..  py:module:: navtools.navigation
 
 AngleParser
@@ -193,12 +240,12 @@ Historical Archive
 
 The original :py:class:`Angle` and :py:class:`GlobeAngle` classes do things which are close
 to correct. They included some needless complexity, however.
-They work in degrees (not radians) and implement a lot of operations that could
+They worked in degrees (not radians) and implemented a lot of operations that could
 have been inherited from ``float``.
 
 
-Old Angle Class
-----------------
+Angle class -- independent of float
+-----------------------------------
 
 An :py:class:`Angle` is a signed radians number, essentially equivalent
 to ``float``. The operators are include the flexibility to work with
@@ -206,8 +253,9 @@ to ``float``. The operators are include the flexibility to work with
 
 ::
 
-    class Angle( numbers.Real ):
-        """An Angle, with conversion from several DMS notations,
+    class Angle(numbers.Real):
+        """
+        An Angle, with conversion from several DMS notations,
         as well as from radians.  The angle can be reported as
         degrees, a (D, M, S) tuple or as a value in radians.
 

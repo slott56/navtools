@@ -24,6 +24,31 @@ https://github.com/google/open-location-code/blob/main/test_data
 Implementation
 ==============
 
+
+Here's the UML overview of this module.
+
+..  uml::
+
+    @startuml
+    'navtools.olc'
+    allow_mixing
+
+    component olc {
+        abstract class Geocode {
+            {abstract} encode(Lat, Lon): str
+            {abstract} decode(str): Lat, Lon
+        }
+
+        class OLC {
+            encode(Lat, Lon): str
+            decode(str): Lat, Lon
+        }
+
+        Geocode <|-- OLC
+    }
+
+    @enduml
+
 ..  py:module:: navtools.olc
 
 Abstract Superclass

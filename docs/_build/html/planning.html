@@ -17,7 +17,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="navtools.analysis – Track Analysis Application" href="analysis.html" />
-    <link rel="prev" title="navtools.navigation – Navigation Calculations Module" href="navigation.html" />
+    <link rel="prev" title="Overview and Context" href="introduction.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -38,159 +38,64 @@
 <span id="navtools-planning-route-planning-application"></span><h1><a class="reference internal" href="#module-navtools.planning" title="navtools.planning"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.planning</span></code></a> – Route Planning Application<a class="headerlink" href="#module-planning" title="Permalink to this headline">¶</a></h1>
 <p>The <a class="reference internal" href="#module-planning" title="planning"><code class="xref py py-mod docutils literal notranslate"><span class="pre">planning</span></code></a> application is used to do voyage planning.
 It computes range, bearing and elapsed time for points along a route.</p>
+<p>Here’s the structure of the classes in this application:</p>
+<p class="plantuml">
+<img src="_images/plantuml-c391d5f8595dff08ee67e616763dd1b0a9d7a873.png" alt="&#64;startuml
+component planning {
+    class Waypoint_Rhumb {
+        point : Waypoint
+    }
+    class Waypoint_Rhumb_Magnetic {
+        point: Waypoint_Rhumb
+    }
+    Waypoint_Rhumb_Magnetic *-&gt; Waypoint_Rhumb
+    class SchedulePoint {
+        point: Waypoint_Rhumb
+    }
+    SchedulePoint *-&gt; Waypoint_Rhumb
+}
+component navigation {
+    class Waypoint {
+        lat: Lat
+        lon: Lon
+    }
+}
+Waypoint_Rhumb *-- Waypoint
+&#64;enduml"/>
+</p>
+<p>This module includes several groups of components.</p>
+<ul class="simple">
+<li><p>The <a class="reference internal" href="#planning-input"><span class="std std-ref">Input Parsing</span></a> group is the functions and classes that
+acquire input from the GPX or CSV file.</p></li>
+<li><p>The <a class="reference internal" href="#planning-computations"><span class="std std-ref">Planning Computations</span></a> functions work out range and bearing, magnetic bearing, total distance run,
+and elapsed time in minutes and hours.</p></li>
+<li><p>The <a class="reference internal" href="#planning-output"><span class="std std-ref">Output Writing</span></a> group is the functions to write the CSV result.</p></li>
+<li><p>Finally, the <a class="reference internal" href="#planning-cli"><span class="std std-ref">Command-Line Interface</span></a> components are used
+to build a proper command-line application.</p></li>
+</ul>
+<span class="target" id="module-navtools.planning"></span><section id="input-parsing">
+<span id="planning-input"></span><h2>Input Parsing<a class="headerlink" href="#input-parsing" title="Permalink to this headline">¶</a></h2>
+<p>The purpose of input parsing is to create <code class="xref py py-class docutils literal notranslate"><span class="pre">Waypoint</span></code> objects
+from input file sources.</p>
+<p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">Waypoint</span></code> is a 5-tuple of name, latitude, longitude, description
+and “point” information.   The “point” information is a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">navigation.LatLon</span></code> instance that combines the source lat and lon
+values.</p>
 <p>The input parsing supports two formats: CSV and GPX.  Each source format has
 a different kind of parser.  The CSV parser uses the <code class="xref py py-mod docutils literal notranslate"><span class="pre">csv</span></code> module.  The GPX parser uses
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">xml.etree</span></code>; it uses the <code class="docutils literal notranslate"><span class="pre">findall()</span></code> method to iterate
 through all of the rows.</p>
-<p>The various navigation calculations use an immutable object (or functional
-programming) style.  A series of functions create new, richer objects
-from the initial <code class="xref py py-class docutils literal notranslate"><span class="pre">RoutePoint</span></code> objects.</p>
-<p>Specifically, we use the following kind of function composition.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">gen_schedule</span><span class="p">(</span>
-    <span class="n">gen_mag_bearing</span><span class="p">(</span>
-        <span class="n">gen_rhumb</span><span class="p">(</span> <span class="n">point_iter</span> <span class="p">),</span>
-        <span class="n">variance</span><span class="p">),</span>
-    <span class="n">speed</span> <span class="p">):</span>
-</pre></div>
-</div>
-<p>This module includes three groups of components.
-The <a class="reference internal" href="#input-parsing">Input Parsing</a> group is the functions and a namedtuple that
-acquire input from the GPX or CSV file.</p>
-<p>The functions and namedtuples
-support computations of range and true bearing, magnetic bearing, total distance run,
-elapsed time in minutes and hours.</p>
-<p>Finally, the <a class="reference internal" href="#id1"><span class="std std-ref">Command-Line Interface</span></a> components are used
-to build a proper command-line application.</p>
-<section id="input-parsing">
-<h2>Input Parsing<a class="headerlink" href="#input-parsing" title="Permalink to this headline">¶</a></h2>
-<p>The purpose of input parsing is to create <code class="xref py py-class docutils literal notranslate"><span class="pre">RoutePoint</span></code> objects
-from input file sources.</p>
-<p>A <code class="xref py py-class docutils literal notranslate"><span class="pre">RoutePoint</span></code> is a 5-tuple of name, latitude, longitude, description
-and “point” information.   The “point” information is a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">navigation.LatLon</span></code> instance that combines the source lat and lon
-values.</p>
 <p>Note that the GPSNavX output was encoded in <code class="docutils literal notranslate"><span class="pre">Western</span> <span class="pre">(Mac</span> <span class="pre">OS</span> <span class="pre">Roman)</span></code>.
 This can make CSV parsing a bit more complex because there will be
 Unicode characters that the CSV module doesn’t always handle gracefully.
 However, the patterns used for parsing tolerate the extraneous bytes
 that appear in the midst of degree-minute values.</p>
-</section>
-<section id="command-line-interface">
-<span id="planning-cli"></span><h2>Command-Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline">¶</a></h2>
-<p>Writes a sequence of <code class="xref py py-class docutils literal notranslate"><span class="pre">Schedule</span></code> objects to a given target file.</p>
-<p>The file will have the following columns:</p>
-<blockquote>
-<div><p>“Name”, “Lat”, “Lon”, “Desc”,
-“Distance (nm)”, “True Bearing”, “Magnetic Bearing”,
-“Distance Run”, “Elapsed HH:MM”</p>
-</div></blockquote>
-<p>Note that we apply some rounding rules to these values before writing them
-to a CSV file. The distances are rounded to <span class="math notranslate nohighlight">\(10^{-5}\)</span> which is about
-an inch, or 2 cm: more accurate than the GPS position.
-The bearing is rounded to zero places.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>It’s hard to steer to a given degree,
-much less a fraction of a degree. Classically, the mariner’s compass divides
-the circle into 32 points; this is 12.5 degrees each point.
-The width of your fist at arm’s length is 10°. If you extend index finger and pinky,
-that’s 15°. That’s about as close as you can steer by hand.</p>
-</div>
-</section>
-<section id="id1">
-<span id="id2"></span><h2>Command-Line Interface<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
-<p>Typical use cases for this module include the following.</p>
-<ul class="simple">
-<li><p>Run from the command line:</p></li>
-</ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">navtools</span><span class="o">.</span><span class="n">planning</span> <span class="o">-</span><span class="n">s</span> <span class="mf">5.0</span> <span class="s1">&#39;../../Sailing/Cruising Plans/Lewes 2011/Jackson Creek to Cape Henlopen -- Offshore.gpx&#39;</span>
-</pre></div>
-</div>
-<ul class="simple">
-<li><p>Run within a Python script:</p></li>
-</ul>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navtools.planning</span> <span class="kn">import</span> <span class="n">plan</span>
-<span class="n">plan</span><span class="p">(</span> <span class="s1">&#39;../../Sailing/Cruising Plans/Routes/Whitby Rendezvous.csv&#39;</span><span class="p">,</span> <span class="mf">5.0</span> <span class="p">)</span>
-<span class="n">plan</span><span class="p">(</span> <span class="s1">&#39;../../Sailing/Cruising Plans/Routes/Whitby Rendezvous.gpx&#39;</span><span class="p">,</span> <span class="mf">5.0</span> <span class="p">)</span>
-</pre></div>
-</div>
-</section>
-<section id="module-navtools.planning">
-<span id="implementation"></span><h2>Implementation<a class="headerlink" href="#module-navtools.planning" title="Permalink to this headline">¶</a></h2>
-<section id="a-waypoint-on-a-route">
-<h3>A waypoint on a route<a class="headerlink" href="#a-waypoint-on-a-route" title="Permalink to this headline">¶</a></h3>
-<dl class="py class">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">RoutePoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.RoutePoint" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#navtools.planning.RoutePoint.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 0</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint.lat">
-<span class="sig-name descname"><span class="pre">lat</span></span><em class="property"><span class="pre">:</span> <span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.planning.RoutePoint.lat" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 1</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint.lon">
-<span class="sig-name descname"><span class="pre">lon</span></span><em class="property"><span class="pre">:</span> <span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.planning.RoutePoint.lon" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 2</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint.desc">
-<span class="sig-name descname"><span class="pre">desc</span></span><em class="property"><span class="pre">:</span> <span class="pre">str</span></em><a class="headerlink" href="#navtools.planning.RoutePoint.desc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 3</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint.point">
-<span class="sig-name descname"><span class="pre">point</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="navigation.html#navtools.navigation.LatLon" title="navtools.navigation.LatLon"><span class="pre">navtools.navigation.LatLon</span></a></em><a class="headerlink" href="#navtools.planning.RoutePoint.point" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 4</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint._asdict">
-<span class="sig-name descname"><span class="pre">_asdict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.RoutePoint._asdict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a new dict which maps field names to their values.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint._field_defaults">
-<span class="sig-name descname"><span class="pre">_field_defaults</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{}</span></em><a class="headerlink" href="#navtools.planning.RoutePoint._field_defaults" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint._fields">
-<span class="sig-name descname"><span class="pre">_fields</span></span><em class="property"> <span class="pre">=</span> <span class="pre">('name',</span> <span class="pre">'lat',</span> <span class="pre">'lon',</span> <span class="pre">'desc',</span> <span class="pre">'point')</span></em><a class="headerlink" href="#navtools.planning.RoutePoint._fields" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint._make">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">_make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.RoutePoint._make" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make a new RoutePoint object from a sequence or iterable</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint._replace">
-<span class="sig-name descname"><span class="pre">_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.RoutePoint._replace" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a new RoutePoint object replacing specified fields with new values</p>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-<section id="csv-input-parsing">
-<h3>CSV input parsing<a class="headerlink" href="#csv-input-parsing" title="Permalink to this headline">¶</a></h3>
 <dl class="py function">
-<dt class="sig sig-object py" id="navtools.planning.csv_to_RoutePoint">
-<span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">csv_to_RoutePoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">TextIO</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.planning.RoutePoint" title="navtools.planning.RoutePoint"><span class="pre">navtools.planning.RoutePoint</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.planning.csv_to_RoutePoint" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="navtools.planning.csv_to_Waypoint">
+<span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">csv_to_Waypoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">TextIO</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">navtools.navigation.Waypoint</span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.planning.csv_to_Waypoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parses the CSV files produced by tools like GPSNavX, iNavX, OpenCPN
-to yield an iterable sequence of <a class="reference internal" href="#navtools.planning.RoutePoint" title="navtools.planning.RoutePoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutePoint</span></code></a> objects.</p>
-<p>Generate RoutePoint from a CSV reader.  The assumed column
+to yield an iterable sequence of <code class="xref py py-class docutils literal notranslate"><span class="pre">Waypoint</span></code> objects.</p>
+<p>Generate Waypoint from a CSV reader.  The assumed column
 order is “name”, “lat”, “lon” followed by any additional attributes.</p>
 <p>Note that the GPSNavX output was encoded in <code class="docutils literal notranslate"><span class="pre">Western</span> <span class="pre">(Mac</span> <span class="pre">OS</span> <span class="pre">Roman)</span></code>.
 This can make CSV parsing a bit more complex because there will be
@@ -202,18 +107,15 @@ that appear in the midst of degree-minute values.</p>
 <dd class="field-odd"><p><strong>source</strong> – Open file or file-like object that can be read</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>iterable sequence of <a class="reference internal" href="#navtools.planning.RoutePoint" title="navtools.planning.RoutePoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutePoint</span></code></a> instances.</p>
+<dd class="field-even"><p>iterable sequence of <code class="xref py py-class docutils literal notranslate"><span class="pre">Waypoint</span></code> instances.</p>
 </dd>
 </dl>
 </dd></dl>
 
-</section>
-<section id="gpx-input-parsing">
-<h3>GPX input parsing<a class="headerlink" href="#gpx-input-parsing" title="Permalink to this headline">¶</a></h3>
 <dl class="py function">
-<dt class="sig sig-object py" id="navtools.planning.gpx_to_RoutePoint">
-<span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">gpx_to_RoutePoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">TextIO</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.planning.RoutePoint" title="navtools.planning.RoutePoint"><span class="pre">navtools.planning.RoutePoint</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.planning.gpx_to_RoutePoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates <a class="reference internal" href="#navtools.planning.RoutePoint" title="navtools.planning.RoutePoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutePoint</span></code></a> onjects from a GPX doc.</p>
+<dt class="sig sig-object py" id="navtools.planning.gpx_to_Waypoint">
+<span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">gpx_to_Waypoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">TextIO</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">navtools.navigation.Waypoint</span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.planning.gpx_to_Waypoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates <code class="xref py py-class docutils literal notranslate"><span class="pre">Waypoint</span></code> onjects from a GPX doc.</p>
 <p>We assume a minimal schema:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">&lt;rte&gt;</span></code> contains</p>
@@ -221,7 +123,7 @@ that appear in the midst of degree-minute values.</p>
 <li><p><code class="docutils literal notranslate"><span class="pre">&lt;rtept</span> <span class="pre">lat=&quot;&quot;</span> <span class="pre">lon=&quot;&quot;&gt;</span></code> contains</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">&lt;name&gt;</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">&lt;desc&gt;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">&lt;description&gt;</span></code></p></li>
 </ul>
 </li>
 </ul>
@@ -232,84 +134,98 @@ that appear in the midst of degree-minute values.</p>
 <dd class="field-odd"><p><strong>source</strong> – an open XML file.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>An iterator over <a class="reference internal" href="#navtools.planning.RoutePoint" title="navtools.planning.RoutePoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutePoint</span></code></a> objects.</p>
+<dd class="field-even"><p>An iterator over <code class="xref py py-class docutils literal notranslate"><span class="pre">Waypoint</span></code> objects.</p>
 </dd>
 </dl>
 </dd></dl>
 
 </section>
+<section id="planning-computations">
+<span id="id1"></span><h2>Planning Computations<a class="headerlink" href="#planning-computations" title="Permalink to this headline">¶</a></h2>
+<p>The various navigation calculations use an immutable object (or functional
+programming) style.  A series of functions create new, richer objects
+from the initial <code class="xref py py-class docutils literal notranslate"><span class="pre">Waypoint</span></code> objects.</p>
+<p>Specifically, we use the following kind of function composition.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">gen_schedule</span><span class="p">(</span>
+    <span class="n">gen_mag_bearing</span><span class="p">(</span>
+        <span class="n">gen_rhumb</span><span class="p">(</span><span class="n">point_iter</span><span class="p">),</span>
+        <span class="n">variance</span><span class="p">),</span>
+    <span class="n">speed</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">point_iter</span></code> is a CSV or GPX file with the route defined as a series of waypoints.</p>
 <section id="point-with-distance-and-bearing">
 <h3>Point with Distance and Bearing<a class="headerlink" href="#point-with-distance-and-bearing" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint_Rhumb">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">RoutePoint_Rhumb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bearing</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.RoutePoint_Rhumb" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint_Rhumb.point">
-<span class="sig-name descname"><span class="pre">point</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="#navtools.planning.RoutePoint" title="navtools.planning.RoutePoint"><span class="pre">navtools.planning.RoutePoint</span></a></em><a class="headerlink" href="#navtools.planning.RoutePoint_Rhumb.point" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="navtools.planning.Waypoint_Rhumb">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">Waypoint_Rhumb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">navtools.navigation.Waypoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bearing</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.Waypoint_Rhumb" title="Permalink to this definition">¶</a></dt>
+<dd><p>A waypoint along a planned route; includes
+distance and true bearing from the previous waypoint.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.planning.Waypoint_Rhumb.point">
+<span class="sig-name descname"><span class="pre">point</span></span><em class="property"><span class="pre">:</span> <span class="pre">navtools.navigation.Waypoint</span></em><a class="headerlink" href="#navtools.planning.Waypoint_Rhumb.point" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 0</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint_Rhumb.distance">
-<span class="sig-name descname"><span class="pre">distance</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.planning.RoutePoint_Rhumb.distance" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="navtools.planning.Waypoint_Rhumb.distance">
+<span class="sig-name descname"><span class="pre">distance</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#navtools.planning.Waypoint_Rhumb.distance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 1</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint_Rhumb.bearing">
-<span class="sig-name descname"><span class="pre">bearing</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.planning.RoutePoint_Rhumb.bearing" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="navtools.planning.Waypoint_Rhumb.bearing">
+<span class="sig-name descname"><span class="pre">bearing</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.planning.Waypoint_Rhumb.bearing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 2</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint_Rhumb._asdict">
-<span class="sig-name descname"><span class="pre">_asdict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.RoutePoint_Rhumb._asdict" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="navtools.planning.Waypoint_Rhumb._asdict">
+<span class="sig-name descname"><span class="pre">_asdict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.Waypoint_Rhumb._asdict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a new dict which maps field names to their values.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint_Rhumb._field_defaults">
-<span class="sig-name descname"><span class="pre">_field_defaults</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{}</span></em><a class="headerlink" href="#navtools.planning.RoutePoint_Rhumb._field_defaults" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="navtools.planning.Waypoint_Rhumb._field_defaults">
+<span class="sig-name descname"><span class="pre">_field_defaults</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{}</span></em><a class="headerlink" href="#navtools.planning.Waypoint_Rhumb._field_defaults" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint_Rhumb._fields">
-<span class="sig-name descname"><span class="pre">_fields</span></span><em class="property"> <span class="pre">=</span> <span class="pre">('point',</span> <span class="pre">'distance',</span> <span class="pre">'bearing')</span></em><a class="headerlink" href="#navtools.planning.RoutePoint_Rhumb._fields" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="navtools.planning.Waypoint_Rhumb._fields">
+<span class="sig-name descname"><span class="pre">_fields</span></span><em class="property"> <span class="pre">=</span> <span class="pre">('point',</span> <span class="pre">'distance',</span> <span class="pre">'bearing')</span></em><a class="headerlink" href="#navtools.planning.Waypoint_Rhumb._fields" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint_Rhumb._make">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">_make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.RoutePoint_Rhumb._make" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make a new RoutePoint_Rhumb object from a sequence or iterable</p>
+<dt class="sig sig-object py" id="navtools.planning.Waypoint_Rhumb._make">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">_make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.Waypoint_Rhumb._make" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a new Waypoint_Rhumb object from a sequence or iterable</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint_Rhumb._replace">
-<span class="sig-name descname"><span class="pre">_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.RoutePoint_Rhumb._replace" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a new RoutePoint_Rhumb object replacing specified fields with new values</p>
+<dt class="sig sig-object py" id="navtools.planning.Waypoint_Rhumb._replace">
+<span class="sig-name descname"><span class="pre">_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.Waypoint_Rhumb._replace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new Waypoint_Rhumb object replacing specified fields with new values</p>
 </dd></dl>
 
 </dd></dl>
 
-</section>
-<section id="creating-the-point-with-distance-and-bearing">
-<h3>Creating the point with distance and bearing<a class="headerlink" href="#creating-the-point-with-distance-and-bearing" title="Permalink to this headline">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="navtools.planning.gen_rhumb">
-<span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">gen_rhumb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">route_points_iter</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.planning.RoutePoint" title="navtools.planning.RoutePoint"><span class="pre">navtools.planning.RoutePoint</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.planning.RoutePoint_Rhumb" title="navtools.planning.RoutePoint_Rhumb"><span class="pre">navtools.planning.RoutePoint_Rhumb</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.planning.gen_rhumb" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the simple, true bearing
-and distance between points.  Since this is for navigating forward
-along a route, each point is decorated with range and bearing to the
-next mark.  The last point is included, but has <code class="samp docutils literal notranslate"><span class="pre">None</span></code> for
-range and bearing.</p>
+<span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">gen_rhumb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">route_points_iter</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><span class="pre">navtools.navigation.Waypoint</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.planning.Waypoint_Rhumb" title="navtools.planning.Waypoint_Rhumb"><span class="pre">navtools.planning.Waypoint_Rhumb</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.planning.gen_rhumb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the range and bearing to each maypoint from a previous waypoint.</p>
+<p>This uses <code class="xref py py-mod docutils literal notranslate"><span class="pre">navigation</span></code> to compute range and bearing between points.</p>
+<p>An assumed mark prior to the first waypoint in the route is required.
+This can either be
+-   the current lat/lon, OR,
+-   a repeat of the first waypoint, leading to an irrelevant bearing and zero distance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>route_points_iter</strong> – Iterator over individual <a class="reference internal" href="#navtools.planning.RoutePoint" title="navtools.planning.RoutePoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutePoint</span></code></a> instances.
-For example, the results of the <a class="reference internal" href="#navtools.planning.csv_to_RoutePoint" title="navtools.planning.csv_to_RoutePoint"><code class="xref py py-func docutils literal notranslate"><span class="pre">csv_to_RoutePoint()</span></code></a> or <a class="reference internal" href="#navtools.planning.gpx_to_RoutePoint" title="navtools.planning.gpx_to_RoutePoint"><code class="xref py py-func docutils literal notranslate"><span class="pre">gpx_to_RoutePoint()</span></code></a>
+<dd class="field-odd"><p><strong>route_points_iter</strong> – Iterator over individual <code class="xref py py-class docutils literal notranslate"><span class="pre">Waypoint</span></code> instances.
+For example, the results of the <code class="xref py py-func docutils literal notranslate"><span class="pre">csv_to_RoutePoint()</span></code> or <code class="xref py py-func docutils literal notranslate"><span class="pre">gpx_to_RoutePoint()</span></code>
 function.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>iterator over <a class="reference internal" href="#navtools.planning.RoutePoint_Rhumb" title="navtools.planning.RoutePoint_Rhumb"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutePoint_Rhumb</span></code></a> instances.</p>
+<dd class="field-even"><p>iterator over <a class="reference internal" href="#navtools.planning.Waypoint_Rhumb" title="navtools.planning.Waypoint_Rhumb"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waypoint_Rhumb</span></code></a> instances.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -318,74 +234,83 @@ function.</p>
 <section id="point-with-distance-bearing-and-declination">
 <h3>Point with Distance, Bearing, and Declination<a class="headerlink" href="#point-with-distance-bearing-and-declination" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint_Rhumb_Magnetic">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">RoutePoint_Rhumb_Magnetic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_bearing</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">magnetic</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.RoutePoint_Rhumb_Magnetic" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint_Rhumb_Magnetic.point">
-<span class="sig-name descname"><span class="pre">point</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="#navtools.planning.RoutePoint_Rhumb" title="navtools.planning.RoutePoint_Rhumb"><span class="pre">navtools.planning.RoutePoint_Rhumb</span></a></em><a class="headerlink" href="#navtools.planning.RoutePoint_Rhumb_Magnetic.point" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="navtools.planning.Waypoint_Rhumb_Magnetic">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">Waypoint_Rhumb_Magnetic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#navtools.planning.Waypoint_Rhumb" title="navtools.planning.Waypoint_Rhumb"><span class="pre">navtools.planning.Waypoint_Rhumb</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_bearing</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">magnetic</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.Waypoint_Rhumb_Magnetic" title="Permalink to this definition">¶</a></dt>
+<dd><p>A waypoint along a planned route; includes
+distance and bearing from the previous waypoint.
+Includes both true and magnetic bearings with current local variance.</p>
+<p>This keeps the magnetic bearing as a value computed once only.</p>
+<p>An alternative design is to make <code class="docutils literal notranslate"><span class="pre">magnetic</span></code> a property
+and compute it as needed. This would allow us to refactor
+the variance and magnetic computations into the :py:class:<code class="docutils literal notranslate"><span class="pre">Waypoint_Rhumb</span></code> class,
+eliminating a need for this separate class and computation.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.planning.Waypoint_Rhumb_Magnetic.point">
+<span class="sig-name descname"><span class="pre">point</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="#navtools.planning.Waypoint_Rhumb" title="navtools.planning.Waypoint_Rhumb"><span class="pre">navtools.planning.Waypoint_Rhumb</span></a></em><a class="headerlink" href="#navtools.planning.Waypoint_Rhumb_Magnetic.point" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 0</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint_Rhumb_Magnetic.distance">
-<span class="sig-name descname"><span class="pre">distance</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.planning.RoutePoint_Rhumb_Magnetic.distance" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="navtools.planning.Waypoint_Rhumb_Magnetic.distance">
+<span class="sig-name descname"><span class="pre">distance</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#navtools.planning.Waypoint_Rhumb_Magnetic.distance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 1</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint_Rhumb_Magnetic.true_bearing">
-<span class="sig-name descname"><span class="pre">true_bearing</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.planning.RoutePoint_Rhumb_Magnetic.true_bearing" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="navtools.planning.Waypoint_Rhumb_Magnetic.true_bearing">
+<span class="sig-name descname"><span class="pre">true_bearing</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.planning.Waypoint_Rhumb_Magnetic.true_bearing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 2</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint_Rhumb_Magnetic.magnetic">
-<span class="sig-name descname"><span class="pre">magnetic</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.planning.RoutePoint_Rhumb_Magnetic.magnetic" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="navtools.planning.Waypoint_Rhumb_Magnetic.magnetic">
+<span class="sig-name descname"><span class="pre">magnetic</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.planning.Waypoint_Rhumb_Magnetic.magnetic" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 3</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint_Rhumb_Magnetic._asdict">
-<span class="sig-name descname"><span class="pre">_asdict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.RoutePoint_Rhumb_Magnetic._asdict" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="navtools.planning.Waypoint_Rhumb_Magnetic._asdict">
+<span class="sig-name descname"><span class="pre">_asdict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.Waypoint_Rhumb_Magnetic._asdict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a new dict which maps field names to their values.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint_Rhumb_Magnetic._field_defaults">
-<span class="sig-name descname"><span class="pre">_field_defaults</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{}</span></em><a class="headerlink" href="#navtools.planning.RoutePoint_Rhumb_Magnetic._field_defaults" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="navtools.planning.Waypoint_Rhumb_Magnetic._field_defaults">
+<span class="sig-name descname"><span class="pre">_field_defaults</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{}</span></em><a class="headerlink" href="#navtools.planning.Waypoint_Rhumb_Magnetic._field_defaults" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint_Rhumb_Magnetic._fields">
-<span class="sig-name descname"><span class="pre">_fields</span></span><em class="property"> <span class="pre">=</span> <span class="pre">('point',</span> <span class="pre">'distance',</span> <span class="pre">'true_bearing',</span> <span class="pre">'magnetic')</span></em><a class="headerlink" href="#navtools.planning.RoutePoint_Rhumb_Magnetic._fields" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="navtools.planning.Waypoint_Rhumb_Magnetic._fields">
+<span class="sig-name descname"><span class="pre">_fields</span></span><em class="property"> <span class="pre">=</span> <span class="pre">('point',</span> <span class="pre">'distance',</span> <span class="pre">'true_bearing',</span> <span class="pre">'magnetic')</span></em><a class="headerlink" href="#navtools.planning.Waypoint_Rhumb_Magnetic._fields" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint_Rhumb_Magnetic._make">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">_make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.RoutePoint_Rhumb_Magnetic._make" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make a new RoutePoint_Rhumb_Magnetic object from a sequence or iterable</p>
+<dt class="sig sig-object py" id="navtools.planning.Waypoint_Rhumb_Magnetic._make">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">_make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iterable</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.Waypoint_Rhumb_Magnetic._make" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a new Waypoint_Rhumb_Magnetic object from a sequence or iterable</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="navtools.planning.RoutePoint_Rhumb_Magnetic._replace">
-<span class="sig-name descname"><span class="pre">_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.RoutePoint_Rhumb_Magnetic._replace" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a new RoutePoint_Rhumb_Magnetic object replacing specified fields with new values</p>
+<dt class="sig sig-object py" id="navtools.planning.Waypoint_Rhumb_Magnetic._replace">
+<span class="sig-name descname"><span class="pre">_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwds</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.Waypoint_Rhumb_Magnetic._replace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new Waypoint_Rhumb_Magnetic object replacing specified fields with new values</p>
 </dd></dl>
 
 </dd></dl>
 
-</section>
-<section id="creating-declination">
-<h3>Creating declination<a class="headerlink" href="#creating-declination" title="Permalink to this headline">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="navtools.planning.gen_mag_bearing">
-<span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">gen_mag_bearing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rhumb_iter</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.planning.RoutePoint_Rhumb" title="navtools.planning.RoutePoint_Rhumb"><span class="pre">navtools.planning.RoutePoint_Rhumb</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">declination</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.LatLon" title="navtools.navigation.LatLon"><span class="pre">navtools.navigation.LatLon</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.planning.RoutePoint_Rhumb_Magnetic" title="navtools.planning.RoutePoint_Rhumb_Magnetic"><span class="pre">navtools.planning.RoutePoint_Rhumb_Magnetic</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.planning.gen_mag_bearing" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">gen_mag_bearing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rhumb_iter</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.planning.Waypoint_Rhumb" title="navtools.planning.Waypoint_Rhumb"><span class="pre">navtools.planning.Waypoint_Rhumb</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">declination</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.LatLon" title="navtools.navigation.LatLon"><span class="pre">navtools.navigation.LatLon</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.planning.Waypoint_Rhumb_Magnetic" title="navtools.planning.Waypoint_Rhumb_Magnetic"><span class="pre">navtools.planning.Waypoint_Rhumb_Magnetic</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.planning.gen_mag_bearing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applies the given <code class="docutils literal notranslate"><span class="pre">declination</span></code> function to each point to
 compute the compass bearing value from the true bearing at each waypoint in a route.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Declination is also known as Variation</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>rhumb_iter</strong> – iterator over <a class="reference internal" href="#navtools.planning.RoutePoint_Rhumb" title="navtools.planning.RoutePoint_Rhumb"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutePoint_Rhumb</span></code></a> instances.
+<li><p><strong>rhumb_iter</strong> – iterator over <a class="reference internal" href="#navtools.planning.Waypoint_Rhumb" title="navtools.planning.Waypoint_Rhumb"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waypoint_Rhumb</span></code></a> instances.
 For example, the <a class="reference internal" href="#navtools.planning.gen_rhumb" title="navtools.planning.gen_rhumb"><code class="xref py py-func docutils literal notranslate"><span class="pre">gen_rhumb()</span></code></a> function.</p></li>
 <li><p><strong>declination</strong> – function to compute declination.
 We often use <code class="xref py py-func docutils literal notranslate"><span class="pre">navigation.declination()</span></code> for this.</p></li>
@@ -394,28 +319,28 @@ the declination. If omitted, today’s date is used.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Iterator over <a class="reference internal" href="#navtools.planning.RoutePoint_Rhumb_Magnetic" title="navtools.planning.RoutePoint_Rhumb_Magnetic"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutePoint_Rhumb_Magnetic</span></code></a> objects.</p>
+<dd class="field-even"><p>Iterator over <a class="reference internal" href="#navtools.planning.Waypoint_Rhumb_Magnetic" title="navtools.planning.Waypoint_Rhumb_Magnetic"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waypoint_Rhumb_Magnetic</span></code></a> objects.</p>
 </dd>
 </dl>
-<p># A/k/a Variation</p>
 </dd></dl>
 
 </section>
-<section id="a-waypoint-with-schedule-details">
-<h3>A Waypoint with Schedule Details<a class="headerlink" href="#a-waypoint-with-schedule-details" title="Permalink to this headline">¶</a></h3>
+<section id="schedule-details">
+<h3>Schedule Details<a class="headerlink" href="#schedule-details" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="navtools.planning.SchedulePoint">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">SchedulePoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#navtools.planning.RoutePoint_Rhumb" title="navtools.planning.RoutePoint_Rhumb"><span class="pre">navtools.planning.RoutePoint_Rhumb</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_bearing</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">magnetic</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">running</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elapsed_min</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elapsed_hm</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.SchedulePoint" title="Permalink to this definition">¶</a></dt>
-<dd><p>Last point in a route has none of the derived attributes.</p>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">SchedulePoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#navtools.planning.Waypoint_Rhumb" title="navtools.planning.Waypoint_Rhumb"><span class="pre">navtools.planning.Waypoint_Rhumb</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_bearing</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">magnetic</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cumulative_distance</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enroute_min</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enroute_hm</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.SchedulePoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scheduled waypoints.
+These include distance, bearing, and estimated time enroute (ETE)</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="navtools.planning.SchedulePoint.point">
-<span class="sig-name descname"><span class="pre">point</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="#navtools.planning.RoutePoint_Rhumb" title="navtools.planning.RoutePoint_Rhumb"><span class="pre">navtools.planning.RoutePoint_Rhumb</span></a></em><a class="headerlink" href="#navtools.planning.SchedulePoint.point" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">point</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="#navtools.planning.Waypoint_Rhumb" title="navtools.planning.Waypoint_Rhumb"><span class="pre">navtools.planning.Waypoint_Rhumb</span></a></em><a class="headerlink" href="#navtools.planning.SchedulePoint.point" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 0</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="navtools.planning.SchedulePoint.distance">
-<span class="sig-name descname"><span class="pre">distance</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.planning.SchedulePoint.distance" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">distance</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#navtools.planning.SchedulePoint.distance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 1</p>
 </dd></dl>
 
@@ -432,20 +357,20 @@ the declination. If omitted, today’s date is used.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.SchedulePoint.running">
-<span class="sig-name descname"><span class="pre">running</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.planning.SchedulePoint.running" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="navtools.planning.SchedulePoint.cumulative_distance">
+<span class="sig-name descname"><span class="pre">cumulative_distance</span></span><em class="property"><span class="pre">:</span> <span class="pre">float</span></em><a class="headerlink" href="#navtools.planning.SchedulePoint.cumulative_distance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 4</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.SchedulePoint.elapsed_min">
-<span class="sig-name descname"><span class="pre">elapsed_min</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.planning.SchedulePoint.elapsed_min" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="navtools.planning.SchedulePoint.enroute_min">
+<span class="sig-name descname"><span class="pre">enroute_min</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.planning.SchedulePoint.enroute_min" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 5</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.planning.SchedulePoint.elapsed_hm">
-<span class="sig-name descname"><span class="pre">elapsed_hm</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.planning.SchedulePoint.elapsed_hm" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="navtools.planning.SchedulePoint.enroute_hm">
+<span class="sig-name descname"><span class="pre">enroute_hm</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.planning.SchedulePoint.enroute_hm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 6</p>
 </dd></dl>
 
@@ -462,7 +387,7 @@ the declination. If omitted, today’s date is used.</p></li>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="navtools.planning.SchedulePoint._fields">
-<span class="sig-name descname"><span class="pre">_fields</span></span><em class="property"> <span class="pre">=</span> <span class="pre">('point',</span> <span class="pre">'distance',</span> <span class="pre">'true_bearing',</span> <span class="pre">'magnetic',</span> <span class="pre">'running',</span> <span class="pre">'elapsed_min',</span> <span class="pre">'elapsed_hm')</span></em><a class="headerlink" href="#navtools.planning.SchedulePoint._fields" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_fields</span></span><em class="property"> <span class="pre">=</span> <span class="pre">('point',</span> <span class="pre">'distance',</span> <span class="pre">'true_bearing',</span> <span class="pre">'magnetic',</span> <span class="pre">'cumulative_distance',</span> <span class="pre">'enroute_min',</span> <span class="pre">'enroute_hm')</span></em><a class="headerlink" href="#navtools.planning.SchedulePoint._fields" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -479,19 +404,18 @@ the declination. If omitted, today’s date is used.</p></li>
 
 </dd></dl>
 
-</section>
-<section id="building-a-schedule">
-<h3>Building a schedule<a class="headerlink" href="#building-a-schedule" title="Permalink to this headline">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="navtools.planning.gen_schedule">
-<span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">gen_schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rhumb_mag_iter</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.planning.RoutePoint_Rhumb_Magnetic" title="navtools.planning.RoutePoint_Rhumb_Magnetic"><span class="pre">navtools.planning.RoutePoint_Rhumb_Magnetic</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">speed</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">5.0</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.planning.SchedulePoint" title="navtools.planning.SchedulePoint"><span class="pre">navtools.planning.SchedulePoint</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.planning.gen_schedule" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">gen_schedule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rhumb_mag_iter</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.planning.Waypoint_Rhumb_Magnetic" title="navtools.planning.Waypoint_Rhumb_Magnetic"><span class="pre">navtools.planning.Waypoint_Rhumb_Magnetic</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">speed</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">5.0</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.planning.SchedulePoint" title="navtools.planning.SchedulePoint"><span class="pre">navtools.planning.SchedulePoint</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.planning.gen_schedule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the elapsed
 distance and elapsed time (in two formats) for each waypoint.
 This is (technically) the time to the <strong>next</strong> waypoint.</p>
+<p>An input bearing of <code class="samp docutils literal notranslate"><span class="pre">None</span></code> in a <a class="reference internal" href="#navtools.planning.Waypoint_Rhumb_Magnetic" title="navtools.planning.Waypoint_Rhumb_Magnetic"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waypoint_Rhumb_Magnetic</span></code></a> object
+indicates the first waypoint which is the starting position.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>rhumb_mag_iter</strong> – Iterator over <a class="reference internal" href="#navtools.planning.RoutePoint_Rhumb_Magnetic" title="navtools.planning.RoutePoint_Rhumb_Magnetic"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutePoint_Rhumb_Magnetic</span></code></a> objects.</p></li>
+<li><p><strong>rhumb_mag_iter</strong> – Iterator over <a class="reference internal" href="#navtools.planning.Waypoint_Rhumb_Magnetic" title="navtools.planning.Waypoint_Rhumb_Magnetic"><code class="xref py py-class docutils literal notranslate"><span class="pre">Waypoint_Rhumb_Magnetic</span></code></a> objects.</p></li>
 <li><p><strong>speed</strong> – Default speed assumption to use; default is 5.0 knots.</p></li>
 </ul>
 </dd>
@@ -499,17 +423,47 @@ This is (technically) the time to the <strong>next</strong> waypoint.</p>
 <dd class="field-even"><p>iterator over <a class="reference internal" href="#navtools.planning.SchedulePoint" title="navtools.planning.SchedulePoint"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchedulePoint</span></code></a> instances.</p>
 </dd>
 </dl>
-<p>An input bearing of <code class="samp docutils literal notranslate"><span class="pre">None</span></code> in a <a class="reference internal" href="#navtools.planning.RoutePoint_Rhumb_Magnetic" title="navtools.planning.RoutePoint_Rhumb_Magnetic"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutePoint_Rhumb_Magnetic</span></code></a> object
-indicates the trailing waypoint which is the final destination.</p>
 </dd></dl>
 
 </section>
-<section id="writing-the-csv-output">
-<h3>Writing The CSV Output<a class="headerlink" href="#writing-the-csv-output" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="output-writing">
+<span id="planning-output"></span><h2>Output Writing<a class="headerlink" href="#output-writing" title="Permalink to this headline">¶</a></h2>
+<p>Writes a sequence of <code class="xref py py-class docutils literal notranslate"><span class="pre">Schedule</span></code> objects to a given target file.</p>
+<p>The file will have the following columns:</p>
+<blockquote>
+<div><p>“Name”, “Lat”, “Lon”, “Desc”,
+“Distance (nm)”, “True Bearing”, “Magnetic Bearing”,
+“Distance Run”, “Elapsed HH:MM”</p>
+</div></blockquote>
+<p>Note that we apply some rounding rules to these values before writing them
+to a CSV file. The distances are rounded to <span class="math notranslate nohighlight">\(10^{-5}\)</span> which is about
+an inch, or 2 cm more accurate than the GPS position.
+The bearing is rounded to zero places.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It’s hard to steer to a given degree,
+much less a fraction of a degree. Classically, the mariner’s compass divides
+the circle into 32 points; this is 12.5 degrees each point. That’s an appropriate rounding
+for coastal cruising.</p>
+<p>The width of your fist at arm’s length is 10°. If you extend index finger and pinky,
+that’s 15°. In the middle is all the accuracy you have when steering by hand.</p>
+</div>
 <dl class="py function">
 <dt class="sig sig-object py" id="navtools.planning.nround">
 <span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">nround</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">digits</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.planning.nround" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a rounded value, properly honoring <code class="docutils literal notranslate"><span class="pre">None</span></code> objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> – Float value (or None)</p></li>
+<li><p><strong>digits</strong> – number of digits</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>rounded float value (or None)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -522,6 +476,10 @@ indicates the trailing waypoint which is the final destination.</p>
 “Distance (nm)”, “True Bearing”, “Magnetic Bearing”,
 “Distance Run”, “Elapsed HH:MM”</p>
 </div></blockquote>
+<p>Note that we apply some rounding rules to these values before writing them
+to a CSV file. The distances are rounded to <span class="math notranslate nohighlight">\(10^{-5}\)</span> which is about
+an inch, or 2 cm: more accurate than the GPS position.
+The bearing is rounded to zero places.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -532,19 +490,43 @@ written.</p></li>
 </ul>
 </dd>
 </dl>
-<p>Note that we apply some rounding rules to these values before writing them
-to a CSV file. The distances are rounded to <span class="math notranslate nohighlight">\(10^{-5}\)</span> which is about
-an inch, or 2 cm: more accurate than the GPS position.
-The bearing is rounded to zero places.</p>
 </dd></dl>
 
 </section>
+<section id="command-line-interface">
+<span id="planning-cli"></span><h2>Command-Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline">¶</a></h2>
+<p>Typical use cases for this module include the following.</p>
+<ul>
+<li><p>Run from the command line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python -m navtools.planning -s <span class="m">5</span>.0 <span class="s1">&#39;../../Sailing/Cruising Plans/Lewes 2011/Jackson Creek to Cape Henlopen -- Offshore.gpx&#39;</span>
+</pre></div>
+</div>
+</li>
+<li><p>Run within a Python script:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">navtools.planning</span> <span class="kn">import</span> <span class="n">plan</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="n">routes</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;/path/to/routes&quot;</span><span class="p">)</span>
+<span class="n">plan</span><span class="p">(</span><span class="n">routes</span><span class="o">/</span><span class="s1">&#39;Whitby Rendezvous.csv&#39;</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span>
+<span class="n">plan</span><span class="p">(</span><span class="n">routes</span><span class="o">/</span><span class="s1">&#39;Whitby Rendezvous.gpx&#39;</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ul>
 <section id="the-plan-application">
 <h3>The <a class="reference internal" href="#navtools.planning.plan" title="navtools.planning.plan"><code class="xref py py-func docutils literal notranslate"><span class="pre">plan()</span></code></a> application<a class="headerlink" href="#the-plan-application" title="Permalink to this headline">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="navtools.planning.plan">
 <span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">plan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">route_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">speed</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variance</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.LatLon" title="navtools.navigation.LatLon"><span class="pre">navtools.navigation.LatLon</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#navtools.planning.plan" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transforms a simple route into a route with a detailed schedule.</p>
+<p>This doesn’t compute ETA’s. It computes ETE’s for each leg, and
+an assumed start time can be plugged in to create ETA’s.</p>
+<p>The date is used to compute variance, but not to compute ETA’s.</p>
+<p>A more sophisticated planner would allow for two kinds of plans.</p>
+<ul class="simple">
+<li><p>A “forward” plan uses a departure time to compute a sequence of ETA’s.</p></li>
+<li><p>A “reverse” plan would use a desired arrival time and work backwords to
+compute departures.</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -571,6 +553,26 @@ output file with the detailed schedule.</p>
 
 </section>
 </section>
+<section id="improvements">
+<h2>Improvements<a class="headerlink" href="#improvements" title="Permalink to this headline">¶</a></h2>
+<p>There are several improvements required.</p>
+<div class="admonition-todo admonition" id="id2">
+<p class="admonition-title">Todo</p>
+<p>Refactor magnetic bearing computation</p>
+<p>Include variance directly, not as a separate step.</p>
+</div>
+<div class="admonition-todo admonition" id="id3">
+<p class="admonition-title">Todo</p>
+<p>Locate the sunrise equation and include anticipated time-of-day for an ETA</p>
+<p>See <a class="reference external" href="https://gml.noaa.gov/grad/solcalc/solareqns.PDF">https://gml.noaa.gov/grad/solcalc/solareqns.PDF</a></p>
+</div>
+<div class="admonition-todo admonition" id="id4">
+<p class="admonition-title">Todo</p>
+<p>Compute the locations at noon of each day.</p>
+<p>This requires looking at waypoints before and after local noon, Splitting the segment
+to find noon, and adding a waypoint with no course change.</p>
+</div>
+</section>
 </section>
 
 
@@ -591,30 +593,30 @@ output file with the detailed schedule.</p>
 
 <h3>Navigation</h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview and Context</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#actors">Actors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#use-cases">Use Cases</a></li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#solution-overview">Solution Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#architecture">Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#container-overview">Container Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#component-architecture">Component Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#other-notes">Other Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#references">References</a></li>
 </ul>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="navigation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code> – Navigation Calculations Module</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.planning</span></code> – Route Planning Application</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.analysis</span></code> – Track Analysis Application</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opencpn_table.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.opencpn_table</span></code> – OpenCPN Table Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.waypoint_merge</span></code> – Waypoint and Route Merge Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="navigation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code> – Navigation Calculations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lowrance_usr.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.lowrance_usr</span></code> – Lowrance USR File Parser</a></li>
 <li class="toctree-l1"><a class="reference internal" href="olc.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.olc</span></code> – OLC Geocoding</a></li>
-<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.waypoint_merge</span></code> – Waypoint and Route Merge</a></li>
-<li class="toctree-l1"><a class="reference internal" href="igrf11.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf11</span></code> – International Geomagnetic Reference Field Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="igrf.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf</span></code> – International Geomagnetic Reference Field</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="navigation.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code> – Navigation Calculations Module</a></li>
+      <li>Previous: <a href="introduction.html" title="previous chapter">Overview and Context</a></li>
       <li>Next: <a href="analysis.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.analysis</span></code> – Track Analysis Application</a></li>
   </ul></li>
 </ul>

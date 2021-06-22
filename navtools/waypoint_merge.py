@@ -53,27 +53,23 @@ import xml.etree.ElementTree
 from xml.etree.ElementTree import QName
 from jinja2 import Environment, PackageLoader, select_autoescape
 from navtools import navigation
+from navtools.navigation import Waypoint
 from navtools import analysis
 from navtools import lowrance_usr
 from navtools import olc
 
 
 @dataclass(eq=True)
-class WayPoint:
-    lat: navigation.Lat
-    lon: navigation.Lon
-    time: Optional[datetime.datetime] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
+class Waypoint_Plot:
+    """
+    Plotted image of a waypoint.
+    """
+
+    waypoint: Waypoint
+    last_updated: Optional[datetime.datetime] = None
     sym: Optional[str] = None
     type: Optional[str] = None
     extensions: dict[str, str] = field(default_factory=dict)
-    point: navigation.LatLon = field(init=False, compare=False)
-    geocode: str = field(init=False, compare=True)
-
-    def __post_init__(self) -> None:
-        self.point = navigation.LatLon(self.lat, self.lon)
-        self.geocode = olc.OLC().encode(degrees(self.lat), degrees(self.lon))
 
 
 def parse_datetime(text: Optional[str]) -> Optional[datetime.datetime]:
@@ -83,6 +79,8 @@ def parse_datetime(text: Optional[str]) -> Optional[datetime.datetime]:
     - ``2020-09-30T07:52:39Z``
 
     - ``2013-11-08T13:53:42-05:00``
+
+    ..  todo:: Refactor to merge with :py:func:`analysis.parse_date`
 
     :param text: source text
     :return: datetime.datetime
@@ -103,9 +101,9 @@ def parse_datetime(text: Optional[str]) -> Optional[datetime.datetime]:
     raise ValueError(f"Can't parse {text!r}")
 
 
-def opencpn_GPX_to_WayPoint(source: TextIO) -> Iterator[WayPoint]:
+def opencpn_GPX_to_WayPoint(source: TextIO) -> Iterator[Waypoint_Plot]:
     """
-    Generates :py:class:`WayPoint` onjects from an OpenCPN GPX doc.
+    Generates :py:class:`Waypoint_Plot` onjects from an OpenCPN GPX doc.
 
     ::
 
@@ -124,10 +122,10 @@ def opencpn_GPX_to_WayPoint(source: TextIO) -> Iterator[WayPoint]:
 
     This uses a BUNCH of namespaces
 
-    -   xmlns="http://www.topografix.com/GPX/1/1"
-    -   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    -   xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3"
-    -   xmlns:opencpn="http://www.opencpn.org"
+    -   ``xmlns="http://www.topografix.com/GPX/1/1"``
+    -   ``xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"``
+    -   ``xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3"``
+    -   ``xmlns:opencpn="http://www.opencpn.org"``
 
     :param source: an open XML file.
     :returns: An iterator over :py:class:`LogEntry` objects.
@@ -191,14 +189,18 @@ def opencpn_GPX_to_WayPoint(source: TextIO) -> Iterator[WayPoint]:
             row_dict = dict(xml_to_tuples(extensions))
         else:
             row_dict = {}
-        yield WayPoint(
-            lat, lon, dt, name, None, sym, type, row_dict,  # point,
+        yield Waypoint_Plot(
+            Waypoint(lat=lat, lon=lon, name=name, description=None,),
+            last_updated=dt,
+            sym=sym,
+            type=type,
+            extensions=row_dict,
         )
 
 
-def lowrance_GPX_to_WayPoint(source: TextIO) -> Iterator[WayPoint]:
+def lowrance_GPX_to_WayPoint(source: TextIO) -> Iterator[Waypoint_Plot]:
     """
-    Generates :py:class:`WayPoint` onjects from an Chartplotter GPX doc.
+    Generates :py:class:`Waypoint_Plot` onjects from an Chartplotter GPX doc.
 
     ::
 
@@ -216,7 +218,7 @@ def lowrance_GPX_to_WayPoint(source: TextIO) -> Iterator[WayPoint]:
 
     This uses one namespace
 
-    -   xmlns="http://www.topografix.com/GPX/1/1"
+    -   ``xmlns="http://www.topografix.com/GPX/1/1"``
 
     :param source: an open XML file.
     :returns: An iterator over :py:class:`LogEntry` objects.
@@ -242,12 +244,16 @@ def lowrance_GPX_to_WayPoint(source: TextIO) -> Iterator[WayPoint]:
         name = pt.findtext(name_tag.text)
         sym = pt.findtext(sym_tag.text)
         row_dict: dict[str, Any] = {}
-        yield WayPoint(
-            lat, lon, dt, name, None, sym, None, row_dict,  # point,
+        yield Waypoint_Plot(
+            Waypoint(lat=lat, lon=lon, name=name, description=None,),
+            last_updated=dt,
+            sym=sym,
+            type=None,
+            extensions=row_dict,
         )
 
 
-def lowrance_USR_to_WayPoint(source: BinaryIO) -> Iterator[WayPoint]:
+def lowrance_USR_to_WayPoint(source: BinaryIO) -> Iterator[Waypoint_Plot]:
     """
     USR Details
 
@@ -290,16 +296,20 @@ def lowrance_USR_to_WayPoint(source: BinaryIO) -> Iterator[WayPoint]:
         except KeyError:  # pragma: no cover
             sym = f'{wp["icon_id"]},{wp["color_id"]}'  # pragma: no cover
         row_dict = wp
-        yield WayPoint(
-            lat, lon, dt, name, description, sym, None, row_dict,  # point,
+        yield Waypoint_Plot(
+            Waypoint(lat=lat, lon=lon, name=name, description=description,),
+            last_updated=dt,
+            sym=sym,
+            type=None,
+            extensions=row_dict,
         )
 
 
-def waypoint_to_GPX(source: Iterable[WayPoint]) -> str:
+def waypoint_to_GPX(source: Iterable[Waypoint_Plot]) -> str:
     """
     Inject waypoint data into an XML template.
 
-    :param source: source of  WayPoint instances.
+    :param source: source of  Waypoint_Plot instances.
     :return: XML document as text.
     """
     env = Environment(loader=PackageLoader("navtools"), autoescape=select_autoescape())
@@ -314,8 +324,8 @@ class History:
     This allows us to track waypoints that have matches.
     """
 
-    wp: WayPoint
-    matched: Optional[WayPoint] = None
+    wp: Waypoint_Plot
+    matched: Optional[Waypoint_Plot] = None
 
 
 class WP_Match(NamedTuple):
@@ -330,17 +340,18 @@ class WP_Match(NamedTuple):
     -   2 -- From the second source (usually the chart plotter) with no match
     """
 
-    wp_1: Optional[WayPoint]
-    wp_2: Optional[WayPoint]
+    wp_1: Optional[Waypoint_Plot]
+    wp_2: Optional[Waypoint_Plot]
 
 
-def match_gen(
-    compare: Callable[[WayPoint, WayPoint], bool],
-    wp_list_1: list[WayPoint],
-    wp_list_2: list[WayPoint],
-) -> Iterator[WP_Match]:
+def history_update(
+    compare: Callable[[Waypoint_Plot, Waypoint_Plot], bool],
+    history_1: list[History],
+    history_2: list[History],
+) -> None:
     """
-    Given a comparison function, generate :py:class:`WP_Match` pairs.
+    Given a comparison function, and history objects,
+    update :py:class:`History` objects to reflect matches.
 
     This does a brute-force :math:`m \\times n` comparison
     of all items in both lists. It applies the :py:func:`comparison`
@@ -354,14 +365,24 @@ def match_gen(
     :param wp_list_1: master list of waypoints (often the computer)
     :param wp_list_2: other devices list of waypoints (iPad, Chart Plotter, Phone, etc.)
     """
-    history_1 = [History(wp) for wp in wp_list_1]
-    history_2 = [History(wp) for wp in wp_list_2]
     for pt_1 in history_1:
         for pt_2 in history_2:
             if compare(pt_1.wp, pt_2.wp):
-                yield WP_Match(pt_1.wp, pt_2.wp)
                 pt_1.matched = pt_2.wp
                 pt_2.matched = pt_1.wp
+
+
+def match_gen(history_1: list[History], history_2: list[History]) -> Iterator[WP_Match]:
+    """
+    Summarize a pair of match histories as a single sequence of matches.
+    There are three subtypes of matches.
+
+    -   Something was the same.
+    -   Only in the first history list.
+    -   Only in the second history list.
+    """
+    for pt_1 in (h for h in history_1 if h.matched is not None):
+        yield WP_Match(pt_1.wp, pt_1.matched)
     for pt_1 in (h for h in history_1 if h.matched is None):
         yield WP_Match(pt_1.wp, None)
     for pt_2 in (h for h in history_2 if h.matched is None):
@@ -371,25 +392,57 @@ def match_gen(
 def report(matches: Iterable[WP_Match]) -> None:
     """
     Report on a list of :py:class:`WP_Match` instances.
+    This is a human-readable DIFF-like report.
     """
-    # Common
     for m in matches:
+        # Common -- two cases. Common and proximate; common and not proximate
         if m.wp_1 and m.wp_2:
-            if isclose(d := m.wp_1.point.near(m.wp_2.point), 0.0, abs_tol=0.05):
-                print(f"  {m.wp_1.name:24s}={m.wp_2.name:24s}")
+            if isclose(
+                d := m.wp_1.waypoint.point.near(m.wp_2.waypoint.point),
+                0.0,
+                abs_tol=0.05,
+            ):
+                # Common and proximate. Yay. No chnage required
+                print(f"  {m.wp_1.waypoint.name:24s}={m.wp_2.waypoint.name:24s}")
             else:
+                # Common and not proximate. Must update the computer to reflect the chartplotter.
                 print(
-                    f"  {m.wp_1.name:24s}={m.wp_2.name:24s} {m.wp_1.point} {m.wp_2.point} {d:0.2f} NM"
+                    f"  {m.wp_1.waypoint.name:24s}={m.wp_2.waypoint.name:24s}  {m.wp_1.waypoint.point} ➡︎ {m.wp_2.waypoint.point}; {d:0.2f} NM"
                 )
+        # Source 1 (the computer) only. These can be ignored.
         elif m.wp_1:
-            print(f"- {m.wp_1.name:24s}={'':24s} {m.wp_1.point}")
+            print(f"- {m.wp_1.waypoint.name:24s}={'':24s}  {m.wp_1.waypoint.point}")
+        # Source 2 (the chartplotter) only -- these need to be added to the computer
         elif m.wp_2:
-            print(f"+ {'':24s}={m.wp_2.name:24s} {'':24s} {m.wp_2.point}")
+            print(
+                f"+ {'':24s}={m.wp_2.waypoint.name:24s}  {'':24s} {m.wp_2.waypoint.point}"
+            )
         else:
             raise RuntimeError("WTF")  # pragma: no cover
 
 
+def computer_upload(matches: Iterable[WP_Match]) -> None:
+    """
+    Report on a list of :py:class:`WP_Match` instances.
+    This is a GPX Upload to get the computer up-to-date with what's on the chartplotter.
+
+    This has two clumps of data.
+
+    1.  Common but not proximate: these may need to be updated on the computer to reflect
+        changes on the chartplotter. (Or. They may need to be updated on the chartplotter.)
+
+    2.  Chartplotter only: these need to be transferred to the computer.
+    """
+    raise NotImplementedError
+
+
 def main(argv: list[str]) -> None:
+    """
+    Waypoint merge. Parses the command line options.
+    Compares two files, and emits a report/summary or GPX.
+
+    ..  todo:: parameterize the distance or geocode options.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-p",
@@ -408,7 +461,7 @@ def main(argv: list[str]) -> None:
     parser.add_argument(
         "-b",
         "--by",
-        action="store",
+        action="append",
         type=str,
         choices=["name", "distance", "geocode", "guid"],
     )
@@ -430,37 +483,50 @@ def main(argv: list[str]) -> None:
     with plotter.open("rb") as plotter_source:
         plotter_wp = list(lowrance_USR_to_WayPoint(plotter_source))
 
-    if options.by == "name":
-        title = "By Name"
-        match_rule = lambda pt1, pt2: pt1.name == pt2.name
-    elif options.by == "distance":
-        title = "By Distance"
-        match_rule = lambda pt1, pt2: isclose(
-            pt1.point.near(pt2.point), 0.0, abs_tol=0.05
-        )
-    elif options.by == "geocode":
-        title = "By Geocode"
-        match_rule = lambda pt1, pt2: pt1.geocode[:8] == pt2.geocode[:8]
-    elif options.by == "guid":
-        title = "By GUID"
-        match_rule = (
-            lambda pt1, pt2: pt1.extensions["opencpn:guid"] == pt2.extensions["uuid"]
-        )
-    else:
-        raise ValueError(f"Uknown --by {options.by!r}")  # pragma: no cover
+    opencpn_history = [History(wp) for wp in opencpn_wp]
+    plotter_history = [History(wp) for wp in plotter_wp]
 
-    matches = match_gen(match_rule, opencpn_wp, plotter_wp)
+    title = []
+    for compare in options.by:
+        if compare == "name":
+            title.append("By Name")
+            match_rule = lambda pt1, pt2: pt1.waypoint.name == pt2.waypoint.name
+        elif compare == "distance":
+            title.append("By Distance")
+            match_rule = lambda pt1, pt2: isclose(
+                pt1.waypoint.point.near(pt2.waypoint.point), 0.0, abs_tol=0.05
+            )
+        elif compare == "geocode":
+            title.append("By Geocode")
+            match_rule = (
+                lambda pt1, pt2: pt1.waypoint.geocode[:8] == pt2.waypoint.geocode[:8]
+            )
+        elif compare == "guid":
+            title.append("By GUID")
+            match_rule = (
+                lambda pt1, pt2: pt1.extensions["opencpn:guid"]
+                == pt2.extensions["uuid"]
+            )
+        else:
+            raise ValueError(
+                f"Unknown {compare} in {' --by '.join(options.by)}"
+            )  # pragma: no cover
+        history_update(match_rule, opencpn_history, plotter_history)
+
+    matches = match_gen(opencpn_history, plotter_history)
 
     if options.report == "summary":
-        print(f"{title}\nComputer (-) | Chartplotter (+)")
+        print(f"{', '.join(title)}\nComputer (-) | Chartplotter (+)")
         report(matches)
     elif options.report == "gpx":
+        # computer_upload(matches)
+        # Spike Solution...
         unique_plotter = (
             m.wp_2 for m in matches if m.wp_1 is None and m.wp_2 is not None
         )
         print(waypoint_to_GPX(unique_plotter))
     else:
-        raise ValueError(f"Uknown --report {options.report!r}")  # pragma: no cover
+        raise ValueError(f"Unknown --report {options.report!r}")  # pragma: no cover
 
 
 if __name__ == "__main__":  # pragma: no cover

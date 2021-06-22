@@ -75,11 +75,13 @@ def mock_unpack_context_int():
     return unpack_context
 
 def test_field(mock_unpack_context_int):
-    f = lowrance_usr.Field("name", "<I", lambda x: 2**x[0])
+    f = lowrance_usr.AtomicField("name", "<I", lambda x: 2 ** x[0])
     r = f.extract(mock_unpack_context_int)
     assert r == 32
     assert mock_unpack_context_int.fields["name"] == 32
-
+    assert list(f.report()) == [
+        {"name": "name", "format": "<I", "size": "4"},
+    ]
 
 @fixture
 def mock_unpack_context_ascii():
@@ -89,31 +91,34 @@ def mock_unpack_context_ascii():
     )
     return unpack_context
 
-def test_field(mock_unpack_context_ascii):
-    f1 = lowrance_usr.Field("name_len", "<i")
-    f2 = lowrance_usr.Field("name", "<{name_len}s", lambda x: x[0].decode("ascii"))
+def test_field_dependency(mock_unpack_context_ascii):
+    f1 = lowrance_usr.AtomicField("name_len", "<i")
+    f2 = lowrance_usr.AtomicField("name", "<{name_len}s", lambda x: x[0].decode("ascii"))
     r1 = f1.extract(mock_unpack_context_ascii)
     r2 = f2.extract(mock_unpack_context_ascii)
     assert r1 == 5
     assert r2 == "xyzzy"
     assert mock_unpack_context_ascii.fields["name_len"] == 5
     assert mock_unpack_context_ascii.fields["name"] == "xyzzy"
+    assert list(f1.report()) == [{'format': '<i', 'name': 'name_len', 'size': '4'}]
+    assert list(f2.report()) == [{'format': '', 'name': 'name', 'size': 'varies'}]
+
 
 def test_field_bad_encoding(mock_unpack_context_ascii):
-    f1 = lowrance_usr.Field("name_len", "<R")
+    f1 = lowrance_usr.AtomicField("name_len", "<R")
     with raises(struct.error) as exinfo:
         f1.extract(mock_unpack_context_ascii)
     assert exinfo.value.args == ('bad char in struct format',)
 
 def test_field_bad_conversion(mock_unpack_context_ascii):
-    f1 = lowrance_usr.Field("name_len", "<i", lambda x: x[0] / 0)
+    f1 = lowrance_usr.AtomicField("name_len", "<i", lambda x: x[0] / 0)
     with raises(ZeroDivisionError) as exinfo:
         f1.extract(mock_unpack_context_ascii)
     assert exinfo.value.args == ('division by zero',)
 
 def test_field_list(mock_unpack_context_ascii):
-    f1 = lowrance_usr.Field("name_len", "<i")
-    f2 = lowrance_usr.Field("name", "<{name_len}s", lambda x: x[0].decode("ascii"))
+    f1 = lowrance_usr.AtomicField("name_len", "<i")
+    f2 = lowrance_usr.AtomicField("name", "<{name_len}s", lambda x: x[0].decode("ascii"))
     f3 = lowrance_usr.FieldList(
         "name_and_len",
         [f1, f2]
@@ -123,6 +128,11 @@ def test_field_list(mock_unpack_context_ascii):
     assert mock_unpack_context_ascii.fields["name_len"] == 5
     assert mock_unpack_context_ascii.fields["name"] == "xyzzy"
     assert mock_unpack_context_ascii.fields["name_and_len"] == {"name": "xyzzy", "name_len": 5}
+    assert list(f3.report()) == [
+        {'name': 'name_and_len'},
+        {'format': '<i', 'name': 'name_and_len - name_len', 'size': '4'},
+        {'format': '', 'name': 'name_and_len - name', 'size': 'varies'},
+    ]
 
 @fixture
 def mock_unpack_context_array():
@@ -133,15 +143,20 @@ def mock_unpack_context_array():
     return unpack_context
 
 def test_field_repeat(mock_unpack_context_array):
-    f1 = lowrance_usr.Field("count", "<h")
-    f2 = lowrance_usr.FieldRepeat("values", lowrance_usr.Field("v", "<f"), "count")
+    f1 = lowrance_usr.AtomicField("count", "<h")
+    f2 = lowrance_usr.FieldRepeat("values", lowrance_usr.AtomicField("v", "<f"), "count")
     f3 = lowrance_usr.FieldList(
         "count_and_values",
         [f1, f2]
     )
     r3 = f3.extract(mock_unpack_context_array)
     assert r3 ==  {'count': 3, 'values': approx([3.1415926, 2.718281828, 42.0])}
-
+    assert list(f3.report()) == [
+        {'name': 'count_and_values'},
+        {'format': '<h', 'name': 'count_and_values - count', 'size': '2'},
+        {'format': 'depends on count', 'name': 'count_and_values - values'},
+        {'format': '<f', 'name': 'count_and_values - values - v', 'size': '4'},
+    ]
 
 def test_lon_degree():
     """
@@ -207,3 +222,12 @@ def test_lowrance_usr(format_6):
     assert usr["waypoints"][0]["waypt_name"] == "WARDRCK BR"
     assert usr["routes"][0]["route_name"] == "WRDRK BLKP"
     assert usr["routes"][0]["leg_uuids"][0] == usr["waypoints"][0]["uuid"]
+
+def test_layout(capsys):
+    f = lowrance_usr.AtomicField("name", "<I", lambda x: 2 ** x[0])
+    lowrance_usr.layout(f)
+    out, err = capsys.readouterr()
+    assert out.splitlines() == [
+        'name,format,size',
+        'name,<I,4'
+    ]

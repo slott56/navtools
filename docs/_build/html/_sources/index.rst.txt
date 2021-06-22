@@ -23,24 +23,25 @@ Introduction
 Implementation
 =================
 
+Each of the following sections describes the implementation
+details for each module.
+
 .. toctree::
    :maxdepth: 1
 
-   navigation
    planning
    analysis
    opencpn_table
+   waypoint_merge
+   navigation
    lowrance_usr
    olc
-   waypoint_merge
-   igrf11
+   igrf
 
 The TODO List
 ===============
 
-If you have PySerial installed, you could write applications to read common
-GPS devices and decode the messages. This would allow you to track
-waypoints, and possibly even build an anchor alarm monitor.
+This is a list of all "TODO" items from the documentation.
 
 ..  todolist::
 

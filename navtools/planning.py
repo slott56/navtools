@@ -11,35 +11,31 @@ through all of the rows.
 
 The various navigation calculations use an immutable object (or functional
 programming) style.  A series of functions create new, richer objects
-from the initial :py:class:`RoutePoint` objects.
+from the initial :py:class:`Waypoint` objects.
 """
 
 from navtools import navigation
 
-import csv
-import datetime
-import xml.etree.ElementTree
-from xml.etree.ElementTree import QName
-import sys
 import argparse
+import csv
+from dataclasses import dataclass, field
+import datetime
+from math import degrees, radians
 from pathlib import Path
 from typing import TextIO, Iterator, Iterable, Callable, Optional, NamedTuple, Union
+import sys
+import xml.etree.ElementTree
+from xml.etree.ElementTree import QName
+from navtools import olc
+from navtools.navigation import Waypoint
 
 
-class RoutePoint(NamedTuple):
-    name: str
-    lat: Union[navigation.Angle, str]
-    lon: Union[navigation.Angle, str]
-    desc: str
-    point: navigation.LatLon
-
-
-def csv_to_RoutePoint(source: TextIO) -> Iterator[RoutePoint]:
+def csv_to_Waypoint(source: TextIO) -> Iterator[Waypoint]:
     """
     Parses the CSV files produced by tools like GPSNavX, iNavX, OpenCPN
-    to yield an iterable sequence of :py:class:`RoutePoint` objects.
+    to yield an iterable sequence of :py:class:`Waypoint` objects.
 
-    Generate RoutePoint from a CSV reader.  The assumed column
+    Generate Waypoint from a CSV reader.  The assumed column
     order is "name", "lat", "lon" followed by any additional attributes.
 
     Note that the GPSNavX output was encoded in ``Western (Mac OS Roman)``.
@@ -49,17 +45,21 @@ def csv_to_RoutePoint(source: TextIO) -> Iterator[RoutePoint]:
     that appear in the midst of degree-minute values.
 
     :param source: Open file or file-like object that can be read
-    :returns: iterable sequence of :py:class:`RoutePoint` instances.
+    :returns: iterable sequence of :py:class:`Waypoint` instances.
     """
     rte = csv.reader(source)
     for name, lat, lon, desc in rte:
-        point = navigation.LatLon(lat, lon)
-        yield RoutePoint(name, lat, lon, desc, point)
+        yield Waypoint(
+            name=name,
+            lat=navigation.Lat.fromstring(lat),
+            lon=navigation.Lon.fromstring(lon),
+            description=desc,
+        )
 
 
-def gpx_to_RoutePoint(source: TextIO) -> Iterator[RoutePoint]:
+def gpx_to_Waypoint(source: TextIO) -> Iterator[Waypoint]:
     """
-    Generates :py:class:`RoutePoint` onjects from a GPX doc.
+    Generates :py:class:`Waypoint` onjects from a GPX doc.
 
     We assume a minimal schema:
 
@@ -69,15 +69,15 @@ def gpx_to_RoutePoint(source: TextIO) -> Iterator[RoutePoint]:
 
             -   ``<name>``
 
-            -   ``<desc>``
+            -   ``<description>``
 
     :param source: an open XML file.
-    :returns: An iterator over :py:class:`RoutePoint` objects.
+    :returns: An iterator over :py:class:`Waypoint` objects.
     """
     gpx_ns = "http://www.topografix.com/GPX/1/1"
     path = "/".join(n.text for n in (QName(gpx_ns, "rte"), QName(gpx_ns, "rtept")))
     name_tag = QName(gpx_ns, "name")
-    desc_tag = QName(gpx_ns, "desc")
+    desc_tag = QName(gpx_ns, "description")
     doc = xml.etree.ElementTree.parse(source)
     for pt in doc.findall(path):
         lat_text, lon_text = pt.get("lat"), pt.get("lon")
@@ -85,134 +85,178 @@ def gpx_to_RoutePoint(source: TextIO) -> Iterator[RoutePoint]:
             raise ValueError(
                 f"Can't process {xml.etree.ElementTree.tostring(pt, encoding='unicode', method='xml')}"
             )
-        lat = navigation.Angle.fromstring(lat_text)
-        lon = navigation.Angle.fromstring(lon_text)
-        point = navigation.LatLon(lat, lon)
-        yield RoutePoint(
-            pt.findtext(name_tag.text) or "",
-            lat,
-            lon,
-            pt.findtext(desc_tag.text) or "",
-            point,
+        lat = navigation.Lat.fromstring(lat_text)
+        lon = navigation.Lon.fromstring(lon_text)
+        yield Waypoint(
+            name=pt.findtext(name_tag.text) or "",
+            lat=lat,
+            lon=lon,
+            description=pt.findtext(desc_tag.text) or "",
         )
 
 
-class RoutePoint_Rhumb(NamedTuple):
-    point: RoutePoint
-    distance: Optional[float]
+class Waypoint_Rhumb(NamedTuple):
+    """
+    A waypoint along a planned route; includes
+    distance and true bearing from the previous waypoint.
+    """
+
+    point: Waypoint
+    distance: float
     bearing: Optional[navigation.Angle]
 
 
-def gen_rhumb(route_points_iter: Iterator[RoutePoint]) -> Iterator[RoutePoint_Rhumb]:
+def gen_rhumb(route_points_iter: Iterator[Waypoint]) -> Iterator[Waypoint_Rhumb]:
     """
-    Calculates the simple, true bearing
-    and distance between points.  Since this is for navigating forward
-    along a route, each point is decorated with range and bearing to the
-    next mark.  The last point is included, but has :samp:`None` for
-    range and bearing.
+    Calculates the range and bearing to each maypoint from a previous waypoint.
 
-    :param route_points_iter: Iterator over individual :py:class:`RoutePoint` instances.
+    This uses :py:mod:`navigation` to compute range and bearing between points.
+
+    An assumed mark prior to the first waypoint in the route is required.
+    This can either be
+    -   the current lat/lon, OR,
+    -   a repeat of the first waypoint, leading to an irrelevant bearing and zero distance.
+
+    :param route_points_iter: Iterator over individual :py:class:`Waypoint` instances.
         For example, the results of the :py:func:`csv_to_RoutePoint` or :py:func:`gpx_to_RoutePoint`
         function.
 
-    :returns: iterator over :py:class:`RoutePoint_Rhumb` instances.
-
+    :returns: iterator over :py:class:`Waypoint_Rhumb` instances.
     """
-    p1 = next(route_points_iter)
-    for p2 in route_points_iter:
-        r, theta = navigation.range_bearing(p1.point, p2.point)
-        yield RoutePoint_Rhumb(p1, r, theta)
-        p1 = p2
-    yield RoutePoint_Rhumb(p2, None, None)
+    start = next(route_points_iter)
+    yield Waypoint_Rhumb(start, distance=0, bearing=None)
+    for here in route_points_iter:
+        r, theta = navigation.range_bearing(start.point, here.point)
+        yield Waypoint_Rhumb(here, distance=r, bearing=theta)
+        start = here
 
 
-class RoutePoint_Rhumb_Magnetic(NamedTuple):
-    point: RoutePoint_Rhumb
-    distance: Optional[float]
+class Waypoint_Rhumb_Magnetic(NamedTuple):
+    """
+    A waypoint along a planned route; includes
+    distance and bearing from the previous waypoint.
+    Includes both true and magnetic bearings with current local variance.
+
+    This keeps the magnetic bearing as a value computed once only.
+
+    An alternative design is to make ``magnetic`` a property
+    and compute it as needed. This would allow us to refactor
+    the variance and magnetic computations into the :py:class:``Waypoint_Rhumb`` class,
+    eliminating a need for this separate class and computation.
+    """
+
+    point: Waypoint_Rhumb
+    distance: float
     true_bearing: Optional[navigation.Angle]
     magnetic: Optional[navigation.Angle]
 
 
 def gen_mag_bearing(
-    rhumb_iter: Iterable[RoutePoint_Rhumb],
+    rhumb_iter: Iterable[Waypoint_Rhumb],
     declination: Callable[[navigation.LatLon, Optional[datetime.date]], float],
     date: Optional[datetime.date] = None,
-) -> Iterator[RoutePoint_Rhumb_Magnetic]:
+) -> Iterator[Waypoint_Rhumb_Magnetic]:
     """
     Applies the given ``declination`` function to each point to
     compute the compass bearing value from the true bearing at each waypoint in a route.
 
-    :param rhumb_iter: iterator over :py:class:`RoutePoint_Rhumb` instances.
+    ..  important::
+
+        Declination is also known as Variation
+
+    :param rhumb_iter: iterator over :py:class:`Waypoint_Rhumb` instances.
         For example, the :py:func:`gen_rhumb` function.
     :param declination: function to compute declination.
         We often use :py:func:`navigation.declination` for this.
     :param date: Optional :py:class:`datetime.datetime` for which to compute
         the declination. If omitted, today's date is used.
-    :returns: Iterator over :py:class:`RoutePoint_Rhumb_Magnetic` objects.
+    :returns: Iterator over :py:class:`Waypoint_Rhumb_Magnetic` objects.
 
-    # A/k/a Variation
     """
     for rp_rhumb in rhumb_iter:
         if rp_rhumb.bearing is None:
-            yield RoutePoint_Rhumb_Magnetic(rp_rhumb, None, None, None)
+            yield Waypoint_Rhumb_Magnetic(
+                rp_rhumb,
+                distance=rp_rhumb.distance,
+                true_bearing=rp_rhumb.bearing,
+                magnetic=None,
+            )
         else:
             magnetic = rp_rhumb.bearing + declination(rp_rhumb.point.point, date)
-            yield RoutePoint_Rhumb_Magnetic(
-                rp_rhumb, rp_rhumb.distance, rp_rhumb.bearing, magnetic
+            yield Waypoint_Rhumb_Magnetic(
+                rp_rhumb,
+                distance=rp_rhumb.distance,
+                true_bearing=rp_rhumb.bearing,
+                magnetic=magnetic,
             )
 
 
 class SchedulePoint(NamedTuple):
-    """Last point in a route has none of the derived attributes."""
+    """Scheduled waypoints.
+    These include distance, bearing, and estimated time enroute (ETE)
+    """
 
-    point: RoutePoint_Rhumb
-    distance: Optional[float]
+    point: Waypoint_Rhumb
+    distance: float
     true_bearing: Optional[navigation.Angle]
     magnetic: Optional[navigation.Angle]
-    running: Optional[float]
-    elapsed_min: Optional[float]
-    elapsed_hm: Optional[str]
+    cumulative_distance: float
+    enroute_min: Optional[float]
+    enroute_hm: Optional[str]
 
 
 def gen_schedule(
-    rhumb_mag_iter: Iterable[RoutePoint_Rhumb_Magnetic], speed: float = 5.0
+    rhumb_mag_iter: Iterable[Waypoint_Rhumb_Magnetic], speed: float = 5.0
 ) -> Iterator[SchedulePoint]:
     """
     Calculates the elapsed
     distance and elapsed time (in two formats) for each waypoint.
     This is (technically) the time to the **next** waypoint.
 
-    :param rhumb_mag_iter:  Iterator over :py:class:`RoutePoint_Rhumb_Magnetic` objects.
+    An input bearing of :samp:`None` in a :py:class:`Waypoint_Rhumb_Magnetic` object
+    indicates the first waypoint which is the starting position.
+
+    :param rhumb_mag_iter:  Iterator over :py:class:`Waypoint_Rhumb_Magnetic` objects.
     :param speed: Default speed assumption to use; default is 5.0 knots.
     :returns: iterator over :py:class:`SchedulePoint` instances.
 
-    An input bearing of :samp:`None` in a :py:class:`RoutePoint_Rhumb_Magnetic` object
-    indicates the trailing waypoint which is the final destination.
     """
-    distance = 0.0
+    cumulative_distance = 0.0
     for rp in rhumb_mag_iter:
         if rp.true_bearing is None:
             yield SchedulePoint(
-                rp.point, rp.distance, rp.true_bearing, rp.magnetic, None, None, None
+                rp.point,
+                distance=rp.distance,
+                true_bearing=rp.true_bearing,
+                magnetic=rp.magnetic,
+                cumulative_distance=0.0,
+                enroute_min=0,
+                enroute_hm="0h 0m",
             )
         else:
-            distance += rp.distance or 0
-            elapsed_min = 60.0 * distance / speed
-            h, m = divmod(int(elapsed_min), 60)
-            elapsed_hm = "{0:02d}h {1:02d}m".format(h, m)
+            cumulative_distance += rp.distance or 0
+            enroute_min = 60.0 * rp.distance / speed
+            h, m = divmod(int(enroute_min), 60)
+            enroute_hm = "{0:02d}h {1:02d}m".format(h, m)
             yield SchedulePoint(
-                rp.point,
-                rp.distance,
-                rp.true_bearing,
-                rp.magnetic,
-                distance,
-                elapsed_min,
-                elapsed_hm,
+                point=rp.point,
+                distance=rp.distance,
+                true_bearing=rp.true_bearing,
+                magnetic=rp.magnetic,
+                cumulative_distance=cumulative_distance,
+                enroute_min=enroute_min,
+                enroute_hm=enroute_hm,
             )
 
 
 def nround(value: Optional[float], digits: int) -> Optional[float]:
-    """Returns a rounded value, properly honoring ``None`` objects."""
+    """
+    Returns a rounded value, properly honoring ``None`` objects.
+
+    :param value: Float value (or None)
+    :param digits: number of digits
+    :returns: rounded float value (or None)
+    """
     return None if value is None else round(value, digits)
 
 
@@ -226,15 +270,16 @@ def write_csv(sched_iter: Iterable[SchedulePoint], target: TextIO) -> None:
         "Distance (nm)", "True Bearing", "Magnetic Bearing",
         "Distance Run", "Elapsed HH:MM"
 
+    Note that we apply some rounding rules to these values before writing them
+    to a CSV file. The distances are rounded to :math:`10^{-5}` which is about
+    an inch, or 2 cm: more accurate than the GPS position.
+    The bearing is rounded to zero places.
+
     :param sched_iter:  iterator over :py:class:`SchedulePoint` instances.
         For example, the output from the :py:func:`gen_schedule` function.
     :param target: Open file (or file-like object) to which csv data will be
         written.
 
-    Note that we apply some rounding rules to these values before writing them
-    to a CSV file. The distances are rounded to :math:`10^{-5}` which is about
-    an inch, or 2 cm: more accurate than the GPS position.
-    The bearing is rounded to zero places.
     """
     rte_rhumb = csv.writer(target)
     rte_rhumb.writerow(
@@ -257,14 +302,16 @@ def write_csv(sched_iter: Iterable[SchedulePoint], target: TextIO) -> None:
                 sched.point.point.name,
                 lat,
                 lon,
-                sched.point.point.desc,
+                sched.point.point.description,
                 nround(sched.distance, 5),
-                None
-                if sched.true_bearing is None
-                else nround(sched.true_bearing.deg, 0),
-                None if sched.magnetic is None else nround(sched.magnetic.deg, 0),
-                nround(sched.running, 5),
-                sched.elapsed_hm,
+                (
+                    None
+                    if sched.true_bearing is None
+                    else nround(sched.true_bearing.deg, 0)
+                ),
+                (None if sched.magnetic is None else nround(sched.magnetic.deg, 0)),
+                nround(sched.cumulative_distance, 5),
+                sched.enroute_hm,
             ]
         )
 
@@ -280,6 +327,18 @@ def plan(
 ) -> None:
     """
     Transforms a simple route into a route with a detailed schedule.
+
+    This doesn't compute ETA's. It computes ETE's for each leg, and
+    an assumed start time can be plugged in to create ETA's.
+
+    The date is used to compute variance, but not to compute ETA's.
+
+    A more sophisticated planner would allow for two kinds of plans.
+
+    -   A "forward" plan uses a departure time to compute a sequence of ETA's.
+
+    -   A "reverse" plan would use a desired arrival time and work backwords to
+        compute departures.
 
     :param route_filename: Source route, extracted into CSV format.
     :param speed: Assumed speed; default is 5.0kn.
@@ -304,12 +363,12 @@ def plan(
     with schedule_path.open("w", newline="") as target:
         if ext == ".csv":
             with route_path.open() as source:
-                route = csv_to_RoutePoint(source)
+                route = csv_to_Waypoint(source)
                 sched = schedule(source, variance, date, speed)
                 write_csv(sched, target)
         elif ext == ".gpx":
             with route_path.open() as source:
-                route = gpx_to_RoutePoint(source)
+                route = gpx_to_Waypoint(source)
                 sched = schedule(source, variance, date, speed)
                 write_csv(sched, target)
         else:

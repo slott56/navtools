@@ -9,12 +9,53 @@ The display is a CSV file with a great deal of supplemental formatting.
 This application strips away the formatting so the data can be more easily
 loaded into a spreadsheet.
 
-..  todo:: Refactor OpenCPN Table to reuse elements of :py:mod:`navigation`
+Here's the structure of this application
 
-Implementation
-==============
+..  uml::
+
+    @startuml
+    component opencpn_table {
+        class Leg
+        class Route
+        Route *-- "*" Leg
+        class Duration
+        Leg -- Duration
+    }
+    component navigation {
+        class Waypoint {
+            lat: Lat
+            lon: Lon
+        }
+    }
+    Leg *-- Waypoint
+    @enduml
+
+
+This module includes several groups of components.
+
+-   The :ref:`opencpn-input` group is the functions and classes that
+    acquire input from the GPX or CSV file.
+
+-   The :ref:`opencpn-output` group is the functions to write the CSV result.
+
+-   Finally, the :ref:`opencpn-cli` components are used
+    to build a proper command-line application.
 
 ..  py:module:: navtools.opencpn_table
+
+..  _`opencpn-input`:
+
+Input Parsing
+=============
+
+The data is a CSV file with a fixed set of columns.
+
+::
+
+    "Leg", "To waypoint", "Distance", "Bearing",
+    "Latitude", "Longitude", "ETE", "ETA",
+    "Speed", "Next tide event", "Description", "Course"
+
 
 Core objects
 ------------
@@ -23,8 +64,6 @@ A :py:class:`Leg` is the space between waypoints.
 Rather than repeat each endpoint, only the ending
 point is shown and the starting point is implied
 by the previous leg's ending point.
-
-(Note. Some of these duplicate :py:mod:`navtools.analysis`.)
 
 ..  autoclass:: Leg
     :members:
@@ -42,22 +81,30 @@ This is essentially similar to ``datetime.timedelta``.
 
 ..  autoclass:: Duration
 
-The following classes -- to an extent -- duplicate :py:mod:`navtools.navigation`.
-However, these are only superficially the same. These
-are used to reformat inputs, not actually undertake any
-detailed computations.
 
-..  autoclass:: Point
 
-..  autoclass:: Latitude
+..  _`opencpn-output`:
 
-..  autoclass:: Longitude
+Output Writing
+==============
 
-Application Processing
-----------------------
+We're creating a CSV output file with de-formatted inputs. We maintain the column
+titles for simplistic compatibility with the source file.
 
 ..  autofunction:: to_html
 
 ..  autofunction:: to_csv
 
+..  _`opencpn-cli`:
+
+Command-Line Interface
+======================
+
+We generally use it like this:
+
+..  code-block:: bash
+
+    python -m navtools.opencpn_table 'planned_route.csv'
+
 ..  autofunction:: main
+

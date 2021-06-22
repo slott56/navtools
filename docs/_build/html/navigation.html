@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>navtools.navigation – Navigation Calculations Module &#8212; Navtools 2021.06.01 documentation</title>
+    <title>navtools.navigation – Navigation Calculations &#8212; Navtools 2021.06.01 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -16,8 +16,8 @@
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="navtools.planning – Route Planning Application" href="planning.html" />
-    <link rel="prev" title="Overview" href="introduction.html" />
+    <link rel="next" title="navtools.lowrance_usr – Lowrance USR File Parser" href="lowrance_usr.html" />
+    <link rel="prev" title="navtools.waypoint_merge – Waypoint and Route Merge Application" href="waypoint_merge.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -34,10 +34,10 @@
 
           <div class="body" role="main">
             
-  <section id="navtools-navigation-navigation-calculations-module">
-<h1><a class="reference internal" href="#module-navtools.navigation" title="navtools.navigation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code></a> – Navigation Calculations Module<a class="headerlink" href="#navtools-navigation-navigation-calculations-module" title="Permalink to this headline">¶</a></h1>
+  <section id="navtools-navigation-navigation-calculations">
+<h1><a class="reference internal" href="#module-navtools.navigation" title="navtools.navigation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code></a> – Navigation Calculations<a class="headerlink" href="#navtools-navigation-navigation-calculations" title="Permalink to this headline">¶</a></h1>
 <p>The <a class="reference internal" href="#module-navtools.navigation" title="navtools.navigation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code></a> module computes range and bearing between two points.
-It leverages the <a class="reference internal" href="igrf11.html#module-navtools.igrf11" title="navtools.igrf11"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf11</span></code></a> module to compute compass bearing from
+It leverages the <a class="reference internal" href="igrf.html#module-navtools.igrf" title="navtools.igrf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf</span></code></a> module to compute compass bearing from
 true bearing.</p>
 <p>See the Aviation Formulary: <a class="reference external" href="http://edwilliams.org/avform147.htm">http://edwilliams.org/avform147.htm</a> for a number of useful formulae
 and examples.</p>
@@ -120,9 +120,54 @@ a fraction with terms near zero. A lot? We’re not an a simple E-W line.</p>
 </li>
 </ol>
 </section>
-<section id="module-navtools.navigation">
-<span id="implementation"></span><h2>Implementation<a class="headerlink" href="#module-navtools.navigation" title="Permalink to this headline">¶</a></h2>
-<section id="angleparser">
+<section id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
+<p>Here’s the UML overview of this module.</p>
+<p class="plantuml">
+<img src="_images/plantuml-6856425681eca3728ad5543e17b1e89f46600621.png" alt="&#64;startuml
+'navtools.navigation'
+allow_mixing
+
+component navigation {
+
+    class AngleParser {
+        {static} sign(str) : int
+        {static} parse(str) : str
+    }
+
+    class float
+
+    class Angle {
+        {static} fromstring(str) : str
+    }
+
+    float &lt;|-- Angle
+
+    Angle --&gt; AngleParser
+
+    class Lat
+
+    class Lon
+
+    Angle &lt;|-- Lat
+    Angle &lt;|-- Lon
+
+    class LatLon {
+        lat : Lat
+        lon : Lon
+    }
+
+    LatLon::lat -- Lat
+    LatLon::lon -- Lon
+}
+
+component igrf
+
+navigation ..&gt; igrf
+
+&#64;enduml"/>
+</p>
+<span class="target" id="module-navtools.navigation"></span><section id="angleparser">
 <h3>AngleParser<a class="headerlink" href="#angleparser" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="navtools.navigation.AngleParser">
@@ -185,7 +230,7 @@ a fraction with terms near zero. A lot? We’re not an a simple E-W line.</p>
 These are relative to the equator or the prime meridian.
 In that sense, they aren’t completely generic angles; they’re restricted in their
 meaning.</p>
-<p>Currently, we extend float. This leads to the following</p>
+<p>Currently, we extend <code class="docutils literal notranslate"><span class="pre">float</span></code>. This leads to the following</p>
 <blockquote>
 <div><p>DeprecationWarning: Angle.__float__ returned non-float (type Angle).
 The ability to return an instance of a strict subclass of float is deprecated,
@@ -228,7 +273,7 @@ remove annoying 10E-16 noise bits that arise sometimes.</p>
 <span class="go">-0.524</span>
 </pre></div>
 </div>
-<p># Formmatter.</p>
+<p><strong>Formatter</strong>.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">fmt</span><span class="p">,</span> <span class="n">prop</span> <span class="o">=</span> <span class="n">Angle</span><span class="o">.</span><span class="n">_rewrite</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%02.0d</span><span class="s2">° %2.5m&#39;&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fmt</span>
 <span class="go">&quot;{d:02.0f}° {m:2.5f}&#39;&quot;</span>
@@ -238,13 +283,13 @@ remove annoying 10E-16 noise bits that arise sometimes.</p>
 <span class="go">&quot;Lat: 30°  0.000&#39;&quot;</span>
 </pre></div>
 </div>
-<p># Another round-off test.</p>
+<p><strong>Another round-off test</strong>.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a2</span> <span class="o">=</span> <span class="n">Angle</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">12</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a2</span><span class="o">.</span><span class="n">dms</span>
 <span class="go">(15, 0, 0.0)</span>
 </pre></div>
 </div>
-<p># Math.</p>
+<p><strong>Math</strong>.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">a2</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 <span class="go">-0.2618</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">round</span><span class="p">((</span><span class="n">a</span><span class="o">+</span><span class="n">a2</span><span class="p">)</span><span class="o">.</span><span class="n">degrees</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
@@ -288,6 +333,11 @@ which must be degrees.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="navtools.navigation.Angle.fromdegmin">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">fromdegmin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deg</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hemisphere</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><a class="headerlink" href="#navtools.navigation.Angle.fromdegmin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="navtools.navigation.Angle.fromstring">
 <em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">fromstring</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><a class="headerlink" href="#navtools.navigation.Angle.fromstring" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates an <a class="reference internal" href="#navtools.navigation.Angle" title="navtools.navigation.Angle"><code class="xref py py-class docutils literal notranslate"><span class="pre">Angle</span></code></a> from a string value,
@@ -324,6 +374,12 @@ If it isn’t, we use the <a class="reference internal" href="#navtools.navigati
 <span class="go">-77.4325</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.navigation.Angle.parse">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><a class="headerlink" href="#navtools.navigation.Angle.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for <a class="reference internal" href="#navtools.navigation.Angle.fromstring" title="navtools.navigation.Angle.fromstring"><code class="xref py py-meth docutils literal notranslate"><span class="pre">fromstring()</span></code></a></p>
 </dd></dl>
 
 <dl class="py property">
@@ -661,7 +717,7 @@ these values to populate separate spreadsheet columns.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Variables</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>lat</strong> – The latitude <code class="xref py py-class docutils literal notranslate"><span class="pre">lat</span></code>.</p></li>
+<li><p><strong>lat</strong> – The latitude <a class="reference internal" href="#navtools.navigation.Lat" title="navtools.navigation.Lat"><code class="xref py py-class docutils literal notranslate"><span class="pre">Lat</span></code></a>.</p></li>
 <li><p><strong>lon</strong> – The longitude <a class="reference internal" href="#navtools.navigation.Lon" title="navtools.navigation.Lon"><code class="xref py py-class docutils literal notranslate"><span class="pre">Lon</span></code></a>.</p></li>
 <li><p><strong>dms</strong> – A pair of DMS strings.</p></li>
 <li><p><strong>dm</strong> – A pair of DM strings.</p></li>
@@ -823,7 +879,7 @@ Values include <a class="reference internal" href="#navtools.navigation.KM" titl
 point.</p>
 <p><a class="reference external" href="http://www.ngdc.noaa.gov/geomag/models.shtml">http://www.ngdc.noaa.gov/geomag/models.shtml</a></p>
 <p><a class="reference external" href="http://www.ngdc.noaa.gov/IAGA/vmod/igrf.html">http://www.ngdc.noaa.gov/IAGA/vmod/igrf.html</a></p>
-<p>See <a class="reference internal" href="igrf11.html#igrf11"><span class="std std-ref">navtools.igrf11 – International Geomagnetic Reference Field Module</span></a> for details.</p>
+<p>See <a class="reference internal" href="igrf.html#igrf"><span class="std std-ref">navtools.igrf – International Geomagnetic Reference Field</span></a> for details.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -843,15 +899,16 @@ point.</p>
 <h2>Historical Archive<a class="headerlink" href="#historical-archive" title="Permalink to this headline">¶</a></h2>
 <p>The original <a class="reference internal" href="#navtools.navigation.Angle" title="navtools.navigation.Angle"><code class="xref py py-class docutils literal notranslate"><span class="pre">Angle</span></code></a> and <code class="xref py py-class docutils literal notranslate"><span class="pre">GlobeAngle</span></code> classes do things which are close
 to correct. They included some needless complexity, however.
-They work in degrees (not radians) and implement a lot of operations that could
+They worked in degrees (not radians) and implemented a lot of operations that could
 have been inherited from <code class="docutils literal notranslate"><span class="pre">float</span></code>.</p>
-<section id="old-angle-class">
-<h3>Old Angle Class<a class="headerlink" href="#old-angle-class" title="Permalink to this headline">¶</a></h3>
+<section id="angle-class-independent-of-float">
+<h3>Angle class – independent of float<a class="headerlink" href="#angle-class-independent-of-float" title="Permalink to this headline">¶</a></h3>
 <p>An <a class="reference internal" href="#navtools.navigation.Angle" title="navtools.navigation.Angle"><code class="xref py py-class docutils literal notranslate"><span class="pre">Angle</span></code></a> is a signed radians number, essentially equivalent
 to <code class="docutils literal notranslate"><span class="pre">float</span></code>. The operators are include the flexibility to work with
 <code class="docutils literal notranslate"><span class="pre">float</span></code> values, doing coercion to <a class="reference internal" href="#navtools.navigation.Angle" title="navtools.navigation.Angle"><code class="xref py py-class docutils literal notranslate"><span class="pre">Angle</span></code></a>.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Angle</span><span class="p">(</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Real</span> <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;An Angle, with conversion from several DMS notations,</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Angle</span><span class="p">(</span><span class="n">numbers</span><span class="o">.</span><span class="n">Real</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An Angle, with conversion from several DMS notations,</span>
 <span class="sd">    as well as from radians.  The angle can be reported as</span>
 <span class="sd">    degrees, a (D, M, S) tuple or as a value in radians.</span>
 
@@ -1202,31 +1259,31 @@ isn’t important enough to use.</p>
 
 <h3>Navigation</h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview and Context</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#actors">Actors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#use-cases">Use Cases</a></li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#solution-overview">Solution Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#architecture">Architecture</a></li>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html#consequences">Consequences</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#container-overview">Container Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#component-architecture">Component Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#other-notes">Other Notes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#references">References</a></li>
 </ul>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code> – Navigation Calculations Module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="planning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.planning</span></code> – Route Planning Application</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.analysis</span></code> – Track Analysis Application</a></li>
 <li class="toctree-l1"><a class="reference internal" href="opencpn_table.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.opencpn_table</span></code> – OpenCPN Table Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.waypoint_merge</span></code> – Waypoint and Route Merge Application</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code> – Navigation Calculations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="lowrance_usr.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.lowrance_usr</span></code> – Lowrance USR File Parser</a></li>
 <li class="toctree-l1"><a class="reference internal" href="olc.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.olc</span></code> – OLC Geocoding</a></li>
-<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.waypoint_merge</span></code> – Waypoint and Route Merge</a></li>
-<li class="toctree-l1"><a class="reference internal" href="igrf11.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf11</span></code> – International Geomagnetic Reference Field Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="igrf.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf</span></code> – International Geomagnetic Reference Field</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="introduction.html" title="previous chapter">Overview</a></li>
-      <li>Next: <a href="planning.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.planning</span></code> – Route Planning Application</a></li>
+      <li>Previous: <a href="waypoint_merge.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.waypoint_merge</span></code> – Waypoint and Route Merge Application</a></li>
+      <li>Next: <a href="lowrance_usr.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.lowrance_usr</span></code> – Lowrance USR File Parser</a></li>
   </ul></li>
 </ul>
 </div>

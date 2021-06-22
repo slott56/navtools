@@ -11,7 +11,71 @@ like a dictionary.
 
 See https://github.com/GPSBabel/gpsbabel/blob/master/lowranceusr.h and https://github.com/GPSBabel/gpsbabel/blob/master/lowranceusr.cc
 
+The Format 6 file layout can be described as follows:
+
+..  csv-table::
+    :widths: 64 32 16
+
+    name,format,size
+    usr,,
+    usr - format,<I,4
+    usr - data_stream_version,<I,4
+    usr - file_title_length,<i,4
+    usr - file_title,,varies
+    usr - file_creation_date_length,<i,4
+    usr - file_creation_date_text,,varies
+    usr - file_creation_date,<I,4
+    usr - file_creation_time,<I,4
+    usr - unknown,<b,1
+    usr - unit_serial_number,<I,4
+    usr - file_description_length,<i,4
+    usr - file_description,,varies
+    usr - number_waypoints,<i,4
+    usr - waypoints,depends on number_waypoints,
+    usr - waypoints - waypoint,,
+    usr - waypoints - waypoint - uuid,<16s,16
+    usr - waypoints - waypoint - UID_unit_number,<I,4
+    usr - waypoints - waypoint - UID_sequence_number,<Q,8
+    usr - waypoints - waypoint - waypt_stream_version,<h,2
+    usr - waypoints - waypoint - waypt_name_length,<i,4
+    usr - waypoints - waypoint - waypt_name,,varies
+    usr - waypoints - waypoint - UID_unit_number_2,<I,4
+    usr - waypoints - waypoint - longitude,<i,4
+    usr - waypoints - waypoint - latitude,<i,4
+    usr - waypoints - waypoint - flags,<I,4
+    usr - waypoints - waypoint - icon_id,<h,2
+    usr - waypoints - waypoint - color_id,<h,2
+    usr - waypoints - waypoint - waypt_description_length,<i,4
+    usr - waypoints - waypoint - waypt_description,,varies
+    usr - waypoints - waypoint - alarm_radius,<f,4
+    usr - waypoints - waypoint - waypt_creation_date,<I,4
+    usr - waypoints - waypoint - waypt_creation_time,<I,4
+    usr - waypoints - waypoint - unknown_2,<b,1
+    usr - waypoints - waypoint - depth,<f,4
+    usr - waypoints - waypoint - LORAN_GRI,<i,4
+    usr - waypoints - waypoint - LORAN_Tda,<i,4
+    usr - waypoints - waypoint - LORAN_Tdb,<i,4
+    usr - number_routes,<i,4
+    usr - routes,depends on number_routes,
+    usr - routes - route,,
+    usr - routes - route - uuid,<16s,16
+    usr - routes - route - UID_unit_number,<I,4
+    usr - routes - route - UID_sequence_number,<Q,8
+    usr - routes - route - route_stream_version,<h,2
+    usr - routes - route - route_name_length,<i,4
+    usr - routes - route - route_name,,varies
+    usr - routes - route - UID_unit_number_3,<I,4
+    usr - routes - route - number_legs,<i,4
+    usr - routes - route - leg_uuids,depends on number_legs,
+    usr - routes - route - leg_uuids - leg_uuid,<16s,16
+    usr - routes - route - route_unknown,<10s,10
+    usr - number_event_markers,<i,4
+    usr - number_trails,<i,4
+
+
 """
+import abc
+import csv
 from dataclasses import dataclass
 import datetime
 import math
@@ -30,6 +94,7 @@ from typing import (
     Dict,
     Tuple,
     cast,
+    Iterable,
 )
 from pathlib import Path
 
@@ -118,8 +183,26 @@ ICON_TABLE_2 = {
 }
 
 
-@dataclass
-class Field:
+class Field(abc.ABC):  # pragma: no cover
+    """
+    A generic Field.
+
+    The report output is CSV ``name,format,size``.
+    """
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+    @abc.abstractmethod
+    def extract(self, context: "UnpackContext") -> Any:
+        ...
+
+    def report(self, context: str = "") -> Iterable[dict[str, str]]:
+        prefix = f"{context} - " if context else ""
+        yield {"name": f"{prefix}{self.name}"}
+
+
+class AtomicField(Field):
     """
     An isolated, atomic field or sequence of fields that we are not examining more deeply.
 
@@ -129,8 +212,8 @@ class Field:
     It is extended to permit including ``{name}`` to refer to a previously loaded field's value.
     For example::
 
-        Field("count", "<i"),
-        Field("data", "<{count}f"),
+        AtomicField("count", "<i"),
+        AtomicField("data", "<{count}f"),
 
     This defines a count field followed by a data field. The data field will be a number of
     float values, defined by the value of the preceeding field.
@@ -138,17 +221,20 @@ class Field:
     The conversion is additional conversion beyond what :py:mod:`struct` does.
     For example::
 
-        Field("name_len", "<i"),
-        Field("name", "<{name_len}s", lambda x: x[0].decode("ASCII"))
+        AtomicField("name_len", "<i"),
+        AtomicField("name", "<{name_len}s", lambda x: x[0].decode("ASCII"))
 
     """
 
-    name: str
-    encoding: str
-    conversion: Conversion = lambda x: x[0]
+    def __init__(
+        self, name: str, encoding: str, conversion: Optional[Conversion] = None
+    ) -> None:
+        self.name = name
+        self.encoding = encoding
+        self.conversion = conversion or (lambda x: x[0])
 
     def extract(self, context: "UnpackContext") -> Any:
-        conversion = cast(Conversion, self.conversion)  # type: ignore [misc]
+        conversion = self.conversion
         format = self.encoding
         replacements = re.finditer(r"\{(\w+)\}", format)
         for repl in replacements:
@@ -177,13 +263,23 @@ class Field:
         context.fields[self.name] = results
         return results
 
+    def report(self, context: str = "") -> Iterable[dict[str, str]]:
+        prefix = f"{context} - " if context else ""
+        try:
+            format = self.encoding
+            size = f"{struct.calcsize(self.encoding)}"
+        except struct.error:
+            format = ""
+            size = "varies"
+        yield {"name": f"{prefix}{self.name}", "format": format, "size": size}
 
-@dataclass
-class FieldList:
-    """A sequence of FieldList, FieldRepeat, and Field instances. This is a "block" of data."""
 
-    name: str
-    field_list: list[Union["FieldList", "Field", "FieldRepeat"]]
+class FieldList(Field):
+    """A sequence of Field instances. This is a "block" of data."""
+
+    def __init__(self, name: str, field_list: list[Field]) -> None:
+        self.name = name
+        self.field_list = field_list
 
     def extract(self, context: "UnpackContext") -> dict[str, Any]:
         # print(self.name)
@@ -192,14 +288,21 @@ class FieldList:
         context.fields[self.name] = results
         return results
 
+    def report(self, context: str = "") -> Iterable[dict[str, str]]:
+        prefix = f"{context} - " if context else ""
+        subcontext = f"{prefix}{self.name}"
+        yield {"name": subcontext}
+        for f in self.field_list:
+            yield from f.report(subcontext)
 
-@dataclass
-class FieldRepeat:
-    """A repeating Field or FieldList where the repeat count comes from another field."""
 
-    name: str
-    field_list: Union["FieldList", "Field"]
-    count: str  # Name of a field with the count
+class FieldRepeat(Field):
+    """A repeating AtomicField or FieldList where the repeat count comes from another field."""
+
+    def __init__(self, name: str, field_list: Field, count: str) -> None:
+        self.name = name
+        self.field_list = field_list
+        self.count = count  # Name of a field with the count
 
     def extract(self, context: "UnpackContext") -> list[Any]:
         repeat_value = context.fields[self.count]
@@ -207,11 +310,17 @@ class FieldRepeat:
         context.fields[self.name] = results
         return results
 
+    def report(self, context: str = "") -> Iterable[dict[str, str]]:
+        prefix = f"{context} - " if context else ""
+        subcontext = f"{prefix}{self.name}"
+        yield {"name": subcontext, "format": f"depends on {self.count}"}
+        yield from self.field_list.report(subcontext)
+
 
 class UnpackContext:
     """
     Used to unpack a binary file. This is used to manage the input
-    buffer and extract fields using :py:class:`Field`, :py:class:`FieldList`, :py:class:`FieldRepeat`
+    buffer and extract fields using :py:class:`AtomicField`, :py:class:`FieldList`, :py:class:`FieldRepeat`
     definitions.
 
     THe fields includes the currently named fields being processed.
@@ -223,13 +332,11 @@ class UnpackContext:
         self.source = source
         self.fields: dict[str, Any] = {}
 
-    def extract(
-        self, field_list: Union[Field, FieldList, FieldRepeat]
-    ) -> Union[Any, dict[str, Any], list[Any]]:
+    def extract(self, field_list: Field) -> Union[Any, dict[str, Any], list[Any]]:
         """Extracts the next fields present in the file of bytes."""
         return field_list.extract(self)
 
-    def peek(self, field: Field) -> Any:
+    def peek(self, field: AtomicField) -> Any:
         """Peeks ahead in the file of bytes to see what follows."""
         here = self.source.tell()
         result = field.extract(self)
@@ -281,188 +388,173 @@ class Lowrance_USR(Dict[str, Any]):
     """
 
     @classmethod
-    def load(cls, source: BinaryIO) -> "Lowrance_USR":
-        uc = UnpackContext(source)
-        format = uc.peek(Field("format", "<I"))
-        # format = struct.unpack("<I", source.read(4))[0]
-        if format == 2:  # pragma: no cover
-            return cls.load_2(uc)
-        elif format == 3:  # pragma: no cover
-            return cls.load_3(uc)
-        elif format == 4:  # pragma: no cover
-            return cls.load_4(uc)
-        elif format == 5:  # pragma: no cover
-            return cls.load_5(uc)
-        elif format == 6:
-            return cls.load_6(uc)
-        else:  # pragma: no cover
-            raise ValueError(f"Unkown format {format}")
-
-    @classmethod
-    def load_2(cls, uc: UnpackContext) -> "Lowrance_USR":  # pragma: no cover
-        raise NotImplementedError
-
-    @classmethod
-    def load_3(cls, uc: UnpackContext) -> "Lowrance_USR":  # pragma: no cover
-        raise NotImplementedError
-
-    @classmethod
-    def load_4(cls, uc: UnpackContext) -> "Lowrance_USR":  # pragma: no cover
-        raise NotImplementedError
-
-    @classmethod
-    def load_5(cls, uc: UnpackContext) -> "Lowrance_USR":  # pragma: no cover
-        raise NotImplementedError
-
-    @classmethod
-    def load_6(cls, uc: UnpackContext) -> "Lowrance_USR":
+    def format_6(cls) -> Field:
 
         wp_fields = FieldList(
             "waypoint",
             [
                 # 1.  16 bytes -- UUID.
-                Field("uuid", "<16s", lambda x: uuid.UUID(bytes_le=x[0])),
-                # Field("uuid", "<IHHBB6s", lambda x: uuid.UUID(fields=x[:5]+(b2i_le(x[5]),))),
+                AtomicField("uuid", "<16s", lambda x: uuid.UUID(bytes_le=x[0])),
+                # AtomicField("uuid", "<IHHBB6s", lambda x: uuid.UUID(fields=x[:5]+(b2i_le(x[5]),))),
                 # 2.  4 bytes INT -- UID unit number
-                Field("UID_unit_number", "<I"),
+                AtomicField("UID_unit_number", "<I"),
                 # 3.  8 bytes -- UID sequence number. (This may be two separate small-endian integers.)
-                Field("UID_sequence_number", "<Q"),
+                AtomicField("UID_sequence_number", "<Q"),
                 # 4.  2 bytes INT -- Waypt stream version number
-                Field("waypt_stream_version", "<h"),
+                AtomicField("waypt_stream_version", "<h"),
                 # 5.  4 bytes INT -- name_length
-                Field("waypt_name_length", "<i"),
+                AtomicField("waypt_name_length", "<i"),
                 # 6.  name_length bytes -- name in utf-16 encoding
-                Field(
+                AtomicField(
                     "waypt_name",
                     "<{waypt_name_length}s",
                     lambda x: x[0].decode("utf-16"),
                 ),
                 # 7.  4 bytes INT -- repeated UID unit number
-                Field("UID_unit_number_2", "<I"),
+                AtomicField("UID_unit_number_2", "<I"),
                 # 8.  4 bytes INT -- longitude in mercator meter encoding
-                Field("longitude", "<i", lambda x: lon_deg(x[0])),
+                AtomicField("longitude", "<i", lambda x: lon_deg(x[0])),
                 # 9.  4 bytes INT -- latitude in mercator meter encoding
-                Field("latitude", "<i", lambda x: lat_deg(x[0])),
+                AtomicField("latitude", "<i", lambda x: lat_deg(x[0])),
                 # 10. 4 bytes INT -- flags
-                Field("flags", "<I"),
+                AtomicField("flags", "<I"),
                 # 11. 2 bytes INT -- icon ID (See ``lowranceusr4_find_desc_from_icon_number()`` to decode)
-                Field("icon_id", "<h"),
+                AtomicField("icon_id", "<h"),
                 # 12. 2 bytes INT -- color ID (See ``lowranceusr4_find_color_from_icon_number_plus_color_index()`` to decode)
-                Field("color_id", "<h"),
+                AtomicField("color_id", "<h"),
                 # 13. 4 bytes INT -- description_length
-                Field("waypt_description_length", "<i"),
+                AtomicField("waypt_description_length", "<i"),
                 # 14. description_length bytes -- description in utf-16 encoding
-                Field(
+                AtomicField(
                     "waypt_description",
                     "<{waypt_description_length}s",
                     lambda x: x[0].decode("utf-16"),
                 ),
                 # 15. 4 bytes FLOAT -- alarm radius
-                Field("alarm_radius", "<f"),
+                AtomicField("alarm_radius", "<f"),
                 # 16. 4 bytes INT -- creation date, Julian day number; Julian date 2440487 is 1/1/1970
-                Field(
+                AtomicField(
                     "waypt_creation_date",
                     "<I",
                     lambda x: datetime.date.fromordinal(x[0] - JD_TO_ORDINAL),
                 ),
                 # 17. 4 bytes INT -- creation time, milliseconds
-                Field(
+                AtomicField(
                     "waypt_creation_time",
                     "<I",
                     lambda x: datetime.timedelta(seconds=x[0] / 1000),
                 ),
                 # 18. 1 byte -- unused
-                Field("unknown_2", "<b"),
+                AtomicField("unknown_2", "<b"),
                 # 19. 4 bytes FLOAT -- depth in feet
-                Field("depth", "<f"),
+                AtomicField("depth", "<f"),
                 # 20. 4 bytes -- LORAN GRI
-                Field("LORAN_GRI", "<i"),
+                AtomicField("LORAN_GRI", "<i"),
                 # 21. 4 bytes -- LORAN Tda
-                Field("LORAN_Tda", "<i"),
+                AtomicField("LORAN_Tda", "<i"),
                 # 22. 4 bytes -- LORAN Tdb
-                Field("LORAN_Tdb", "<i"),
+                AtomicField("LORAN_Tdb", "<i"),
             ],
         )
         route_fields = FieldList(
             "route",
             [
                 # 1.  16 bytes -- UUID. (This may be four small-endian integers that are later combined.)
-                Field("uuid", "<16s", lambda x: uuid.UUID(bytes_le=x[0])),
+                AtomicField("uuid", "<16s", lambda x: uuid.UUID(bytes_le=x[0])),
                 # 2.  4 bytes INT -- UID unit number
-                Field("UID_unit_number", "<I"),
+                AtomicField("UID_unit_number", "<I"),
                 # 3.  8 bytes -- UID sequence number. (This may be two separate small-endian integers.)
-                Field("UID_sequence_number", "<Q"),
+                AtomicField("UID_sequence_number", "<Q"),
                 # 4.  2 bytes INT -- Waypt stream version number
-                Field("route_stream_version", "<h"),
+                AtomicField("route_stream_version", "<h"),
                 # 5.  4 bytes INT -- name_length
-                Field("route_name_length", "<i"),
+                AtomicField("route_name_length", "<i"),
                 # 6.  name_length bytes -- name in utf-16 encoding
-                Field(
+                AtomicField(
                     "route_name",
                     "<{route_name_length}s",
                     lambda x: x[0].decode("utf-16"),
                 ),
                 # 7.  4 bytes INT -- repeated UID unit number
-                Field("UID_unit_number_3", "<I"),
+                AtomicField("UID_unit_number_3", "<I"),
                 # 8. 4 bytes INT -- number_legs
-                Field("number_legs", "<i"),
+                AtomicField("number_legs", "<i"),
                 # 9. leg_uuids = [struct.unpack("<16s", source.read(16))[0] for l in range(number_legs)]
                 FieldRepeat(
                     "leg_uuids",
-                    Field("leg_uuid", "<16s", lambda x: uuid.UUID(bytes_le=x[0])),
+                    AtomicField("leg_uuid", "<16s", lambda x: uuid.UUID(bytes_le=x[0])),
                     "number_legs",
                 ),
                 # 10. unknown = source.read(10)
-                Field("route_unknown", "<10s"),
+                AtomicField("route_unknown", "<10s"),
             ],
         )
         usr_fields = FieldList(
-            "header",
+            "usr",
             [
-                Field(
+                AtomicField(
                     "format", "<I"
                 ),  # (Was already peeked at, but it's here for completeness.)
-                Field("data_stream_version", "<I"),
-                Field("file_title_length", "<i"),
-                Field(
+                AtomicField("data_stream_version", "<I"),
+                AtomicField("file_title_length", "<i"),
+                AtomicField(
                     "file_title",
                     "<{file_title_length}s",
                     lambda x: x[0].decode("ascii"),
                 ),
-                Field("file_creation_date_length", "<i"),
-                Field(
+                AtomicField("file_creation_date_length", "<i"),
+                AtomicField(
                     "file_creation_date_text",
                     "<{file_creation_date_length}s",
                     lambda x: x[0].decode("ascii"),
                 ),
-                Field(
+                AtomicField(
                     "file_creation_date",
                     "<I",
                     lambda x: datetime.date.fromordinal(x[0] - JD_TO_ORDINAL),
                 ),
-                Field(
+                AtomicField(
                     "file_creation_time",
                     "<I",
                     lambda x: datetime.timedelta(seconds=x[0] / 1000),
                 ),
-                Field("unknown", "<b"),
-                Field("unit_serial_number", "<I"),
-                Field("file_description_length", "<i"),
-                Field(
+                AtomicField("unknown", "<b"),
+                AtomicField("unit_serial_number", "<I"),
+                AtomicField("file_description_length", "<i"),
+                AtomicField(
                     "file_description",
                     "<{file_description_length}s",
                     lambda x: x[0].decode("ascii"),
                 ),
-                Field("number_waypoints", "<i"),
+                AtomicField("number_waypoints", "<i"),
                 FieldRepeat("waypoints", wp_fields, "number_waypoints"),
-                Field("number_routes", "<i"),
+                AtomicField("number_routes", "<i"),
                 FieldRepeat("routes", route_fields, "number_routes"),
-                Field("number_event_markers", "<i"),
+                AtomicField("number_event_markers", "<i"),
                 # FieldRepeat("event_markers", event_marker_fields, "number_event_markers"),
-                Field("number_trails", "<i"),
+                AtomicField("number_trails", "<i"),
                 # FieldRepeat("trails", trail_fields, "number_trails"),
             ],
         )
+        return usr_fields
+
+    @classmethod
+    def load(cls, source: BinaryIO) -> "Lowrance_USR":
+        uc = UnpackContext(source)
+        format = uc.peek(AtomicField("format", "<I"))
+
+        if format == 2:  # pragma: no cover
+            raise NotImplementedError
+        elif format == 3:  # pragma: no cover
+            raise NotImplementedError
+        elif format == 4:  # pragma: no cover
+            raise NotImplementedError
+        elif format == 5:  # pragma: no cover
+            raise NotImplementedError
+        elif format == 6:
+            usr_fields = cls.format_6()
+        else:  # pragma: no cover
+            raise ValueError(f"Unkown format {format}")
 
         data = uc.extract(usr_fields)
 
@@ -502,5 +594,12 @@ def t3() -> None:  # pragma: no cover
             print()
 
 
+def layout(usr_fields: Field = Lowrance_USR.format_6()) -> None:
+    writer = csv.DictWriter(sys.stdout, ["name", "format", "size"])
+    writer.writeheader()
+    writer.writerows(usr_fields.report())
+
+
 if __name__ == "__main__":  # pragma: no cover
-    t3()
+    # t3()
+    layout()

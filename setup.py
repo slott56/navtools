@@ -12,14 +12,14 @@ if sys.version_info < (3, 9):
 setup(
     name='navtools',
     version='2021',
-    description='Navigation Tools for Course, Bearing and Compass Deviation',
+    description='Navigation Tools for Course, Bearing, and Compass Deviation',
     author='S.Lott',
     author_email='slott56@gmail.com',
     url='https://github.com/slott56/navtools',
     packages=[
         'navtools',
     ],
-    package_data={'navtools': ["igrf11coeffs.txt"]},
+    package_data={'navtools': ["igrf11coeffs.txt", "igrf13coeffs.txt"]},
     classifiers=[
         "Development Status :: 6 - Mature",
         "Environment :: Console",

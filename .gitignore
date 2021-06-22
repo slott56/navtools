@@ -68,3 +68,5 @@ data/2021 opencpn waypoints.gpx
 data/2021 opencpn waypoints.gpx
 data/WaypointsRoutesTracks-2021.gpx
 data/WaypointsRoutesTracks.usr
+docs/_build/doctrees/*
+

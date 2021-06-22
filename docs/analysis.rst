@@ -11,16 +11,39 @@ elapsed time between waypoints.
 This additional waypoint-to-waypoint time and distance allows
 for fine-grained analysis of sailing performance.
 
-This module includes three groups of components.
+Here's the structure of this application
 
-The `Input Parsing`_ group is the functions and a namedtuple that
-acquire input from the GPX or CSV file.
+..  uml::
 
-The application processing components consume track data
-and computes derived values including distances,
-times, and rates.
+    @startuml
+    component analysis {
+        class LogEntry {
+        }
+        class LogEntry_Rhumb {
+            point : LogEntry
+        }
+        LogEntry_Rhumb *-> LogEntry
+    }
+    @enduml
 
-The :ref:`analysis.cli` components are used to build a proper command-line application.
+This module includes several groups of components.
+
+-   The :ref:`analysis-input` group is the functions and classes that
+    acquire input from the GPX or CSV file.
+
+-   The :ref:`analysis-computations` functions work out range and bearing, magnetic bearing, total distance run,
+    and elapsed time in minutes and hours.
+
+-   The :ref:`analysis-output` group is the functions to write the CSV result.
+
+-   Finally, the :ref:`analysis-cli` components are used
+    to build a proper command-line application.
+
+
+..  py:module:: navtools.analysis
+
+
+..  _analysis-input:
 
 Input Parsing
 ===============
@@ -76,31 +99,6 @@ The iPhone iNavX can save track information via
 http://x-traverse.com/.  These are standard GPX files, and are
 identical with the tracks created directly by iNavX.
 
-..  _`analysis.cli`:
-
-Command-Line Interface
-======================
-
-Typical use cases for this module include the following:
-
--   Command Line:
-
-..  parsed-literal::
-
-    python -m navtools.analysis '../../Sailing/Cruise History/2011 Reedville/reedville.csv'
-
--   Within a Python Script:
-
-..  parsed-literal::
-
-    from navtools.analysis import analyze
-    analyze( '../../Sailing/Cruise History/2011 Reedville/jackson.csv', 5.0 )
-
-
-Implementation
-==============
-
-..  py:module:: navtools.analysis
 
 Date parsing
 -------------
@@ -117,12 +115,26 @@ Base Log Entry
 CSV input parsing
 -----------------
 
-..  autofunction:: csv_to_LogEntry
+..  autofunction:: csv_sniff_header
+
+..  autofunction:: csv_internheader_to_LogEntry
+
+..  autofunction:: csv_externheader_to_LogEntry
 
 GPX input parsing
 -----------------
 
 ..  autofunction:: gpx_to_LogEntry
+
+
+..  _`analysis-computations`:
+
+Computations
+============
+
+There aren't many: it's essentially deducing of range and bearing from log entries.
+These are part of :py:mod:`navigation`.
+
 
 Log Entry With Derived Details
 -------------------------------
@@ -136,12 +148,40 @@ Computing Details
 
 ..  autofunction:: gen_rhumb
 
-Writing The CSV Output
-----------------------
+..  _`analysis-output`:
+
+Output Writing
+==============
+
+The waypoints with range and bearing information are written to a CSV file.
+
 
 ..  autofunction:: nround
 
 ..  autofunction:: write_csv
+
+..  _`analysis-cli`:
+
+Command-Line Interface
+======================
+
+Typical use cases for this module include the following:
+
+-   Command Line:
+
+    ..  code-block:: bash
+
+        python -m navtools.analysis '../../Sailing/Cruise History/2011 Reedville/reedville.csv'
+
+-   Within a Python Script:
+
+    ..  code-block:: python
+
+        from navtools.analysis import analyze
+        from pathlib import Path
+        history = Path("/path/to/history")
+        analyze(history/"2011 Reedville"/"jackson.csv", 5.0)
+
 
 The :py:func:`analyze` application
 ----------------------------------

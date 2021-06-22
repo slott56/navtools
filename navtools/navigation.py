@@ -1,7 +1,7 @@
 """
 This module computes ranges and bearings between points.
 It also inverts this and computes a point from a point, range, and bearing.
-It leverages the :mod:`igrf11` module to compute compass bearing from
+It leverages the :mod:`igrf` module to compute compass bearing from
 true bearing.
 
 A "rhumb line" (or loxodrome) is a path of constant bearing, which
@@ -205,7 +205,10 @@ for range calculations.
 from __future__ import annotations
 import math
 import re
-from navtools import igrf11
+from dataclasses import dataclass, field
+from math import degrees
+
+from navtools import igrf, olc
 import datetime
 import numbers
 import string
@@ -281,7 +284,7 @@ class Angle(float):
     In that sense, they aren't completely generic angles; they're restricted in their
     meaning.
 
-    Currently, we extend float. This leads to the following
+    Currently, we extend ``float``. This leads to the following
 
         DeprecationWarning: Angle.__float__ returned non-float (type Angle).
         The ability to return an instance of a strict subclass of float is deprecated,
@@ -327,7 +330,7 @@ class Angle(float):
     >>> round(a.r,3)
     -0.524
 
-    # Formmatter.
+    **Formatter**.
 
     >>> fmt, prop = Angle._rewrite("%02.0d° %2.5m'")
     >>> fmt
@@ -337,13 +340,13 @@ class Angle(float):
     >>> "Lat: {0:%02.0d° %6.3m'}".format(a)
     "Lat: 30°  0.000'"
 
-    # Another round-off test.
+    **Another round-off test**.
 
     >>> a2 = Angle(math.pi/12)
     >>> a2.dms
     (15, 0, 0.0)
 
-    # Math.
+    **Math**.
 
     >>> round(a+a2, 5)
     -0.2618
@@ -384,6 +387,12 @@ class Angle(float):
         else:
             raise ValueError(f"Can't create Angle from {deg!r}, {hemisphere!r}")
         return cls(math.radians(sign * deg))
+
+    @classmethod
+    def fromdegmin(
+        cls, deg: float, min: float, hemisphere: Optional[str] = None
+    ) -> "Angle":
+        return cls.fromdegrees(deg + min / 60, hemisphere)
 
     @classmethod
     def fromstring(cls, value: str) -> "Angle":
@@ -429,6 +438,11 @@ class Angle(float):
         except ValueError:
             pass
         raise ValueError(f"Cannot parse {value!r}")
+
+    @classmethod
+    def parse(cls, value: str) -> "Angle":
+        """Alias for :py:meth:`fromstring`"""
+        return cls.fromstring(value)
 
     @property
     def radians(self) -> float:
@@ -781,7 +795,7 @@ class LatLon:
     We return a tuple of two strings so that the application can use
     these values to populate separate spreadsheet columns.
 
-    :ivar lat: The latitude :py:class:`lat`.
+    :ivar lat: The latitude :py:class:`Lat`.
     :ivar lon: The longitude :py:class:`Lon`.
     :ivar dms: A pair of DMS strings.
     :ivar dm: A pair of DM strings.
@@ -793,8 +807,8 @@ class LatLon:
     ) -> None:
         """Build a LatLon from two values.
 
-        :param lat: the latitude, used to build an Angle
-        :param lon: the longitude, used to build an Angle
+        :param lat: the latitude, used to build an Angle. A float is presumed to be in degrees.
+        :param lon: the longitude, used to build an Angle. A float is presumed to be in degrees.
         """
         if isinstance(lat, Lat):
             self.lat = lat
@@ -943,7 +957,7 @@ def declination(point: LatLon, date: Optional[datetime.date] = None) -> float:
 
     http://www.ngdc.noaa.gov/IAGA/vmod/igrf.html
 
-    See :ref:`igrf11` for details.
+    See :ref:`igrf` for details.
 
     :param point: LatLon point
     :param date: :py:class:`datetime.date` in question, default is today.
@@ -956,6 +970,27 @@ def declination(point: LatLon, date: Optional[datetime.date] = None) -> float:
     first_of_year = date.replace(month=1, day=1)
     astro_dt_tm = date.year + (date.toordinal() - first_of_year.toordinal()) / 365.242
 
-    x, y, z, f = igrf11.igrf11syn(astro_dt_tm, point.lat, point.lon.east)
+    x, y, z, f = igrf.igrfsyn(astro_dt_tm, point.lat, point.lon.east)
     decl = math.atan2(y, x)  # Declination
     return decl
+
+
+@dataclass(eq=True)
+class Waypoint:
+    """
+    A waypoint.
+
+    This is the destination of a Leg of a Route.
+    This is the location, name, and description for a plotted waypoint.
+    """
+
+    lat: Lat
+    lon: Lon
+    name: Optional[str] = None
+    description: Optional[str] = None
+    point: LatLon = field(init=False, compare=False)
+    geocode: str = field(init=False, compare=True)
+
+    def __post_init__(self) -> None:
+        self.point = LatLon(self.lat, self.lon)
+        self.geocode = olc.OLC().encode(degrees(self.lat), degrees(self.lon))

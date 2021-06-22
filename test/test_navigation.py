@@ -3,12 +3,12 @@ Test Navigation
 
 The :py:mod:`navigation` module includes the rather complex calculations
 for range and bearing.  It also wraps the declination function from
-:py:mod:`igrf11`.
+:py:mod:`igrf`.
 
-The magnetic declination is imported from the **igrf11** implementation.
+The magnetic declination is imported from the **igrf** implementation.
 The :py:mod:`navigation` uses it; which means we're really doing
 a kind of integration test to be sure that the :py:func:`navigation.declination` function
-properly reflects :py:mod:`igrf11`.
+properly reflects :py:mod:`igrf`.
 
 """
 
@@ -31,6 +31,7 @@ from navtools.navigation import (
     declination,
     destination,
     range_bearing,
+    Waypoint
 )
 
 
@@ -57,6 +58,7 @@ def test_angle():
     assert Angle.fromstring("10.341666S") == approx(math.radians(-10.341666))
     with raises(ValueError):
         Angle.fromstring("True North")
+    assert Angle.parse("10.341666") == approx(math.radians(10.341666))
     a = Angle.fromdegrees(10.341666)
     assert a.radians == approx(math.radians(10.341666))
     assert a.r == approx(math.radians(10.341666))
@@ -131,6 +133,7 @@ def test_LatLon():
     assert latlon_1.dms == ("50 21 50.0N", "004 09 25.0W")
     assert latlon_1.dm == ("50 21.833N", "004 9.417W")
     assert latlon_1.d == ("50.364N", "004.157W")
+    assert repr(latlon_1) == "LatLon(50°21.833′N, 004°09.417′W)"
 
     ll_2 = LatLon(Lat.fromstring("50 21 50N"), Lon.fromstring("004 09 25W"))
     assert ll_2.lat == latlon_1.lat and ll_2.lon == latlon_1.lon
@@ -252,7 +255,7 @@ def test_declination_equator():
     # print( "p1 = {0}".format( p1.dms ) )
     d = declination(p1, date=datetime.date(2012, 4, 18))
     # print( "declination= {0}".format(d.dm) )
-    assert round(math.degrees(d), 3) == -5.801
+    assert math.degrees(d) == approx(-5.801, rel=1E-3)
 
 
 @fixture
@@ -271,3 +274,19 @@ def test_declination_2(mock_datetime):
     d = declination(LatLon(lat=0.0, lon=0.0))
     assert mock_datetime.mock_calls == [call.date.today()]
     assert d == approx(math.radians(-(5 + 26 / 60)), rel=0.1 / 60)
+
+
+
+def test_waypoint():
+    lat = Lat(math.radians(47.0))
+    lon = Lon(math.radians(8.0))
+    wp = Waypoint(
+            lat=lat,
+            lon=lon,
+            name="sample",
+            description="test data",
+        )
+    assert wp.lat == lat
+    assert wp.lon == lon
+    assert wp.point.near(LatLon(lat, lon)) < 1E-05
+    assert wp.geocode == "8FVC2222+222"

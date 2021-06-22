@@ -10,6 +10,7 @@ from io import StringIO
 from navtools.navigation import LatLon, declination, Angle
 from navtools.analysis import *
 from navtools import analysis
+from navtools import navigation
 
 
 @fixture
@@ -40,7 +41,8 @@ def iNavX_csv_file():
 
 
 def test_csv_to_LogEntry_no_header(iNavX_csv_file):
-    generator = csv_to_LogEntry(iNavX_csv_file)
+    assert not csv_sniff_header(iNavX_csv_file)
+    generator = csv_externheader_to_LogEntry(iNavX_csv_file, None)
     points = list(generator)
     assert len(points) == 2
     assert (
@@ -69,7 +71,8 @@ def manual_csv_file():
 
 
 def test_csv_to_LogEntry_header(manual_csv_file):
-    generator = csv_to_LogEntry(manual_csv_file)
+    assert csv_sniff_header(manual_csv_file)
+    generator = csv_internheader_to_LogEntry(manual_csv_file)
     points = list(generator)
     # for p in points: print( repr(p) )
     assert len(points) == 2
@@ -96,7 +99,8 @@ def bad_manual_csv_file():
 
 
 def test_bad_csv_to_LogEntry(bad_manual_csv_file, capsys):
-    generator = csv_to_LogEntry(bad_manual_csv_file)
+    assert csv_sniff_header(bad_manual_csv_file)
+    generator = csv_internheader_to_LogEntry(bad_manual_csv_file)
     points = list(generator)
     output, error = capsys.readouterr()
     assert output == dedent(
@@ -109,6 +113,30 @@ def test_bad_csv_to_LogEntry(bad_manual_csv_file, capsys):
     )
     assert error == ""
 
+@fixture
+def bad_noheader_csv_file():
+    bad_manual_csv_data = dedent(
+        """\
+        2011-06-04 13:12:32 +0000,nope,-76.330536,219,3.6,,,,,,
+        2011-06-04 13:12:43 +0000,37.549084,not good,186,3.0,,,,,,
+        """
+    )
+    return StringIO(bad_manual_csv_data)
+
+def test_bad_noheader_csv_to_LogEntry(bad_noheader_csv_file, capsys):
+    assert not csv_sniff_header(bad_noheader_csv_file)
+    generator = csv_externheader_to_LogEntry(bad_noheader_csv_file)
+    points = list(generator)
+    output, error = capsys.readouterr()
+    assert output == dedent(
+        """\
+    {'date': '2011-06-04 13:12:32 +0000', 'latitude': 'nope', 'longitude': '-76.330536', 'cog': '219', 'sog': '3.6', 'heading': '', 'speed': '', 'depth': '', 'windAngle': '', 'windSpeed': '', 'comment': ''}
+    Cannot parse 'nope'
+    {'date': '2011-06-04 13:12:43 +0000', 'latitude': '37.549084', 'longitude': 'not good', 'cog': '186', 'sog': '3.0', 'heading': '', 'speed': '', 'depth': '', 'windAngle': '', 'windSpeed': '', 'comment': ''}
+    Cannot parse 'not good'
+    """
+    )
+    assert error == ""
 
 @fixture
 def gpx_file_1():
@@ -253,11 +281,10 @@ def test_bad_gpx_to_LogEntry_3(bad_gpx_file_3):
 def gen_rhumb_1():
     route = [
         LogEntry(
-            datetime.datetime(2012, 4, 17, 9, 21),
-            "37.533195",
-            "-76.316963",
-            LatLon("37.533195N", "76.316963W"),
-            {
+            time=datetime.datetime(2012, 4, 17, 9, 21),
+            lat=navigation.Lat.fromstring("37.533195"),
+            lon=navigation.Lat.fromstring("-76.316963"),
+            source_row={
                 "Engine": "1200 RPM",
                 "SOG": "0",
                 "Lon": "076 16.385W",
@@ -271,11 +298,10 @@ def gen_rhumb_1():
             },
         ),
         LogEntry(
-            datetime.datetime(2012, 4, 17, 10, 6),
-            "37.542961",
-            "-76.319580",
-            LatLon("37.542961N", "76.319580W"),
-            {
+            time=datetime.datetime(2012, 4, 17, 10, 6),
+            lat=navigation.Lat.fromstring("37.542961"),
+            lon=navigation.Lon.fromstring("-76.319580"),
+            source_row={
                 "Engine": "1500 RPM",
                 "SOG": "6.6",
                 "Lon": "076 16.056W",
@@ -355,11 +381,10 @@ def sample_track_1():
     track = [
         LogEntry_Rhumb(
             LogEntry(
-                datetime.datetime(2012, 4, 17, 9, 21),
-                "37.533195",
-                "-76.316963",
-                LatLon("37.533195N", "76.316963W"),
-                {
+                time=datetime.datetime(2012, 4, 17, 9, 21),
+                lat=navigation.Lat.fromstring("37.533195"),
+                lon=navigation.Lon.fromstring("-76.316963"),
+                source_row={
                     "Engine": "1200 RPM",
                     "SOG": "0",
                     "Lon": "076 16.385W",
@@ -372,17 +397,16 @@ def sample_track_1():
                     "windAngle": "",
                 },
             ),
-            0.59944686,
-            Angle.fromdegrees(348.0038223),
-            datetime.timedelta(seconds=45 * 60),
+            distance=0.59944686,
+            bearing=Angle.fromdegrees(348.0038223),
+            delta_time=datetime.timedelta(seconds=45 * 60),
         ),
         LogEntry_Rhumb(
             LogEntry(
-                datetime.datetime(2012, 4, 17, 10, 6),
-                "37.542961",
-                "-76.319580",
-                LatLon("37.542961N", "76.319580W"),
-                {
+                time=datetime.datetime(2012, 4, 17, 10, 6),
+                lat=navigation.Lat.fromstring("37.542961"),
+                lon=navigation.Lat.fromstring("-76.319580"),
+                source_row={
                     "Engine": "1500 RPM",
                     "SOG": "6.6",
                     "Lon": "076 16.056W",
@@ -395,9 +419,9 @@ def sample_track_1():
                     "windAngle": "315",
                 },
             ),
-            None,
-            None,
-            None,
+            distance=None,
+            bearing=None,
+            delta_time=None,
         ),
     ]
     return track
