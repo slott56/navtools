@@ -16,7 +16,7 @@
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="navtools.planning – Route Planning Application" href="planning.html" />
+    <link rel="next" title="planning – Route Planning Application" href="planning.html" />
     <link rel="prev" title="NavTools 2021.06" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -507,7 +507,7 @@ GPX-format file that can be used to update OpenCPN.</p>
 <h1>Component Architecture<a class="headerlink" href="#component-architecture" title="Permalink to this headline">¶</a></h1>
 <p>There are several layers to these applications.</p>
 <p class="plantuml">
-<img src="_images/plantuml-b2d35ba5dd61f0cad8c475ff1e023314ebdd699e.png" alt="&#64;startuml
+<img src="_images/plantuml-aa3158072651f9b5416beafd653140ea62f6b72d.png" alt="&#64;startuml
 'components'
 top to bottom direction
 
@@ -520,6 +520,7 @@ package navtools {
     [olc]
     [navigation]
     [igrf]
+    [solar]
     file &quot;igrf11coeffs.txt&quot; as coefs
 }
 [planning] ..&gt; [navigation]
@@ -532,6 +533,7 @@ package navtools {
 [navigation] ..&gt; [igrf]
 [planning] ..&gt; [igrf]
 [igrf] ..&gt; coefs
+[planning] ..&gt; [solar]
 &#64;enduml"/>
 </p>
 <p>The following component descriptions provide additional details of the relationships.</p>
@@ -550,6 +552,8 @@ an input file produced in USR format from a chartplotter.</p></li>
 <li><p><a class="reference internal" href="olc.html#module-navtools.olc" title="navtools.olc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.olc</span></code></a> creates Geocodes
 from latitudes and longitudes. This implements the core of Open Location Code (OLC) Geocoding.
 (Note: It doesn’t fully decode OLC back to Latitude/Longitude.)</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.solar</span></code> computes sunrise and sunset.
+This lets us know if an arrival or departure time is in daylight or night.</p></li>
 <li><p>The “main” applications have the CLI interface and processing.
 Each of these opens one (or more) files, performs the navigation calculations, and creates
 the output file. This may be a schedule or analysis spreadsheet-friendly CSV files.
@@ -640,14 +644,15 @@ by the working GPSBabel code. See <a class="reference external" href="https://ww
 <li class="toctree-l1"><a class="reference internal" href="#references">References</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="planning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.planning</span></code> – Route Planning Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.analysis</span></code> – Track Analysis Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="opencpn_table.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.opencpn_table</span></code> – OpenCPN Table Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.waypoint_merge</span></code> – Waypoint and Route Merge Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="navigation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code> – Navigation Calculations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="lowrance_usr.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.lowrance_usr</span></code> – Lowrance USR File Parser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="olc.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.olc</span></code> – OLC Geocoding</a></li>
-<li class="toctree-l1"><a class="reference internal" href="igrf.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf</span></code> – International Geomagnetic Reference Field</a></li>
+<li class="toctree-l1"><a class="reference internal" href="planning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">planning</span></code> – Route Planning Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code> – Track Analysis Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opencpn_table.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">opencpn_table</span></code> – OpenCPN Table Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">waypoint_merge</span></code> – Waypoint and Route Merge Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="navigation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navigation</span></code> – Navigation Calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lowrance_usr.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">lowrance_usr</span></code> – Lowrance USR File Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="olc.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">olc</span></code> – OLC Geocoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="igrf.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">igrf</span></code> – International Geomagnetic Reference Field</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solar.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">solar</span></code> – Sunrise and Sunset</a></li>
 </ul>
 
 <div class="relations">
@@ -655,7 +660,7 @@ by the working GPSBabel code. See <a class="reference external" href="https://ww
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="index.html" title="previous chapter">NavTools 2021.06</a></li>
-      <li>Next: <a href="planning.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.planning</span></code> – Route Planning Application</a></li>
+      <li>Next: <a href="planning.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">planning</span></code> – Route Planning Application</a></li>
   </ul></li>
 </ul>
 </div>

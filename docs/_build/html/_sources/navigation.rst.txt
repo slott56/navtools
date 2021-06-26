@@ -1,5 +1,5 @@
 ###############################################################
-:mod:`navtools.navigation` -- Navigation Calculations
+:mod:`navigation` -- Navigation Calculations
 ###############################################################
 .. include:: <isonum.txt>
 

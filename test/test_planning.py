@@ -4,6 +4,7 @@ Test the :py:mod:`planning` application.
 """
 
 from pytest import *
+from unittest.mock import Mock, call
 from textwrap import dedent
 import csv
 from io import StringIO
@@ -12,13 +13,9 @@ import os
 from navtools.navigation import LatLon, declination, Angle, Lat, Lon
 from navtools.planning import (
     Waypoint,
-    Waypoint_Rhumb,
-    Waypoint_Rhumb_Magnetic,
     SchedulePoint,
     csv_to_Waypoint,
     gpx_to_Waypoint,
-    gen_rhumb,
-    gen_mag_bearing,
     gen_schedule,
     write_csv,
     plan,
@@ -126,8 +123,14 @@ def test_gpx_bad(gpx_file_bad):
 
 
 @fixture
-def gen_rhumb_1():
+def schedule_1():
     route = [
+        Waypoint(
+            name="Fishing Bay",
+            lat=Lat.fromstring("37.54001607"),
+            lon=Lon.fromstring("-76.33728421"),
+            description="",
+        ),
         Waypoint(
             name="Piankatank 6",
             lat=Lat.fromstring("37.533195"),
@@ -141,182 +144,106 @@ def gen_rhumb_1():
             description="",
         ),
     ]
-    generator = gen_rhumb(iter(route))
+    return route
+
+@fixture
+def gen_schedule_1(schedule_1):
+    generator = gen_schedule(iter(schedule_1), declination, start_datetime=datetime.date(2012, 4, 18), speed=5)
     return generator
 
 
-def test_gen_rhumb(gen_rhumb_1):
-    points = list(gen_rhumb_1)
-    assert len(points) == 2
+def test_gen_schedule_1(gen_schedule_1):
+    points = list(gen_schedule_1)
+    assert len(points) == 3
 
-    assert points[0].point.name == "Piankatank 6"
+    # First is always None -- this is our departure
+    assert points[0].point.name == "Fishing Bay"
     assert points[0].distance is 0
-    assert points[0].bearing is None
+    assert points[0].true_bearing is None
+    assert points[0].magnetic is None
 
-    # Last is always None -- no more places to go.
-    assert points[1].point.name == "Jackson Creek Entrance"
-    assert points[1].distance == approx(0.59944686)
-    assert points[1].bearing.deg == approx(348.0038223)
+    # Next have computed values.
+    assert points[1].point.name == "Piankatank 6"
+    assert points[1].enroute_min == approx(12.6072302)
+    assert points[1].distance == approx(1.05060252)
+    assert points[1].true_bearing.deg == approx(112.9, rel=1E-3)
+    assert points[1].magnetic.deg == approx(123.9, rel=1E-3)
+    assert points[1].enroute_min == approx(12.607230)
+
+    # Next have computed values.
+    assert points[2].point.name == "Jackson Creek Entrance"
+    assert points[2].enroute_min == approx(7.19336232)
+    assert points[2].distance == approx(0.59944686)
+    assert points[2].true_bearing.deg == approx(348.0038223)
+    assert points[2].magnetic.deg == approx(358.9, rel=1E-3)
+    assert points[2].enroute_min == approx(7.19336232)
+
+@fixture
+def mock_today(monkeypatch):
+    date_class = Mock(today=Mock(return_value=datetime.date(2021, 1, 18)))
+    datetime_class = Mock(today=Mock(return_value=datetime.datetime(2021, 1, 18)), now=Mock(return_value=datetime.datetime(2021, 1, 18, 19, 20, 21)))
+    mock_datetime = Mock(wraps=datetime, date=date_class, datetime=datetime_class)
+    monkeypatch.setattr(planning, "datetime", mock_datetime)
+    return mock_datetime
 
 
 @fixture
-def gen_mag_bearing_1():
-    route = [
-        Waypoint_Rhumb(
+def gen_schedule_1_default_date(schedule_1, mock_today):
+    generator = gen_schedule(iter(schedule_1), declination, speed=5)
+    return generator
+
+def test_gen_schedule_1_default_date(gen_schedule_1_default_date):
+    points = list(gen_schedule_1_default_date)
+    assert len(points) == 3
+    # TODO: Some additional checks are appropriate.
+
+
+@fixture
+def schedule_2():
+    schedule = [
+        SchedulePoint(
             Waypoint(
                 name="Piankatank 6",
                 lat=Lat.fromstring("37.533195"),
-                lon=Lat.fromstring("-76.316963"),
+                lon=Lon.fromstring("-76.316963"),
                 description="",
             ),
-            distance=0.59944686,
-            bearing=Angle.fromdegrees(348.0038223),
+            distance=None,
+            true_bearing=None,
+            magnetic=None,
+            speed=0,
+            enroute_min=0,
+            next_course=Angle.fromdegrees(337.0867607),
+            arrival=datetime.datetime(2010,9,10,11,12,13)
         ),
-        Waypoint_Rhumb(
+        SchedulePoint(
             Waypoint(
                 name="Jackson Creek Entrance",
                 lat=Lat.fromstring("37.542961"),
-                lon=Lon.fromstring("-76.319580"),
+                lon=Lat.fromstring("-76.319580"),
                 description="",
             ),
-            distance=None,
-            bearing=None,
-        ),
-    ]
-    generator = gen_mag_bearing(
-        iter(route), declination, date=datetime.date(2012, 4, 18)
-    )
-    return generator
-
-
-def test_gen_mag_bearing(gen_mag_bearing_1):
-    points = list(gen_mag_bearing_1)
-    assert len(points) == 2
-
-    assert points[0].point.point.name == "Piankatank 6", f"Unexpected {points[0]!r}"
-    assert points[0].distance == approx(0.59944686)
-    assert points[0].true_bearing.deg == approx(348.00, rel=1E-2)
-    assert points[0].magnetic.deg == approx(337.09, rel=1E-2)
-
-    # Last is always None -- no more places to go.
-    assert points[1].point.point.name == "Jackson Creek Entrance"
-    assert points[1].distance is None
-    assert points[1].true_bearing is None
-    assert points[1].magnetic is None
-
-
-@fixture
-def gen_schedule_1():
-    route = [
-        Waypoint_Rhumb_Magnetic(
-            Waypoint_Rhumb(
-                Waypoint(
-                    name="Piankatank 6",
-                    lat=Lat.fromstring("37.533195"),
-                    lon=Lon.fromstring("-76.316963"),
-                    description="",
-                ),
-                distance=0.59944686,
-                bearing=Angle.fromdegrees(348.0038223),
-            ),
-            distance=0.59944686,
-            true_bearing=Angle.fromdegrees(348.0038223),
-            magnetic=Angle.fromdegrees(337.0867607),
-        ),
-        Waypoint_Rhumb_Magnetic(
-            Waypoint_Rhumb(
-                Waypoint(
-                    name="Jackson Creek Entrance",
-                    lat=Lat.fromstring("37.542961"),
-                    lon=Lon.fromstring("-76.319580"),
-                    description="",
-                ),
-                distance=None,
-                bearing=None,
-            ),
-            distance=None,
-            true_bearing=None,
-            magnetic=None,
-        ),
-    ]
-    generator = gen_schedule(iter(route), speed=5)
-    return generator
-
-
-def test_gen_schedule(gen_schedule_1):
-    points = list(gen_schedule_1)
-    assert len(points) == 2
-
-    assert points[0].point.point.name == "Piankatank 6"
-    assert points[0].distance == approx(0.59944686)
-    assert points[0].true_bearing.deg == approx(348.0038223)
-    assert points[0].magnetic.deg == approx(337.0867231)
-    assert points[0].cumulative_distance == approx(0.59944686)
-    assert points[0].enroute_min == approx(7.19336232)
-    assert points[0].enroute_hm == "00h 07m"
-
-    # Last is always None -- no more places to go.
-    assert points[1].point.point.name == "Jackson Creek Entrance"
-    assert points[1].distance is None
-    assert points[1].true_bearing is None
-    assert points[1].magnetic is None
-    assert points[0].cumulative_distance == approx(0.59944686)
-    assert points[0].enroute_min == approx(7.19336232)
-    assert points[0].enroute_hm == "00h 07m"
-
-
-@fixture
-def schedule_1():
-    schedule = [
-        SchedulePoint(
-            Waypoint_Rhumb(
-                Waypoint(
-                    name="Piankatank 6",
-                    lat=Lat.fromstring("37.533195"),
-                    lon=Lon.fromstring("-76.316963"),
-                    description="",
-                ),
-                distance=0.59944686,
-                bearing=Angle.fromdegrees(348.0038223),
-            ),
-            distance=0.59944686,
-            true_bearing=Angle.fromdegrees(348.0038223),
-            magnetic=Angle.fromdegrees(337.0867607),
-            cumulative_distance=0.59944686,
-            enroute_min=7.19336232,
-            enroute_hm="00h 07m",
-        ),
-        SchedulePoint(
-            Waypoint_Rhumb(
-                Waypoint(
-                    name="Jackson Creek Entrance",
-                    lat=Lat.fromstring("37.542961"),
-                    lon=Lat.fromstring("-76.319580"),
-                    description="",
-                ),
-                distance=None,
-                bearing=None,
-            ),
-            distance=None,
-            true_bearing=None,
-            magnetic=None,
-            cumulative_distance=None,
-            enroute_min=None,
-            enroute_hm=None,
+            distance = 0.59944686,
+            true_bearing = Angle.fromdegrees(348.0038223),
+            magnetic = Angle.fromdegrees(337.0867607),
+            enroute_min = 7.19336232,
+            speed=5.0,
+            next_course=None,
+            arrival=datetime.datetime(2010, 9, 10, 12, 13, 14)
         ),
     ]
     return schedule
 
 
-def test_write_csv(schedule_1):
+def test_write_csv(schedule_2):
     target = StringIO()
-    write_csv(iter(schedule_1), target)
+    write_csv(target, iter(schedule_2))
     expected = dedent(
         """\
-    Name,Lat,Lon,Desc,Distance (nm),True Bearing,Magnetic Bearing,Distance Run,Elapsed HH:MM\r
-    Piankatank 6,37 31.992N,076 19.018W,,0.59945,348.0,337.0,0.59945,00h 07m\r
-    Jackson Creek Entrance,37 32.578N,076 19.175W,,,,,,\r
-    """
+        Leg,Name,Lat,Lon,Desc,Distance (nm),True Bearing,Magnetic Bearing,Distance Run,Elapsed HH:MM,ETA,Course\r
+        0,Piankatank 6,37 31.992N,076 19.018W,,,,,0.0,00h 00m,Sep 10 11:12,337.0\r
+        1,Jackson Creek Entrance,37 32.578N,076 19.175W,,0.6,348.0,337.0,0.6,00h 07m,Sep 10 12:13,\r
+        """
     )
     assert expected == target.getvalue()
 
@@ -333,13 +260,13 @@ def sample_csv_1(csv_file_1, tmp_path):
 
 
 def test_plan_csv(sample_csv_1):
-    plan(sample_csv_1, date=datetime.date(2012, 4, 18))
+    plan(sample_csv_1, departure=datetime.datetime(2012, 4, 18, 0, 0, 0))
     target = sample_csv_1.parent / f"{sample_csv_1.stem} Schedule.csv"
     expected = dedent(
         """\
-    Name,Lat,Lon,Desc,Distance (nm),True Bearing,Magnetic Bearing,Distance Run,Elapsed HH:MM
-    Piankatank 6,37 31.990N,076 19.020W,,0,,,0.0,0h 0m
-    Jackson Creek Entrance,37 32.580N,076 19.170W,,0.60228,349.0,338.0,0.60228,00h 07m
+    Leg,Name,Lat,Lon,Desc,Distance (nm),True Bearing,Magnetic Bearing,Distance Run,Elapsed HH:MM,ETA,Course
+    0,Piankatank 6,37 31.990N,076 19.020W,,0,,,0.0,00h 00m,Apr 18 00:00,360.0
+    1,Jackson Creek Entrance,37 32.580N,076 19.170W,,0.6,349.0,360.0,0.6,00h 07m,Apr 18 00:07,
     """
     )
     with target.open() as result:
@@ -358,12 +285,12 @@ def sample_gpx_1(gpx_file_1, tmp_path):
 
 
 def test_plan_GPX(sample_gpx_1):
-    plan(sample_gpx_1, date=datetime.date(2012, 4, 18))
+    plan(sample_gpx_1, departure=datetime.datetime(2012, 4, 18, 0, 0, 0))
     expected = dedent(
         """\
-    Name,Lat,Lon,Desc,Distance (nm),True Bearing,Magnetic Bearing,Distance Run,Elapsed HH:MM
-    Piankatank 6,37 31.992N,076 19.018W,,0,,,0.0,0h 0m
-    Jackson Creek Entrance,37 32.578N,076 19.175W,,0.59945,348.0,337.0,0.59945,00h 07m
+    Leg,Name,Lat,Lon,Desc,Distance (nm),True Bearing,Magnetic Bearing,Distance Run,Elapsed HH:MM,ETA,Course
+    0,Piankatank 6,37 31.992N,076 19.018W,,0,,,0.0,00h 00m,Apr 18 00:00,359.0
+    1,Jackson Creek Entrance,37 32.578N,076 19.175W,,0.6,348.0,359.0,0.6,00h 07m,Apr 18 00:07,
     """
     )
     target = sample_gpx_1.parent / f"{sample_gpx_1.stem} Schedule.csv"
@@ -387,3 +314,11 @@ def test_main_full(sample_gpx_1):
     target = sample_gpx_1.parent / f"{sample_gpx_1.stem} Schedule.csv"
     assert target.exists()
     # Processing details tested in test_plan... functions
+
+# TODO: Test with various defaults for departure times.
+def test_main_depart(sample_gpx_1):
+    planning.main(["--departure", "2021-09-10T11:45", str(sample_gpx_1)])
+    target = sample_gpx_1.parent / f"{sample_gpx_1.stem} Schedule.csv"
+    assert target.exists()
+    # Processing details tested in test_plan... functions
+

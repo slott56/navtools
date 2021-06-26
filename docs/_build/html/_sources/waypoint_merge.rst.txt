@@ -1,5 +1,5 @@
 ######################################################################
-:mod:`navtools.waypoint_merge` -- Waypoint and Route Merge Application
+:mod:`waypoint_merge` -- Waypoint and Route Merge Application
 ######################################################################
 
 With multiple chart plotters, it's very easy to have waypoints

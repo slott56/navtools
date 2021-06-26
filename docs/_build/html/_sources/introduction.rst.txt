@@ -579,6 +579,7 @@ There are several layers to these applications.
         [olc]
         [navigation]
         [igrf]
+        [solar]
         file "igrf11coeffs.txt" as coefs
     }
     [planning] ..> [navigation]
@@ -591,6 +592,7 @@ There are several layers to these applications.
     [navigation] ..> [igrf]
     [planning] ..> [igrf]
     [igrf] ..> coefs
+    [planning] ..> [solar]
     @enduml
 
 The following component descriptions provide additional details of the relationships.
@@ -613,6 +615,9 @@ The following component descriptions provide additional details of the relations
 #.  :py:mod:`navtools.olc` creates Geocodes
     from latitudes and longitudes. This implements the core of Open Location Code (OLC) Geocoding.
     (Note: It doesn't fully decode OLC back to Latitude/Longitude.)
+
+#.  :py:mod:`navtools.solar` computes sunrise and sunset.
+    This lets us know if an arrival or departure time is in daylight or night.
 
 #.  The "main" applications have the CLI interface and processing.
     Each of these opens one (or more) files, performs the navigation calculations, and creates

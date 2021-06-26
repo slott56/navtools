@@ -372,7 +372,7 @@ def nround(value: Optional[float], digits: Optional[Any]) -> Union[int, float, N
     return None if value is None else round(value, digits)
 
 
-def write_csv(log_entry_rhumb_iter: Iterator[LogEntry_Rhumb], target: TextIO) -> None:
+def write_csv(target: TextIO, log_entry_rhumb_iter: Iterator[LogEntry_Rhumb]) -> None:
     """
     Writes a sequence of :py:class:`LogEntry_Rhumb`
     objects to a given target file.   The objects are usually built by the
@@ -488,12 +488,12 @@ def analyze(log_filepath: Path, date: Optional[datetime.date] = None) -> None:
                 else:
                     log_iter = csv_externheader_to_LogEntry(source, None, date)
                 track = gen_rhumb(log_iter)
-                write_csv(track, target)
+                write_csv(target, track)
     elif ext == ".gpx":
         with log_filepath.open() as source:
             with distance_path.open("w", newline="") as target:
                 track = gen_rhumb(gpx_to_LogEntry(source))
-                write_csv(track, target)
+                write_csv(target, track)
     else:
         raise ValueError("Can't process {0}: unknown extension".format(log_filepath))
 

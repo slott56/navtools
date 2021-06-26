@@ -1,5 +1,5 @@
 ########################################
-:mod:`navtools.olc` -- OLC Geocoding
+:py:mod:`olc` -- OLC Geocoding
 ########################################
 
 This is one of many Geocoding schemes that permits simplistic proximity checks.
@@ -20,6 +20,32 @@ This document has a few tiny gaps.
 
 See the official Test Cases:
 https://github.com/google/open-location-code/blob/main/test_data
+
+Encoding
+=============
+
+The encoding algorithm has the following outline:
+
+1. Clip latitude to -90 - +90.
+   This includes a special case for excluding +90: back off based on how many digits are going to be encoded.
+
+2.  Normalize longitude to -180 to +180 (excluding +180)
+
+3.  Convert lat and lon to N latitude and E longitude via offsets to remove signs.
+
+4.  Encode in base 20.
+
+5.  Interleave 5 pairs of digits from latitude and longitude for the most significant portion.
+
+6.  Convert pairs of digits into a single base 20 number for least significant portion.
+
+7.  Truncate (or zero pad) given the the size parameter.
+
+8.  Inject the "+" after position 8.
+
+This is a rectangle, not a point. That means there's an implied box around the given point.
+This concept of describing a box with a size implied by the number of digits informs
+decoding.
 
 Implementation
 ==============

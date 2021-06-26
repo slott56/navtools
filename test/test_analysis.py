@@ -436,7 +436,7 @@ def test_write_csv(sample_track_1):
         """
     )
     target = StringIO()
-    write_csv(iter(sample_track_1), target)
+    write_csv(target, iter(sample_track_1))
     assert equalCSV(expected, target.getvalue())
 
 

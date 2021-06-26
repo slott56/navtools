@@ -1,5 +1,5 @@
 ###############################################################
-:py:mod:`navtools.analysis` -- Track Analysis Application
+:py:mod:`analysis` -- Track Analysis Application
 ###############################################################
 
 The :py:mod:`analysis` application is used to do voyage analysis.

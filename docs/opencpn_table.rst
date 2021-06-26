@@ -1,5 +1,5 @@
 ###############################################################
-:py:mod:`navtools.opencpn_table` -- OpenCPN Table Application
+:py:mod:`opencpn_table` -- OpenCPN Table Application
 ###############################################################
 
 The :py:mod:`opencpn_table` application is used to do extract a useful CSV

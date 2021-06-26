@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>navtools.analysis – Track Analysis Application &#8212; Navtools 2021.06.01 documentation</title>
+    <title>analysis – Track Analysis Application &#8212; Navtools 2021.06.01 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -16,8 +16,8 @@
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="navtools.opencpn_table – OpenCPN Table Application" href="opencpn_table.html" />
-    <link rel="prev" title="navtools.planning – Route Planning Application" href="planning.html" />
+    <link rel="next" title="opencpn_table – OpenCPN Table Application" href="opencpn_table.html" />
+    <link rel="prev" title="planning – Route Planning Application" href="planning.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -34,8 +34,8 @@
 
           <div class="body" role="main">
             
-  <section id="navtools-analysis-track-analysis-application">
-<h1><a class="reference internal" href="#module-navtools.analysis" title="navtools.analysis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.analysis</span></code></a> – Track Analysis Application<a class="headerlink" href="#navtools-analysis-track-analysis-application" title="Permalink to this headline">¶</a></h1>
+  <section id="analysis-track-analysis-application">
+<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code> – Track Analysis Application<a class="headerlink" href="#analysis-track-analysis-application" title="Permalink to this headline">¶</a></h1>
 <p>The <code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code> application is used to do voyage analysis.
 This can make a more useful log from manually prepared log data or
 tracks dumped from OpenCPN (or iNavX.)
@@ -398,7 +398,7 @@ This can be produced by <a class="reference internal" href="#navtools.analysis.g
 
 <dl class="py function">
 <dt class="sig sig-object py" id="navtools.analysis.write_csv">
-<span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">write_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_entry_rhumb_iter</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.analysis.LogEntry_Rhumb" title="navtools.analysis.LogEntry_Rhumb"><span class="pre">navtools.analysis.LogEntry_Rhumb</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">TextIO</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#navtools.analysis.write_csv" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">write_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_entry_rhumb_iter</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.analysis.LogEntry_Rhumb" title="navtools.analysis.LogEntry_Rhumb"><span class="pre">navtools.analysis.LogEntry_Rhumb</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#navtools.analysis.write_csv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Writes a sequence of <a class="reference internal" href="#navtools.analysis.LogEntry_Rhumb" title="navtools.analysis.LogEntry_Rhumb"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry_Rhumb</span></code></a>
 objects to a given target file.   The objects are usually built by the
 <a class="reference internal" href="#navtools.analysis.gen_rhumb" title="navtools.analysis.gen_rhumb"><code class="xref py py-func docutils literal notranslate"><span class="pre">gen_rhumb()</span></code></a> function.</p>
@@ -517,22 +517,23 @@ output file with the detailed analysis.</p>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#references">References</a></li>
 </ul>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="planning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.planning</span></code> – Route Planning Application</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.analysis</span></code> – Track Analysis Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="opencpn_table.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.opencpn_table</span></code> – OpenCPN Table Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.waypoint_merge</span></code> – Waypoint and Route Merge Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="navigation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code> – Navigation Calculations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="lowrance_usr.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.lowrance_usr</span></code> – Lowrance USR File Parser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="olc.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.olc</span></code> – OLC Geocoding</a></li>
-<li class="toctree-l1"><a class="reference internal" href="igrf.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf</span></code> – International Geomagnetic Reference Field</a></li>
+<li class="toctree-l1"><a class="reference internal" href="planning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">planning</span></code> – Route Planning Application</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code> – Track Analysis Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opencpn_table.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">opencpn_table</span></code> – OpenCPN Table Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">waypoint_merge</span></code> – Waypoint and Route Merge Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="navigation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navigation</span></code> – Navigation Calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lowrance_usr.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">lowrance_usr</span></code> – Lowrance USR File Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="olc.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">olc</span></code> – OLC Geocoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="igrf.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">igrf</span></code> – International Geomagnetic Reference Field</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solar.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">solar</span></code> – Sunrise and Sunset</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="planning.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.planning</span></code> – Route Planning Application</a></li>
-      <li>Next: <a href="opencpn_table.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.opencpn_table</span></code> – OpenCPN Table Application</a></li>
+      <li>Previous: <a href="planning.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">planning</span></code> – Route Planning Application</a></li>
+      <li>Next: <a href="opencpn_table.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">opencpn_table</span></code> – OpenCPN Table Application</a></li>
   </ul></li>
 </ul>
 </div>

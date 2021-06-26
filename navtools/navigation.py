@@ -966,7 +966,7 @@ def declination(point: LatLon, date: Optional[datetime.date] = None) -> float:
     # print( "declination: {0!r} {1!r}".format(point.lat, point.lon) )
 
     if date is None:
-        date = datetime.date.today()
+        date = datetime.datetime.today()
     first_of_year = date.replace(month=1, day=1)
     astro_dt_tm = date.year + (date.toordinal() - first_of_year.toordinal()) / 365.242
 
@@ -994,3 +994,9 @@ class Waypoint:
     def __post_init__(self) -> None:
         self.point = LatLon(self.lat, self.lon)
         self.geocode = olc.OLC().encode(degrees(self.lat), degrees(self.lon))
+
+
+if __name__ == "__main__":  # pragma: no cover
+    import doctest
+
+    doctest.testmod()

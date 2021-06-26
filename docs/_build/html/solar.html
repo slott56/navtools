@@ -1,0 +1,190 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>solar – Sunrise and Sunset &#8212; Navtools 2021.06.01 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="igrf – International Geomagnetic Reference Field" href="igrf.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="solar-sunrise-and-sunset">
+<h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">solar</span></code> – Sunrise and Sunset<a class="headerlink" href="#solar-sunrise-and-sunset" title="Permalink to this headline">¶</a></h1>
+<p>This module computes sunrise and sunset.</p>
+<p>See <a class="reference external" href="https://en.wikipedia.org/wiki/Sunrise_equation">https://en.wikipedia.org/wiki/Sunrise_equation</a></p>
+<p><a class="reference external" href="https://gml.noaa.gov/grad/solcalc/calcdetails.html">https://gml.noaa.gov/grad/solcalc/calcdetails.html</a></p>
+<p>Also see <a class="reference external" href="https://gml.noaa.gov/grad/solcalc/solareqns.PDF">https://gml.noaa.gov/grad/solcalc/solareqns.PDF</a>.
+This uses the deprecated Spencer equations <a class="reference external" href="https://www.mail-archive.com/sundial&#64;uni-koeln.de/msg01050.html">https://www.mail-archive.com/sundial&#64;uni-koeln.de/msg01050.html</a>.
+It appears the Fourier Transform approximations are no longer considered accurate enough.
+Also, this paper seems to have a number of small errors in it. (See “cost”, for example.)</p>
+<p>Also see <a class="reference external" href="https://gml.noaa.gov/grad/solcalc/sunrise.html">https://gml.noaa.gov/grad/solcalc/sunrise.html</a> which seems to produce
+different, more accurate results. The associated Excel spreadsheet seems more
+useful because it seems to be the preferred approach and provides test data.</p>
+<p>Generally,
+the <span class="math notranslate nohighlight">\(\phi\)</span> values are N-S latitude, and <span class="math notranslate nohighlight">\(\lambda\)</span> values are E-W longitude.</p>
+<p>The procedure is as follows:</p>
+<ol class="arabic simple">
+<li><p>D is the given date as an ordinal number after 1900.
+The spreadsheet representation of dates provides a helpful approximation.
+<code class="docutils literal notranslate"><span class="pre">date</span> <span class="pre">-</span> <span class="pre">(1900-1-1)</span> <span class="pre">+</span> <span class="pre">2</span></code>.</p></li>
+<li><p>E is the time past midnight as a float in minutes.</p></li>
+<li><p>F is the Julian day number.</p></li>
+<li><p>G is the Julian century.
+<span class="math notranslate nohighlight">\(\frac{F - 2451545}{36525}\)</span></p></li>
+<li><p>I is the sun’s geometric mean longitude (in degrees).
+<span class="math notranslate nohighlight">\(280.46646 + G(36000.76983 + 0.0003032 G) \mod 360\)</span></p></li>
+<li><p>J is the sun’s geometric mean anomaly (in degrees).
+<span class="math notranslate nohighlight">\(357.52911 + 35999.05029 G - 0.0001537 G^2\)</span></p></li>
+<li><p>K is the eccentricity of earth’s orbit.
+<span class="math notranslate nohighlight">\(0.016708634 - 0.000042037 G + 0.0000001267 G^2\)</span></p></li>
+<li><p>L is the sun’s equation of center.
+<span class="math notranslate nohighlight">\((1.914602 - 0.004817 G + 0.000014 G^2) \sin J + (0.019993 - 0.000101 G) \sin 2 J + 0.000289 \sin 2 J\)</span></p></li>
+<li><p>M is the sun’s true longitude (in degrees),
+<span class="math notranslate nohighlight">\(I + L\)</span>.</p></li>
+<li><p>N is the sub’s true anomaly (in degrees),
+<span class="math notranslate nohighlight">\(J + L\)</span>.</p></li>
+<li><p>(Not required, but in the original spreadsheet anyway.) O is the sun’s radius vector (in Astronomical Units).
+<span class="math notranslate nohighlight">\(\frac{1.000001018 (1 - K^2)}{1 + K \cos(N)}\)</span></p></li>
+<li><p>P is the sun’s apparent longitude (in degrees).
+<span class="math notranslate nohighlight">\(M - 0.00569 - 0.00478 \sin (125.04 - 1934.136 G)\frac{\pi}{180}\)</span></p></li>
+<li><p>Q is the mean obliquity to the ecliptic (in degrees).
+<span class="math notranslate nohighlight">\(23 + \frac{26}{60} + \frac{21.448 - 46.815 G + 0.00059 G^2 - 0.001813 G^3}{3600}\)</span></p></li>
+<li><p>R is the obliquity correction (degrees). <span class="math notranslate nohighlight">\(Q + 0.00256 \cos(125.04 - 1934.136 G) \frac{\pi}{180}\)</span></p></li>
+<li><p>S is the sun’s right ascension (degrees). <span class="math notranslate nohighlight">\(\arctan \frac{\cos R \sin P} {\cos P}\)</span></p></li>
+<li><p>T is the sun’s declination (degrees). <span class="math notranslate nohighlight">\(\arcsin (\sin R \sin P)\)</span></p></li>
+<li><p>U is the “variable Y”. <span class="math notranslate nohighlight">\(\tan^2 \frac{R}{2}\)</span>. This is referenced as <span class="math notranslate nohighlight">\(y\)</span> in several
+variations. See <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/1989MNRAS.238.1529H/abstract">https://ui.adsabs.harvard.edu/abs/1989MNRAS.238.1529H/abstract</a> for an example.</p></li>
+<li><p>V is the “Equation” of time (in minutes) how apparent time equates to measured time.
+<span class="math notranslate nohighlight">\(4 U \sin(2I) - 2K\sin J + 4KU\sin J \cos 2I - 0.5 U^2 \sin 4I - 1.25 K^2 \sin 2J\)</span></p></li>
+<li><p>W is the Hour Angle of Sunrise (degrees)
+<span class="math notranslate nohighlight">\(\arccos (\frac{\cos 90.833}{\cos \phi \cos T} - \tan \phi \tan T)\)</span></p></li>
+<li><p>X is Solar Noon in Local Standard Time.
+<span class="math notranslate nohighlight">\(\frac{720 - 4 \lambda - V + t}{1440}\)</span></p></li>
+<li><p>Y is sunrise. <span class="math notranslate nohighlight">\(X - 4 W / 1440\)</span>.</p></li>
+<li><p>Z is sunset. <span class="math notranslate nohighlight">\(X + 4 W / 1440\)</span>.</p></li>
+</ol>
+<section id="twilight">
+<h2>Twilight<a class="headerlink" href="#twilight" title="Permalink to this headline">¶</a></h2>
+<p>Computing nautical twilight is Solar zenith angle is 102°, solar elevation angle is -12°.
+This is 12° beyond the horizon.</p>
+<p>For some information, see <a class="reference external" href="http://www.stargazing.net/kepler/sunrise.html">http://www.stargazing.net/kepler/sunrise.html</a></p>
+<p>This appears to be an offset to the Hour Angle of sunrise. The following
+uses 90.833 as the horizon with a correction for refraction of the atmosphere:</p>
+<div class="math notranslate nohighlight">
+\[W = \arccos \left[ \frac{\cos 90.833}{\cos {\phi} \cos T} - \tan{\phi}\tan T \right]\]</div>
+<p>If so, then Nautical twilight could be:</p>
+<div class="math notranslate nohighlight">
+\[W_n = \arccos \left[ \frac{\cos 102}{\cos {\phi} \cos T} - \tan{\phi}\tan T \right]\]</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Navtools</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Overview and Context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#actors">Actors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#use-cases">Use Cases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#container-overview">Container Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#component-architecture">Component Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#other-notes">Other Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html#references">References</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="planning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">planning</span></code> – Route Planning Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code> – Track Analysis Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opencpn_table.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">opencpn_table</span></code> – OpenCPN Table Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">waypoint_merge</span></code> – Waypoint and Route Merge Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="navigation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navigation</span></code> – Navigation Calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lowrance_usr.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">lowrance_usr</span></code> – Lowrance USR File Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="olc.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">olc</span></code> – OLC Geocoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="igrf.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">igrf</span></code> – International Geomagnetic Reference Field</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">solar</span></code> – Sunrise and Sunset</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="igrf.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">igrf</span></code> – International Geomagnetic Reference Field</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2021, S.Lott.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.0.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/solar.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

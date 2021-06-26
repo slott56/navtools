@@ -1,5 +1,5 @@
 ########################################################
-:mod:`navtools.lowrance_usr` -- Lowrance USR File Parser
+:mod:`lowrance_usr` -- Lowrance USR File Parser
 ########################################################
 
 The Lowrance USR file is a binary file, and parsing it is a fairly complex exercise.

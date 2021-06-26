@@ -72,20 +72,44 @@ where the great circle accuracy isn’t critical.</p>
 details for each module.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="planning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.planning</span></code> – Route Planning Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.analysis</span></code> – Track Analysis Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="opencpn_table.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.opencpn_table</span></code> – OpenCPN Table Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.waypoint_merge</span></code> – Waypoint and Route Merge Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="navigation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code> – Navigation Calculations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="lowrance_usr.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.lowrance_usr</span></code> – Lowrance USR File Parser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="olc.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.olc</span></code> – OLC Geocoding</a></li>
-<li class="toctree-l1"><a class="reference internal" href="igrf.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf</span></code> – International Geomagnetic Reference Field</a></li>
+<li class="toctree-l1"><a class="reference internal" href="planning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">planning</span></code> – Route Planning Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code> – Track Analysis Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opencpn_table.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">opencpn_table</span></code> – OpenCPN Table Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">waypoint_merge</span></code> – Waypoint and Route Merge Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="navigation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navigation</span></code> – Navigation Calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lowrance_usr.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">lowrance_usr</span></code> – Lowrance USR File Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="olc.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">olc</span></code> – OLC Geocoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="igrf.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">igrf</span></code> – International Geomagnetic Reference Field</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solar.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">solar</span></code> – Sunrise and Sunset</a></li>
 </ul>
 </div>
 </section>
 <section id="the-todo-list">
 <h2>The TODO List<a class="headerlink" href="#the-todo-list" title="Permalink to this headline">¶</a></h2>
 <p>This is a list of all “TODO” items from the documentation.</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Use urllib2</p>
+<p>We can then use <code class="xref py py-mod docutils literal notranslate"><span class="pre">urllib</span></code> instead of simple
+<code class="xref py py-func docutils literal notranslate"><span class="pre">Path.open()</span></code> so that we could use
+“<a class="reference external" href="file:///path/to/file">file:///path/to/file</a>” or “<a class="reference external" href="https://server/path/to/file">https://server/path/to/file</a>”.</p>
+<p>Even though most use cases involve disconnected computers,
+and rely on a statically downloaded file. It’s easy to cover
+<em>all</em> the bases by opening a URL instead of assuming a local file.</p>
+<p>The official file:
+<a class="reference external" href="http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt">http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt</a></p>
+</div>
+<p class="todo-source">(The <a class="reference internal" href="igrf.html#id1"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/navtools/igrf.py:docstring of navtools.igrf.IGRF.load_coeffs, line 20.)</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>Refactor to merge with <code class="xref py py-func docutils literal notranslate"><span class="pre">analysis.parse_date()</span></code></p>
+</div>
+<p class="todo-source">(The <a class="reference internal" href="waypoint_merge.html#id1"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/navtools/waypoint_merge.py:docstring of navtools.waypoint_merge.parse_datetime, line 7.)</p>
+<div class="admonition-todo admonition">
+<p class="admonition-title">Todo</p>
+<p>parameterize the distance or geocode options.</p>
+</div>
+<p class="todo-source">(The <a class="reference internal" href="waypoint_merge.html#id2"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/navtools/waypoint_merge.py:docstring of navtools.waypoint_merge.main, line 4.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Refactor to merge with <code class="xref py py-func docutils literal notranslate"><span class="pre">opencpn_table.parse_datetime()</span></code></p>
@@ -109,46 +133,33 @@ and adding new headers based on values computed by the iterator.</p>
 <p class="todo-source">(The <a class="reference internal" href="analysis.html#id3"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/navtools/analysis.py:docstring of navtools.analysis.analyze, line 6.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Use urllib2</p>
-<p>We can then use <code class="xref py py-mod docutils literal notranslate"><span class="pre">urllib</span></code> instead of simple
-<code class="xref py py-func docutils literal notranslate"><span class="pre">Path.open()</span></code> so that we could use
-“<a class="reference external" href="file:///path/to/file">file:///path/to/file</a>” or “<a class="reference external" href="https://server/path/to/file">https://server/path/to/file</a>”.</p>
-<p>Even though most use cases involve disconnected computers,
-and rely on a statically downloaded file. It’s easy to cover
-<em>all</em> the bases by opening a URL instead of assuming a local file.</p>
-<p>The official file:
-<a class="reference external" href="http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt">http://www.ngdc.noaa.gov/IAGA/vmod/igrf11coeffs.txt</a></p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="igrf.html#id1"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/navtools/igrf.py:docstring of navtools.igrf.IGRF.load_coeffs, line 20.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>Refactor magnetic bearing computation</p>
-<p>Include variance directly, not as a separate step.</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="planning.html#id2"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/docs/planning.rst, line 200.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
 <p>Locate the sunrise equation and include anticipated time-of-day for an ETA</p>
 <p>See <a class="reference external" href="https://gml.noaa.gov/grad/solcalc/solareqns.PDF">https://gml.noaa.gov/grad/solcalc/solareqns.PDF</a></p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="planning.html#id3"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/docs/planning.rst, line 204.)</p>
+<p class="todo-source">(The <a class="reference internal" href="planning.html#id1"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/docs/planning.rst, line 67.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
 <p>Compute the locations at noon of each day.</p>
 <p>This requires looking at waypoints before and after local noon, Splitting the segment
 to find noon, and adding a waypoint with no course change.</p>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="planning.html#id4"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/docs/planning.rst, line 208.)</p>
+<p class="todo-source">(The <a class="reference internal" href="planning.html#id2"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/docs/planning.rst, line 71.)</p>
 <div class="admonition-todo admonition">
 <p class="admonition-title">Todo</p>
-<p>Refactor to merge with <code class="xref py py-func docutils literal notranslate"><span class="pre">analysis.parse_date()</span></code></p>
+<p>Unify with <code class="xref py py-class docutils literal notranslate"><span class="pre">opencpn_table.Leg</span></code>.</p>
+<ul class="simple">
+<li><p>leg: int</p></li>
+<li><p>ETE: Optional[“Duration”]</p></li>
+<li><p>ETA: Optional[datetime.datetime]</p></li>
+<li><p>ETA_summary: Optional[str]</p></li>
+<li><p>speed: float</p></li>
+<li><p>tide: Optional[str]</p></li>
+<li><p>distance: Optional[float]</p></li>
+<li><p>bearing: Optional[float]</p></li>
+<li><p>course: Optional[float] = None</p></li>
+</ul>
 </div>
-<p class="todo-source">(The <a class="reference internal" href="waypoint_merge.html#id1"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/navtools/waypoint_merge.py:docstring of navtools.waypoint_merge.parse_datetime, line 7.)</p>
-<div class="admonition-todo admonition">
-<p class="admonition-title">Todo</p>
-<p>parameterize the distance or geocode options.</p>
-</div>
-<p class="todo-source">(The <a class="reference internal" href="waypoint_merge.html#id2"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/navtools/waypoint_merge.py:docstring of navtools.waypoint_merge.main, line 4.)</p>
+<p class="todo-source">(The <a class="reference internal" href="planning.html#id4"><em>original entry</em></a> is located in /Users/slott/github/local/navtools/navtools/planning.py:docstring of navtools.planning.SchedulePoint, line 4.)</p>
 </section>
 <section id="indices-and-tables">
 <h2>Indices and Tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
@@ -186,14 +197,15 @@ to find noon, and adding a waypoint with no course change.</p>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html#references">References</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="planning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.planning</span></code> – Route Planning Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.analysis</span></code> – Track Analysis Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="opencpn_table.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.opencpn_table</span></code> – OpenCPN Table Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.waypoint_merge</span></code> – Waypoint and Route Merge Application</a></li>
-<li class="toctree-l1"><a class="reference internal" href="navigation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.navigation</span></code> – Navigation Calculations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="lowrance_usr.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.lowrance_usr</span></code> – Lowrance USR File Parser</a></li>
-<li class="toctree-l1"><a class="reference internal" href="olc.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.olc</span></code> – OLC Geocoding</a></li>
-<li class="toctree-l1"><a class="reference internal" href="igrf.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools.igrf</span></code> – International Geomagnetic Reference Field</a></li>
+<li class="toctree-l1"><a class="reference internal" href="planning.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">planning</span></code> – Route Planning Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">analysis</span></code> – Track Analysis Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="opencpn_table.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">opencpn_table</span></code> – OpenCPN Table Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="waypoint_merge.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">waypoint_merge</span></code> – Waypoint and Route Merge Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="navigation.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">navigation</span></code> – Navigation Calculations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="lowrance_usr.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">lowrance_usr</span></code> – Lowrance USR File Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="olc.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">olc</span></code> – OLC Geocoding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="igrf.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">igrf</span></code> – International Geomagnetic Reference Field</a></li>
+<li class="toctree-l1"><a class="reference internal" href="solar.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">solar</span></code> – Sunrise and Sunset</a></li>
 </ul>
 
 <div class="relations">

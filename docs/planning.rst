@@ -1,5 +1,5 @@
 ###############################################################
-:py:mod:`navtools.planning` -- Route Planning Application
+:py:mod:`planning` -- Route Planning Application
 ###############################################################
 
 ..  py:module:: planning
@@ -33,6 +33,62 @@ Here's the structure of the classes in this application:
     }
     Waypoint_Rhumb *-- Waypoint
     @enduml
+
+Planning Approach
+=================
+
+Currently, the planning application computes distances and Estimated Time Enroute (ETE) for each leg.
+It does little more than this. The approach is embodied by creating a :py:class:`SchedulePoint` object.
+This is direct enrichment of the :py:class:`Waypoint` instances along the route.
+
+There are a number of potential improvements to this approach:
+
+-   Include an estimated time of departure (ETD) as a basis for computing ETE and ETA.
+
+-   Include the position of the sun for each ETA.
+
+-   Include a Noon position on any leg that spans local noon.
+
+An event more sophisticated planner would allow for two kinds of plans:
+
+-   A "forward" plan uses a Desired Time of Departure (DTD) to compute a sequence of ETE and ETA's.
+
+-   A "reverse" plan would use a Desired Time of Arrival (DTA) and work backwords to
+    compute departures and times enroute. This would lead to a Desired Time of Departure (DTD).
+
+The idea is to reduce the amount of work done with a spreadsheet outside :py:mod:`navtools`.
+
+
+Improvements
+------------
+
+There are several improvements required.
+
+..  todo:: Locate the sunrise equation and include anticipated time-of-day for an ETA
+
+    See https://gml.noaa.gov/grad/solcalc/solareqns.PDF
+
+..  todo:: Compute the locations at noon of each day.
+
+    This requires looking at waypoints before and after local noon, Splitting the segment
+    to find noon, and adding a waypoint with no course change.
+
+The goal is to match the output content of :py:mod:`opencpn_table`:
+
+    - waypoint: Waypoint
+    - leg: int
+    - ETE: Optional["Duration"]
+    - ETA: Optional[datetime.datetime]
+    - ETA_summary: Optional[str]
+    - speed: float
+    - tide: Optional[str]
+    - distance: Optional[float]
+    - bearing: Optional[float]
+    - course: Optional[float] = None
+
+
+Implementation
+==============
 
 This module includes several groups of components.
 
@@ -90,30 +146,22 @@ from the initial :py:class:`Waypoint` objects.
 
 Specifically, we use the following kind of function composition.
 
-..  code-block:: python
+..  uml::
 
-    gen_schedule(
-        gen_mag_bearing(
-            gen_rhumb(point_iter),
-            variance),
-        speed)
+    @startuml
+    start
+    switch (format?)
+    case ( CSV )
+        :route = csv_to_Waypoint;
+    case ( GPX )
+        :route = gpx_to_Waypoint;
+    endswitch
+    :gen_schedule;
+    :write_csv;
+    stop
+    @enduml
 
-The ``point_iter`` is a CSV or GPX file with the route defined as a series of waypoints.
 
-
-Point with Distance and Bearing
--------------------------------
-
-..  autoclass:: Waypoint_Rhumb
-
-..  autofunction:: gen_rhumb
-
-Point with Distance, Bearing, and Declination
----------------------------------------------
-
-..  autoclass:: Waypoint_Rhumb_Magnetic
-
-..  autofunction:: gen_mag_bearing
 
 Schedule Details
 --------------------------------
@@ -191,22 +239,4 @@ The :py:func:`main` CLI
 -----------------------
 
 ..  autofunction:: main
-
-Improvements
-============
-
-There are several improvements required.
-
-..  todo:: Refactor magnetic bearing computation
-
-    Include variance directly, not as a separate step.
-
-..  todo:: Locate the sunrise equation and include anticipated time-of-day for an ETA
-
-    See https://gml.noaa.gov/grad/solcalc/solareqns.PDF
-
-..  todo:: Compute the locations at noon of each day.
-
-    This requires looking at waypoints before and after local noon, Splitting the segment
-    to find noon, and adding a waypoint with no course change.
 

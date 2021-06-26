@@ -25,7 +25,7 @@ deps =
 	-rrequirements.txt
 	pytest==6.2.4
 	pytest-cov==2.12.0
-	mypy==0.812
+	mypy==0.910
 	black==19.10b0
 setenv =
 	PYTHONPATH = {toxinidir}/navtools
@@ -37,6 +37,7 @@ commands =
 	python -m doctest --option ELLIPSIS navtools/opencpn_table.py
 	python -m doctest --option ELLIPSIS navtools/planning.py
 	python -m doctest --option ELLIPSIS navtools/olc.py
+	python -m doctest --option ELLIPSIS navtools/solar.py
 	python -m pytest --cov=navtools --cov-report term-missing -vv
 	mypy --strict --show-error-codes navtools
 """

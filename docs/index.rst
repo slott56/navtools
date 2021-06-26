@@ -37,6 +37,7 @@ details for each module.
    lowrance_usr
    olc
    igrf
+   solar
 
 The TODO List
 ===============

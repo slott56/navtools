@@ -32,13 +32,12 @@ from navtools.navigation import Waypoint
 
 def csv_to_Waypoint(source: TextIO) -> Iterator[Waypoint]:
     """
-    Parses the CSV files produced by tools like GPSNavX, iNavX, OpenCPN
+    Parses the CSV files produced by tools like GPSNavX or iNavX
     to yield an iterable sequence of :py:class:`Waypoint` objects.
+    These files had no heading row.
+    The assumed column order is "name", "lat", "lon", "description".
 
-    Generate Waypoint from a CSV reader.  The assumed column
-    order is "name", "lat", "lon" followed by any additional attributes.
-
-    Note that the GPSNavX output was encoded in ``Western (Mac OS Roman)``.
+    Note that the old GPSNavX output was encoded in ``Western (Mac OS Roman)``.
     This can make CSV parsing a bit more complex because there will be
     Unicode characters that the CSV module doesn't always handle gracefully.
     However, the patterns used for parsing tolerate the extraneous bytes
@@ -71,7 +70,10 @@ def gpx_to_Waypoint(source: TextIO) -> Iterator[Waypoint]:
 
             -   ``<description>``
 
-    :param source: an open XML file.
+    In some cases, there are additional attributes available, but we
+    don't seem to need them for planning.
+
+    :param source: an open GPX file.
     :returns: An iterator over :py:class:`Waypoint` objects.
     """
     gpx_ns = "http://www.topografix.com/GPX/1/1"
@@ -95,158 +97,131 @@ def gpx_to_Waypoint(source: TextIO) -> Iterator[Waypoint]:
         )
 
 
-class Waypoint_Rhumb(NamedTuple):
-    """
-    A waypoint along a planned route; includes
-    distance and true bearing from the previous waypoint.
+@dataclass
+class SchedulePoint:
+    """Scheduled waypoints.
+    These include distance, bearing, and estimated time enroute (ETE).
+
+    ..  todo:: Unify with :py:class:`opencpn_table.Leg`.
+
+        - leg: int
+        - ETE: Optional["Duration"]
+        - ETA: Optional[datetime.datetime]
+        - ETA_summary: Optional[str]
+        - speed: float
+        - tide: Optional[str]
+        - distance: Optional[float]
+        - bearing: Optional[float]
+        - course: Optional[float] = None
     """
 
     point: Waypoint
     distance: float
-    bearing: Optional[navigation.Angle]
-
-
-def gen_rhumb(route_points_iter: Iterator[Waypoint]) -> Iterator[Waypoint_Rhumb]:
-    """
-    Calculates the range and bearing to each maypoint from a previous waypoint.
-
-    This uses :py:mod:`navigation` to compute range and bearing between points.
-
-    An assumed mark prior to the first waypoint in the route is required.
-    This can either be
-    -   the current lat/lon, OR,
-    -   a repeat of the first waypoint, leading to an irrelevant bearing and zero distance.
-
-    :param route_points_iter: Iterator over individual :py:class:`Waypoint` instances.
-        For example, the results of the :py:func:`csv_to_RoutePoint` or :py:func:`gpx_to_RoutePoint`
-        function.
-
-    :returns: iterator over :py:class:`Waypoint_Rhumb` instances.
-    """
-    start = next(route_points_iter)
-    yield Waypoint_Rhumb(start, distance=0, bearing=None)
-    for here in route_points_iter:
-        r, theta = navigation.range_bearing(start.point, here.point)
-        yield Waypoint_Rhumb(here, distance=r, bearing=theta)
-        start = here
-
-
-class Waypoint_Rhumb_Magnetic(NamedTuple):
-    """
-    A waypoint along a planned route; includes
-    distance and bearing from the previous waypoint.
-    Includes both true and magnetic bearings with current local variance.
-
-    This keeps the magnetic bearing as a value computed once only.
-
-    An alternative design is to make ``magnetic`` a property
-    and compute it as needed. This would allow us to refactor
-    the variance and magnetic computations into the :py:class:``Waypoint_Rhumb`` class,
-    eliminating a need for this separate class and computation.
-    """
-
-    point: Waypoint_Rhumb
-    distance: float
     true_bearing: Optional[navigation.Angle]
     magnetic: Optional[navigation.Angle]
-
-
-def gen_mag_bearing(
-    rhumb_iter: Iterable[Waypoint_Rhumb],
-    declination: Callable[[navigation.LatLon, Optional[datetime.date]], float],
-    date: Optional[datetime.date] = None,
-) -> Iterator[Waypoint_Rhumb_Magnetic]:
-    """
-    Applies the given ``declination`` function to each point to
-    compute the compass bearing value from the true bearing at each waypoint in a route.
-
-    ..  important::
-
-        Declination is also known as Variation
-
-    :param rhumb_iter: iterator over :py:class:`Waypoint_Rhumb` instances.
-        For example, the :py:func:`gen_rhumb` function.
-    :param declination: function to compute declination.
-        We often use :py:func:`navigation.declination` for this.
-    :param date: Optional :py:class:`datetime.datetime` for which to compute
-        the declination. If omitted, today's date is used.
-    :returns: Iterator over :py:class:`Waypoint_Rhumb_Magnetic` objects.
-
-    """
-    for rp_rhumb in rhumb_iter:
-        if rp_rhumb.bearing is None:
-            yield Waypoint_Rhumb_Magnetic(
-                rp_rhumb,
-                distance=rp_rhumb.distance,
-                true_bearing=rp_rhumb.bearing,
-                magnetic=None,
-            )
-        else:
-            magnetic = rp_rhumb.bearing + declination(rp_rhumb.point.point, date)
-            yield Waypoint_Rhumb_Magnetic(
-                rp_rhumb,
-                distance=rp_rhumb.distance,
-                true_bearing=rp_rhumb.bearing,
-                magnetic=magnetic,
-            )
-
-
-class SchedulePoint(NamedTuple):
-    """Scheduled waypoints.
-    These include distance, bearing, and estimated time enroute (ETE)
-    """
-
-    point: Waypoint_Rhumb
-    distance: float
-    true_bearing: Optional[navigation.Angle]
-    magnetic: Optional[navigation.Angle]
-    cumulative_distance: float
+    speed: Optional[float]
     enroute_min: Optional[float]
-    enroute_hm: Optional[str]
+    next_course: Optional[navigation.Angle]
+    arrival: Optional[datetime.datetime]
+
+
+Declination_Func = Callable[[navigation.LatLon, Optional[datetime.date]], float]
 
 
 def gen_schedule(
-    rhumb_mag_iter: Iterable[Waypoint_Rhumb_Magnetic], speed: float = 5.0
+    waypoints: Iterable[Waypoint],
+    variance: Declination_Func,
+    start_datetime: Optional[datetime.datetime] = None,
+    speed: float = 5.0,
 ) -> Iterator[SchedulePoint]:
     """
-    Calculates the elapsed
-    distance and elapsed time (in two formats) for each waypoint.
-    This is (technically) the time to the **next** waypoint.
+    Calculates distance, bearing, and time en route for each waypoint.
+    This is the forward algorithm starting from start_datetime.
 
-    An input bearing of :samp:`None` in a :py:class:`Waypoint_Rhumb_Magnetic` object
-    indicates the first waypoint which is the starting position.
+    The algorithm peeks ahead to compute the course to the next waypoint.
+    This requires a route with two or more waypoints.
 
-    :param rhumb_mag_iter:  Iterator over :py:class:`Waypoint_Rhumb_Magnetic` objects.
+    It works like this:
+
+    -   Set previous = next(iter); here = next(iter)
+
+    -   Yield previous with no ETE or distance, course from previous to here.
+
+    -   For end in iter:
+
+        -   Compute ETE and distance from previous to here
+
+        -   Yield here with ETE and distance from previous to here and course from here to end.
+
+        -   Set previous, here = here, end; with some cleverness, we should be able to reuse distance and bearing.
+
+    -   Compute ETE and distance from previous to here
+
+    -   Yield here with ETE and course from previous to here and no course.
+
+    This requires a wee bit of optimization to prevent duplicate cade.
+    We should, specifically, cache the distance and bearing to avoid recomputation.
+
+    :param waypoints:  Iterable collection of :py:class:`Waypoint` objects.
+    :param variance: the magnetic variance (a/k/a declination) function;
+        generally use :py:func:`navigation.declination`.
+    :param start_datetime: the date on which to compute the variance; default is today
     :param speed: Default speed assumption to use; default is 5.0 knots.
     :returns: iterator over :py:class:`SchedulePoint` instances.
 
     """
-    cumulative_distance = 0.0
-    for rp in rhumb_mag_iter:
-        if rp.true_bearing is None:
-            yield SchedulePoint(
-                rp.point,
-                distance=rp.distance,
-                true_bearing=rp.true_bearing,
-                magnetic=rp.magnetic,
-                cumulative_distance=0.0,
-                enroute_min=0,
-                enroute_hm="0h 0m",
-            )
-        else:
-            cumulative_distance += rp.distance or 0
-            enroute_min = 60.0 * rp.distance / speed
-            h, m = divmod(int(enroute_min), 60)
-            enroute_hm = "{0:02d}h {1:02d}m".format(h, m)
-            yield SchedulePoint(
-                point=rp.point,
-                distance=rp.distance,
-                true_bearing=rp.true_bearing,
-                magnetic=rp.magnetic,
-                cumulative_distance=cumulative_distance,
-                enroute_min=enroute_min,
-                enroute_hm=enroute_hm,
-            )
+    if start_datetime is None:
+        start_datetime = datetime.datetime.now()
+    waypoints_iter = iter(waypoints)
+    previous, here = next(waypoints_iter), next(waypoints_iter)
+    _, next_course = navigation.range_bearing(previous.point, here.point)
+    yield SchedulePoint(
+        point=previous,
+        distance=0,
+        true_bearing=None,
+        magnetic=None,
+        speed=None,
+        enroute_min=0,
+        next_course=navigation.Angle(
+            next_course - variance(here.point, start_datetime)
+        ),
+        arrival=start_datetime,
+    )
+    for end in waypoints_iter:
+        r, theta = navigation.range_bearing(previous.point, here.point)
+        magnetic = theta - variance(here.point, start_datetime)
+        enroute_min = 60.0 * r / speed
+        start_datetime += datetime.timedelta(seconds=enroute_min * 60)
+        _, next_true = navigation.range_bearing(here.point, end.point)
+        yield SchedulePoint(
+            point=here,
+            distance=r,
+            true_bearing=theta,
+            magnetic=magnetic,
+            speed=speed,
+            enroute_min=enroute_min,
+            next_course=navigation.Angle(
+                next_true - variance(end.point, start_datetime)
+            ),
+            arrival=start_datetime,
+        )
+        previous, here = here, end
+    r, theta = navigation.range_bearing(previous.point, here.point)
+    magnetic = theta - variance(here.point, start_datetime)
+    enroute_min = 60.0 * r / speed
+    print(f"{start_datetime} {enroute_min}")
+    start_datetime += datetime.timedelta(seconds=enroute_min * 60)
+    print(f"{start_datetime}")
+    yield SchedulePoint(
+        point=here,
+        distance=r,
+        true_bearing=theta,
+        magnetic=magnetic,
+        speed=speed,
+        enroute_min=enroute_min,
+        next_course=None,
+        arrival=start_datetime,
+    )
 
 
 def nround(value: Optional[float], digits: int) -> Optional[float]:
@@ -260,69 +235,97 @@ def nround(value: Optional[float], digits: int) -> Optional[float]:
     return None if value is None else round(value, digits)
 
 
-def write_csv(sched_iter: Iterable[SchedulePoint], target: TextIO) -> None:
+def write_csv(target: TextIO, sched_iter: Iterable[SchedulePoint]) -> None:
     """
     Writes a sequence of :py:class:`Schedule` objects to a given target file.
 
-    The file will have the following columns:
+    The file has the following columns::
 
         "Name", "Lat", "Lon", "Desc",
         "Distance (nm)", "True Bearing", "Magnetic Bearing",
         "Distance Run", "Elapsed HH:MM"
 
-    Note that we apply some rounding rules to these values before writing them
-    to a CSV file. The distances are rounded to :math:`10^{-5}` which is about
-    an inch, or 2 cm: more accurate than the GPS position.
+    It makes sense to unify the output with OpenCPN's plan.
+    This leads to the following columns::
+
+        "Leg" -- sequence number of legs.
+        "To waypoint" -- Waypoint name from the GPX source
+        "Distance" -- Equirectangular distance to the waypoint.
+        "True Bearing" -- True-North Bearting
+        "Bearing" -- Magnetic bearing (with decliation.)
+        "Latitude" -- Waypoint latitude from the GPX source
+        "Longitude" -- Waypoint longitude from the GPX source
+        "ETE" -- Estimated Time Enroute in "d h m" duration format.
+        "ETA" -- Estimated time of arrival as "date hh:mm (summary)"
+        "Speed" -- Given speed for this leg (usually it's all one assumed speed.)
+        "Next tide event" -- usually empty
+        "Description" -- Waypoint description from the GPX source
+        "Course" -- Course to steer to the next waypoint
+
+    Note that we apply some rounding rules to some values before writing them
+    to a CSV file. The distances are rounded to :math:`10^{-1}` which is about 607'.
     The bearing is rounded to zero places.
 
-    :param sched_iter:  iterator over :py:class:`SchedulePoint` instances.
-        For example, the output from the :py:func:`gen_schedule` function.
     :param target: Open file (or file-like object) to which csv data will be
         written.
+    :param sched_iter:  iterator over :py:class:`SchedulePoint` instances.
+        For example, the output from the :py:func:`gen_schedule` function.
 
     """
-    rte_rhumb = csv.writer(target)
-    rte_rhumb.writerow(
-        [
-            "Name",
-            "Lat",
-            "Lon",
-            "Desc",
-            "Distance (nm)",
-            "True Bearing",
-            "Magnetic Bearing",
-            "Distance Run",
-            "Elapsed HH:MM",
-        ]
-    )
-    for sched in sched_iter:
-        lat, lon = sched.point.point.point.dm
+    headings = [
+        "Leg",
+        "Name",
+        "Lat",
+        "Lon",
+        "Desc",
+        "Distance (nm)",
+        "True Bearing",
+        "Magnetic Bearing",
+        "Distance Run",
+        "Elapsed HH:MM",
+        "ETA",
+        "Course",
+    ]
+    rte_rhumb = csv.DictWriter(target, headings)
+    rte_rhumb.writeheader()
+    cumulative_distance = 0.0
+    for leg, sched in enumerate(sched_iter):
+        lat, lon = sched.point.point.dm
+        cumulative_distance += sched.distance or 0
+        h, m = divmod(round(sched.enroute_min), 60) if sched.enroute_min else (0, 0)
+        enroute_hm = f"{h:02d}h {m:02d}m"
         rte_rhumb.writerow(
-            [
-                sched.point.point.name,
-                lat,
-                lon,
-                sched.point.point.description,
-                nround(sched.distance, 5),
-                (
+            {
+                "Leg": leg,
+                "Name": sched.point.name,
+                "Lat": lat,
+                "Lon": lon,
+                "Desc": sched.point.description,
+                "Distance (nm)": nround(sched.distance, 1),
+                "True Bearing": (
                     None
                     if sched.true_bearing is None
                     else nround(sched.true_bearing.deg, 0)
                 ),
-                (None if sched.magnetic is None else nround(sched.magnetic.deg, 0)),
-                nround(sched.cumulative_distance, 5),
-                sched.enroute_hm,
-            ]
+                "Magnetic Bearing": (
+                    None if sched.magnetic is None else nround(sched.magnetic.deg, 0)
+                ),
+                "Distance Run": nround(cumulative_distance, 1),
+                "Elapsed HH:MM": enroute_hm,
+                "Course": (
+                    None
+                    if sched.next_course is None
+                    else nround(sched.next_course.deg, 0)
+                ),
+                "ETA": f"{sched.arrival:%b %d %H:%M}",
+            }
         )
-
-
-Declination_Func = Callable[[navigation.LatLon, Optional[datetime.date]], float]
 
 
 def plan(
     route_path: Path,
     speed: float = 5.0,
-    date: Optional[datetime.date] = None,
+    departure: Optional[datetime.datetime] = None,
     variance: Optional[Declination_Func] = None,
 ) -> None:
     """
@@ -333,44 +336,49 @@ def plan(
 
     The date is used to compute variance, but not to compute ETA's.
 
-    A more sophisticated planner would allow for two kinds of plans.
-
-    -   A "forward" plan uses a departure time to compute a sequence of ETA's.
-
-    -   A "reverse" plan would use a desired arrival time and work backwords to
-        compute departures.
-
     :param route_filename: Source route, extracted into CSV format.
     :param speed: Assumed speed; default is 5.0kn.
     :param date: Assumed date for magnetic declination; default is today.
     :param variance: Declination function to use.  Default is :py:func:`navigation.declination`
     """
+
+    def planning_steps(
+        route: Iterable[Waypoint],
+        target: TextIO,
+        speed: float,
+        departure: datetime.datetime,
+        variance: Declination_Func,
+    ) -> None:
+        """
+        Given a source of waypoints, and a target Path,
+        generate a schedule and write the CSV output.
+        """
+        sched = gen_schedule(route, variance, departure, speed)
+        write_csv(target, sched)
+
     if variance is None:
         variance = navigation.declination
-
-    def schedule(
-        source: TextIO,
-        variance: Declination_Func,
-        date: Optional[datetime.date],
-        speed: float,
-    ) -> Iterator[SchedulePoint]:
-        sched = gen_schedule(gen_mag_bearing(gen_rhumb(route), variance, date), speed)
-        return sched
+    if departure is None:
+        departure = datetime.datetime.now()
 
     ext = route_path.suffix.lower()
     schedule_path = route_path.parent / (route_path.stem + " Schedule" + ".csv")
 
     with schedule_path.open("w", newline="") as target:
         if ext == ".csv":
-            with route_path.open() as source:
-                route = csv_to_Waypoint(source)
-                sched = schedule(source, variance, date, speed)
-                write_csv(sched, target)
+            with route_path.open() as source, schedule_path.open(
+                "w", newline=""
+            ) as target:
+                planning_steps(
+                    csv_to_Waypoint(source), target, speed, departure, variance
+                )
         elif ext == ".gpx":
-            with route_path.open() as source:
-                route = gpx_to_Waypoint(source)
-                sched = schedule(source, variance, date, speed)
-                write_csv(sched, target)
+            with route_path.open() as source, schedule_path.open(
+                "w", newline=""
+            ) as target:
+                planning_steps(
+                    gpx_to_Waypoint(source), target, speed, departure, variance
+                )
         else:
             raise ValueError("Can't process {0}".format(route_path))
 
@@ -385,11 +393,29 @@ def main(argv: list[str]) -> None:
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("-s", "--speed", action="store", type=float, default=5.0)
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-d", "--departure", action="store", default=None)
+    group.add_argument("-a", "--arrival", action="store", default=None)
     parser.add_argument("routes", nargs="*", type=Path)
     args = parser.parse_args(argv)
+    # TODO: Parse departure or arrival date to support ETA computations.
+    # Use parse_date from analysis.
+    if args.departure:
+        departure = datetime.datetime.strptime(args.departure, "%Y-%m-%dT%H:%M")
+    elif args.arrival:
+        arrival = datetime.datetime.strptime(
+            args.arrival, "%Y-%m-%dT:%H:%M"
+        )  # pragma: no cover
+    elif not args.arrival and not args.departure:
+        # Default is departure from now
+        departure = datetime.datetime.now()
+    else:
+        parser.error("Cannot have both arrival and departure")  # pragma: no cover
+        # Actually... maybe we can.
+        # Given departure and arrival deduce a speed that would make both work.
 
     for file in args.routes:
-        plan(file, speed=args.speed)
+        plan(file, speed=args.speed, departure=departure)
 
 
 if __name__ == "__main__":  # pragma: no cover

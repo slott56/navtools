@@ -233,3 +233,9 @@ def from20(digits: list[int], msb: int = 20, lsb: int = 5) -> float:
         l = l * lsb + d
     # print(f"{digits=} {m=} {msb ** 3=} {m / msb ** 3=} {l=} {l / lsb**5=}")
     return (m + l / lsb ** 5) / msb ** 3
+
+
+if __name__ == "__main__":  # pragma: no cover
+    import doctest
+
+    doctest.testmod()

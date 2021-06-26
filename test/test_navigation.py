@@ -260,9 +260,9 @@ def test_declination_equator():
 
 @fixture
 def mock_datetime(monkeypatch):
-    today = datetime.date(2015, 1, 1)
-    mock_date = Mock(today=Mock(return_value=today))
-    mock_datetime = Mock(date=mock_date)
+    mock_date = Mock(today=Mock(return_value=datetime.date(2015, 1, 1)))
+    mock_datetime_class = Mock(today=Mock(return_value=datetime.datetime(2015, 1, 1, 2, 3, 4)))
+    mock_datetime = Mock(date=mock_date, datetime=mock_datetime_class)
     monkeypatch.setattr(navtools.navigation, "datetime", mock_datetime)
     return mock_datetime
 
@@ -272,7 +272,7 @@ def test_declination_2(mock_datetime):
     Geomag_Case(date=2015.0, lat=0.0, lon=0.0, alt=0.0, coord='D', D_deg='-5d', D_min='26m')
     """
     d = declination(LatLon(lat=0.0, lon=0.0))
-    assert mock_datetime.mock_calls == [call.date.today()]
+    assert mock_datetime.mock_calls == [call.datetime.today()]
     assert d == approx(math.radians(-(5 + 26 / 60)), rel=0.1 / 60)
 
 

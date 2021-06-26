@@ -1,7 +1,7 @@
 ..  _igrf:
 
 #############################################################################
-:py:mod:`navtools.igrf` -- International Geomagnetic Reference Field
+:py:mod:`igrf` -- International Geomagnetic Reference Field
 #############################################################################
 
 This module computes the compass deviation (or variance)

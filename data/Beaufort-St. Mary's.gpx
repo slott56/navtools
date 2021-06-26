@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<gpx version="1.1" creator="OpenCPN" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" xmlns:opencpn="http://www.opencpn.org">
+  <rte>
+    <name>Beaufort-St. Mary's</name>
+    <extensions>
+      <opencpn:guid>1495b60f-e1c6-4edd-ba1a-b2037edadbbd</opencpn:guid>
+      <opencpn:viz>1</opencpn:viz>
+      <opencpn:start>Beaufort, NC</opencpn:start>
+      <opencpn:end>St. Mary's, GA</opencpn:end>
+      <opencpn:planned_speed>6.00</opencpn:planned_speed>
+      <opencpn:planned_departure>2021-05-26T08:47:26Z</opencpn:planned_departure>
+      <opencpn:time_display>PC</opencpn:time_display>
+      <opencpn:style width="2" />
+      <gpxx:RouteExtension>
+        <gpxx:IsAutoNamed>false</gpxx:IsAutoNamed>
+      </gpxx:RouteExtension>
+    </extensions>
+    <rtept lat="34.580163333" lon="-76.689278333">
+      <time>2021-05-26T08:44:37Z</time>
+      <name>Beaufort, NC</name>
+      <desc>Entrance to the fairway</desc>
+      <sym>diamond</sym>
+      <type>WPT</type>
+      <extensions>
+        <opencpn:guid>5290d801-46ab-4fa8-ab52-08ac333a90ba</opencpn:guid>
+        <opencpn:arrival_radius>0.050</opencpn:arrival_radius>
+        <opencpn:waypoint_range_rings visible="false" number="0" step="1" units="0" colour="#FF0000" />
+        <opencpn:scale_min_max UseScale="false" ScaleMin="2147483646" ScaleMax="0" />
+      </extensions>
+    </rtept>
+    <rtept lat="33.428115000" lon="-77.545036667">
+      <time>2021-05-26T08:45:39Z</time>
+      <name>Cape Fear</name>
+      <desc>Outside Frying Pan Shoals</desc>
+      <sym>diamond</sym>
+      <type>WPT</type>
+      <extensions>
+        <opencpn:guid>5e5e9d7a-2b6a-4ff7-9498-22e105918647</opencpn:guid>
+        <opencpn:arrival_radius>0.050</opencpn:arrival_radius>
+        <opencpn:waypoint_range_rings visible="false" number="0" step="1" units="0" colour="#FF0000" />
+        <opencpn:scale_min_max UseScale="false" ScaleMin="2147483646" ScaleMax="0" />
+      </extensions>
+    </rtept>
+    <rtept lat="32.997228333" lon="-78.890048333">
+      <time>2021-05-26T08:47:04Z</time>
+      <name>Georgetown</name>
+      <desc>Outside Winyah Inlet</desc>
+      <sym>diamond</sym>
+      <type>WPT</type>
+      <extensions>
+        <opencpn:guid>17148da0-8cbc-4271-9c59-23325f76a063</opencpn:guid>
+        <opencpn:arrival_radius>0.050</opencpn:arrival_radius>
+        <opencpn:waypoint_range_rings visible="false" number="0" step="1" units="0" colour="#FF0000" />
+        <opencpn:scale_min_max UseScale="false" ScaleMin="2147483646" ScaleMax="0" />
+      </extensions>
+    </rtept>
+    <rtept lat="32.620498333" lon="-79.575895000">
+      <time>2021-05-26T08:47:16Z</time>
+      <name>Charleston</name>
+      <desc>Outside fairway</desc>
+      <sym>diamond</sym>
+      <type>WPT</type>
+      <extensions>
+        <opencpn:guid>1136c793-46d1-49dd-b9aa-5d945df6007c</opencpn:guid>
+        <opencpn:arrival_radius>0.050</opencpn:arrival_radius>
+        <opencpn:waypoint_range_rings visible="false" number="0" step="1" units="0" colour="#FF0000" />
+        <opencpn:scale_min_max UseScale="false" ScaleMin="2147483646" ScaleMax="0" />
+      </extensions>
+    </rtept>
+    <rtept lat="32.049620000" lon="-80.543380000">
+      <time>2021-05-26T08:56:45Z</time>
+      <name>Beaufort, SC</name>
+      <desc>Entrance to Port Royal Sound</desc>
+      <sym>diamond</sym>
+      <type>WPT</type>
+      <extensions>
+        <opencpn:guid>6ea34eb5-4709-4487-b1c7-1ff3591a2029</opencpn:guid>
+        <opencpn:arrival_radius>0.050</opencpn:arrival_radius>
+        <opencpn:waypoint_range_rings visible="false" number="0" step="1" units="0" colour="#FF0000" />
+        <opencpn:scale_min_max UseScale="false" ScaleMin="2147483646" ScaleMax="0" />
+      </extensions>
+    </rtept>
+    <rtept lat="30.999478333" lon="-81.113385000">
+      <time>2021-05-26T08:58:40Z</time>
+      <name>Brunswick</name>
+      <desc>St. Simon’s Sound</desc>
+      <sym>diamond</sym>
+      <type>WPT</type>
+      <extensions>
+        <opencpn:guid>5c3638db-d79d-47ec-86c2-32d530209077</opencpn:guid>
+        <opencpn:arrival_radius>0.050</opencpn:arrival_radius>
+        <opencpn:waypoint_range_rings visible="false" number="0" step="1" units="0" colour="#FF0000" />
+        <opencpn:scale_min_max UseScale="false" ScaleMin="2147483646" ScaleMax="0" />
+      </extensions>
+    </rtept>
+    <rtept lat="30.711715000" lon="-81.318343333">
+      <time>2021-05-26T08:59:38Z</time>
+      <name>St. Mary's</name>
+      <desc>Inside traffic separation</desc>
+      <sym>diamond</sym>
+      <type>WPT</type>
+      <extensions>
+        <opencpn:guid>00d34ad4-5fab-4662-8ff4-319c03f1414f</opencpn:guid>
+        <opencpn:arrival_radius>0.050</opencpn:arrival_radius>
+        <opencpn:waypoint_range_rings visible="false" number="0" step="1" units="0" colour="#FF0000" />
+        <opencpn:scale_min_max UseScale="false" ScaleMin="2147483646" ScaleMax="0" />
+      </extensions>
+    </rtept>
+  </rte>
+</gpx>
