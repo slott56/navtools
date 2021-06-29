@@ -108,7 +108,7 @@ class OLC(Geocode):
         the end of the leading 8 characters.
 
         1.  ``AOAOAOAO``: no plus. Assume "+00" suffix to fill up to a 10-digit MSB-only form.
-        2.  ``AOAOAOAO+AO``: the expected 10-digit MSB-only form
+        2.  ``AOAOAOAO+AO``: the expected 10-digit MSB-only form.
         3.  ``AOAOAOAO+AOVWYXZ``:  after the 10-digits, an LSB suffix of 1 to 5 additional digits.
         4.  ``AOAO0000`` zeros used as place-holders to fill out the MSB section.
         5.  ``AOAO+`` leading positions can be assumed based on other context.
@@ -118,13 +118,12 @@ class OLC(Geocode):
         These are -- in effect -- wild-card matching values. We can replace them with "2" which
         is not as obviously a wild-card.
 
-        The reference implementation provides a bounding box; not a single point.
-
-        This needs to locate the center of the box to parallel the reference implementation.
-        Four test cases do not pass with this implementation.
+        The reference implementation decodes an OLC to define a bounding box; not a single point.
+        We don't implement this completely. Four test cases do not pass with this implementation.
 
         :param olc: OLC string
         :param size: not used, but can truncate long over-specified strings
+            Can also be used to define the size of the bounding box in the LSB suffix.
         :return: lat, lon pair
         """
         # Expand to a single, uniform string (without punctuation or special cases.)
@@ -143,7 +142,7 @@ class OLC(Geocode):
         )
         lsb_expanded += "2" * (10 - len(lsb_expanded))
         full = msb + lsb_expanded
-        # Convert from base-20 and base-5/base-4 to float.
+        # Convert from base-20 to float.
         # TODO: Honor the size parameter by chopping the values.
         nlat = from20(list(self.code.index(c) for c in full[0::2]), lsb=5)
         elon = from20(list(self.code.index(c) for c in full[1::2]), lsb=4)

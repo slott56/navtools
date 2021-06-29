@@ -21,6 +21,20 @@ This document has a few tiny gaps.
 See the official Test Cases:
 https://github.com/google/open-location-code/blob/main/test_data
 
+To compare proximate waypoints, we can translate Lat/Lon to OLC (Open Location Code.)
+OLC comparisons provide a very handy proximity test.
+
+..  csv-table::
+
+    Code length,Precision in degrees,Precision
+    2,20,2226 km
+    4,1,"111.321 km, 60 nmi"
+    6,1/20,"5566 meters, 3 nmi"
+    8,1/400,"278 meters, .15 nmi"
+    10,1/8000,"13.9 meters, 45 feet"
+
+Further geocode details can narrow the space to spaces 2.8 x 3.5 meters (or even smaller.)
+
 Encoding
 =============
 
@@ -46,6 +60,11 @@ The encoding algorithm has the following outline:
 This is a rectangle, not a point. That means there's an implied box around the given point.
 This concept of describing a box with a size implied by the number of digits informs
 decoding.
+
+Decoding
+========
+
+TBD.
 
 Implementation
 ==============

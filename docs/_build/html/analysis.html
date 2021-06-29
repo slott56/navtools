@@ -110,10 +110,10 @@ fields are populated unless OpenCPN (or iNavX) gets an instrument feed.</p>
 identical with the tracks created directly by iNavX.</p>
 <section id="date-parsing">
 <h3>Date parsing<a class="headerlink" href="#date-parsing" title="Permalink to this headline">¶</a></h3>
-<dl class="py function">
-<dt class="sig sig-object py" id="navtools.analysis.parse_date">
-<span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">parse_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">datetime.datetime</span><a class="headerlink" href="#navtools.analysis.parse_date" title="Permalink to this definition">¶</a></dt>
-<dd><p>March through all of the known date formats until we find one that works.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="navtools.analysis.DateParser">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">DateParser</span></span><a class="headerlink" href="#navtools.analysis.DateParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parses input dates in a variety of formats.</p>
 <p>For more complex situations (i.e., multi-day voyages with partial
 date-time stamps in the log) this function isn’t quite appropriate.
 This assumes a single date field is sufficient to fill in all attributes of a date.
@@ -123,6 +123,44 @@ indicator of date change. Or, we might have some notation like “d1, d2” or �
 <p class="admonition-title">Todo</p>
 <p>Refactor to merge with <code class="xref py py-func docutils literal notranslate"><span class="pre">opencpn_table.parse_datetime()</span></code></p>
 </div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.analysis.DateParser.default_date_formats">
+<span class="sig-name descname"><span class="pre">default_date_formats</span></span><em class="property"> <span class="pre">=</span> <span class="pre">['%H%M',</span> <span class="pre">'%H:%M',</span> <span class="pre">'%I:%M</span> <span class="pre">%p']</span></em><a class="headerlink" href="#navtools.analysis.DateParser.default_date_formats" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.analysis.DateParser.default_year_formats">
+<span class="sig-name descname"><span class="pre">default_year_formats</span></span><em class="property"> <span class="pre">=</span> <span class="pre">['%m/%d</span> <span class="pre">%H%M',</span> <span class="pre">'%m/%d</span> <span class="pre">%H:%M',</span> <span class="pre">'%m/%d</span> <span class="pre">%I:%M</span> <span class="pre">%p',</span> <span class="pre">'%b</span> <span class="pre">%d</span> <span class="pre">%H%M',</span> <span class="pre">'%b</span> <span class="pre">%d</span> <span class="pre">%H:%M',</span> <span class="pre">'%b</span> <span class="pre">%d</span> <span class="pre">%I:%M</span> <span class="pre">%p',</span> <span class="pre">'%d</span> <span class="pre">%b</span> <span class="pre">%H%M',</span> <span class="pre">'%d</span> <span class="pre">%b</span> <span class="pre">%H:%M',</span> <span class="pre">'%d</span> <span class="pre">%b</span> <span class="pre">%I:%M</span> <span class="pre">%p',</span> <span class="pre">'%b-%d</span> <span class="pre">%H%M',</span> <span class="pre">'%b-%d</span> <span class="pre">%H:%M',</span> <span class="pre">'%b-%d</span> <span class="pre">%I:%M</span> <span class="pre">%p',</span> <span class="pre">'%d-%b</span> <span class="pre">%H%M',</span> <span class="pre">'%d-%b</span> <span class="pre">%H:%M',</span> <span class="pre">'%d-%b</span> <span class="pre">%I:%M</span> <span class="pre">%p',</span> <span class="pre">'%B</span> <span class="pre">%d</span> <span class="pre">%H%M',</span> <span class="pre">'%B</span> <span class="pre">%d</span> <span class="pre">%H:%M',</span> <span class="pre">'%B</span> <span class="pre">%d</span> <span class="pre">%I:%M</span> <span class="pre">%p']</span></em><a class="headerlink" href="#navtools.analysis.DateParser.default_year_formats" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.analysis.DateParser.full_formats">
+<span class="sig-name descname"><span class="pre">full_formats</span></span><em class="property"> <span class="pre">=</span> <span class="pre">['%m/%d/%Y</span> <span class="pre">%H%M',</span> <span class="pre">'%m/%d/%Y</span> <span class="pre">%H:%M',</span> <span class="pre">'%m/%d/%Y</span> <span class="pre">%I:%M</span> <span class="pre">%p',</span> <span class="pre">'%m/%d/%y</span> <span class="pre">%H%M',</span> <span class="pre">'%m/%d/%y</span> <span class="pre">%H:%M',</span> <span class="pre">'%m/%d/%y</span> <span class="pre">%I:%M</span> <span class="pre">%p',</span> <span class="pre">'%Y-%m-%d</span> <span class="pre">%H%M',</span> <span class="pre">'%Y-%m-%d</span> <span class="pre">%H:%M',</span> <span class="pre">'%Y-%m-%d</span> <span class="pre">%I:%M</span> <span class="pre">%p',</span> <span class="pre">'%y-%m-%d</span> <span class="pre">%H%M',</span> <span class="pre">'%y-%m-%d</span> <span class="pre">%H:%M',</span> <span class="pre">'%y-%m-%d</span> <span class="pre">%I:%M</span> <span class="pre">%p',</span> <span class="pre">'%m-%d-%Y</span> <span class="pre">%H%M',</span> <span class="pre">'%m-%d-%Y</span> <span class="pre">%H:%M',</span> <span class="pre">'%m-%d-%Y</span> <span class="pre">%I:%M</span> <span class="pre">%p',</span> <span class="pre">'%m-%d-%y</span> <span class="pre">%H%M',</span> <span class="pre">'%m-%d-%y</span> <span class="pre">%H:%M',</span> <span class="pre">'%m-%d-%y</span> <span class="pre">%I:%M</span> <span class="pre">%p']</span></em><a class="headerlink" href="#navtools.analysis.DateParser.full_formats" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.analysis.DateParser.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">datetime.datetime</span><a class="headerlink" href="#navtools.analysis.DateParser.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>March through all of the known date formats until we find one that works.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>date</strong> – string in some known format</p></li>
+<li><p><strong>default</strong> – default date to use when only a time is given.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>datetime</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="navtools.analysis.parse_date">
+<span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">parse_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">datetime.datetime</span><a class="headerlink" href="#navtools.analysis.parse_date" title="Permalink to this definition">¶</a></dt>
+<dd><p>March through all of the known date formats until we find one that works.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

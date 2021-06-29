@@ -13,6 +13,7 @@
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="navigation – Navigation Calculations" href="navigation.html" />
@@ -256,51 +257,345 @@ information.</p></li>
 <span id="merge-computations"></span><h2>Processing<a class="headerlink" href="#processing" title="Permalink to this headline">¶</a></h2>
 <p>This is part of a four-step use case.</p>
 <ol class="arabic simple">
-<li><p>Dump charplotter-unique waypoints. These are not on the computer, which is the
+<li><p>Dump charplotter-unique waypoints. These are not on the computer, which should be the
 single source of truth.</p></li>
 <li><p>Merge the waypoints, loading OpenCPN. Make manual edits and updates to cleanup and simplify.
 Locate “to-be deleted” waypoints. These are duplicates (or near duplicates) that need to
 be merged and reconciled. Removing a waypoint can break routes, so route editing is part of
-this.</p></li>
+this. There several cases:</p>
+<ul class="simple">
+<li><p>Same name, new location. These are updates to OpenCPN to move an existing waypoint
+to a new location. It’s not clear how this should be done, but GUID matching should
+make this work.</p></li>
+<li><p>Different names, proximate locations. The waypoint was renamed or is a duplicate.</p></li>
+<li><p>New name, unique location. These are simply added.</p></li>
+</ul>
+</li>
 <li><p>Dump chartplotter-unique routes (if any.) These are not on the computer, which is the
 single source of truth.</p></li>
 <li><p>Merge the routes into OpenCPN. Make any manual edits.</p></li>
 </ol>
-<section id="adjacency">
-<h3>Adjacency<a class="headerlink" href="#adjacency" title="Permalink to this headline">¶</a></h3>
-<p>While we can use loxodromic distance, this is a lot of computation.</p>
-<p>Instead we use OLC. Using truncated OLC permits flexible adjacency via simple string-based processing.
-Less math.</p>
-<p>See <a class="reference external" href="https://en.m.wikipedia.org/wiki/Open_Location_Code">https://en.m.wikipedia.org/wiki/Open_Location_Code</a></p>
+<p>We’re focused on step 2, and the various comparisons between waypoints to determine
+what merge should be done.
+Step 2 decomposes into three phases:</p>
+<ul class="simple">
+<li><p>Survey of differences. This is an text (or HTML) file with a comparison using
+all of rules.</p></li>
+<li><p>Preparation of modifications; this is a GPX file that can be used to load OpenCPN.
+Some manual changes may be needed before these waypoints can be used.</p></li>
+<li><p>Preparation of adds; this is a GPX file that is simply loaded into OpenCPN,
+since the waypoints are all new.</p></li>
+</ul>
+<section id="comparisons">
+<h3>Comparisons<a class="headerlink" href="#comparisons" title="Permalink to this headline">¶</a></h3>
+<p>We have a number of comparison rules among waypoints. We can meaningfully compare waypoints
+on any of the following attributes:</p>
+<ul>
+<li><p>“name” – While names change, they also reflect old technology limitations.
+So, some names are sometimes rewritten on a new device. There’s no near-miss
+matching here because “CHPTNK6” may have become “Choptank Entrance 6” with
+few overlapping letters.</p></li>
+<li><p>“guid” – These should be immutable, but it’s not clear if it’s preserved in
+tranfers between devices.</p></li>
+<li><p>“distance” – this is the waypoint-to-waypoint distance computation. This is
+the equirectangular distance. While accurate it’s also computationally intensive.</p></li>
+<li><p>“geocode” – this is the faster geocode-based proximity test. Intead of
+computing <span class="math notranslate nohighlight">\(m \times n\)</span> distances, we can compute <span class="math notranslate nohighlight">\(m + n\)</span> geocodes,
+and use string comparison for a simple proximity check.
+The loxodromic or equirectangular distance involves a lot of computation.
+Using truncated OLC permits flexible adjacency via simple string-based processing.
+Less math. See <a class="reference external" href="https://en.m.wikipedia.org/wiki/Open_Location_Code">https://en.m.wikipedia.org/wiki/Open_Location_Code</a></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>positions</p></td>
+<td><p>degrees</p></td>
+<td><p>distances</p></td>
+</tr>
+<tr class="row-even"><td><p>6</p></td>
+<td><p>1/20</p></td>
+<td><p>5566 meters, 3 nmi</p></td>
+</tr>
+<tr class="row-odd"><td><p>8</p></td>
+<td><p>1/400</p></td>
+<td><p>278 meters, .15 nmi</p></td>
+</tr>
+<tr class="row-even"><td><p>10</p></td>
+<td><p>1/8000</p></td>
+<td><p>13.9 meters, 45 feet</p></td>
+</tr>
+</tbody>
+</table>
+</li>
+</ul>
+<p>This leads to a four comparison outcomes.</p>
+<ul class="simple">
+<li><p><strong>Same Name – Different Locations</strong>.
+This means a waypoint was moved. It can also mean two waypoints were created near
+each other with coincidentally identical names. This is a GPX file of waypoints
+which must be modified in OpenCPN.</p></li>
+<li><p><strong>Different Names – Proximate Locations</strong>.
+These are likely simple duplicates; one of the two must be removed,
+and the other used for all routes. Depending on the use within OpenCPN routes,
+this may be a complex change to modify reoutes to replace a waypoint.</p></li>
+<li><p><strong>Completely Different</strong>.
+In this case, Chartplotter points need to be added to the OpenCPN computer points.
+This should be visible as a GPX file of waypoints to add.</p></li>
+<li><p><strong>The Same</strong>.
+These are simple duplicates that can be ignored.</p></li>
+</ul>
 </section>
 <section id="classes-and-functions">
 <h3>Classes and Functions<a class="headerlink" href="#classes-and-functions" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="navtools.waypoint_merge.History">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.waypoint_merge.</span></span><span class="sig-name descname"><span class="pre">History</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wp</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#navtools.waypoint_merge.Waypoint_Plot" title="navtools.waypoint_merge.Waypoint_Plot"><span class="pre">navtools.waypoint_merge.Waypoint_Plot</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">matched</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.waypoint_merge.Waypoint_Plot" title="navtools.waypoint_merge.Waypoint_Plot"><span class="pre">navtools.waypoint_merge.Waypoint_Plot</span></a><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.waypoint_merge.History" title="Permalink to this definition">¶</a></dt>
-<dd><p>The state of the matching operation.
-This allows us to track waypoints that have matches.</p>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.waypoint_merge.</span></span><span class="sig-name descname"><span class="pre">History</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">wp:</span> <span class="pre">navtools.waypoint_merge.Waypoint_Plot</span></em>, <em class="sig-param"><span class="pre">matches:</span> <span class="pre">DefaultDict[str</span></em>, <em class="sig-param"><span class="pre">list]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.waypoint_merge.History" title="Permalink to this definition">¶</a></dt>
+<dd><p>The state of the matching operation.</p>
+<p>Each History reflects a waypoint and the matches against other
+waypoints from the same source, or waypoints from a different source.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="navtools.waypoint_merge.History.wp">
 <span class="sig-name descname"><span class="pre">wp</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="#navtools.waypoint_merge.Waypoint_Plot" title="navtools.waypoint_merge.Waypoint_Plot"><span class="pre">navtools.waypoint_merge.Waypoint_Plot</span></a></em><a class="headerlink" href="#navtools.waypoint_merge.History.wp" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="navtools.waypoint_merge.History.matched">
-<span class="sig-name descname"><span class="pre">matched</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.waypoint_merge.Waypoint_Plot" title="navtools.waypoint_merge.Waypoint_Plot"><span class="pre">navtools.waypoint_merge.Waypoint_Plot</span></a><span class="p"><span class="pre">]</span></span></em><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#navtools.waypoint_merge.History.matched" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="navtools.waypoint_merge.History.matches">
+<span class="sig-name descname"><span class="pre">matches</span></span><em class="property"><span class="pre">:</span> <span class="pre">DefaultDict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.waypoint_merge.History.matches" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.History.all_matches">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">all_matches</span></span><em class="property"><span class="pre">:</span> <span class="pre">list</span></em><a class="headerlink" href="#navtools.waypoint_merge.History.all_matches" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.List_Compare">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.waypoint_merge.</span></span><span class="sig-name descname"><span class="pre">List_Compare</span></span><a class="headerlink" href="#navtools.waypoint_merge.List_Compare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a comparison function, updates two collections of <a class="reference internal" href="#navtools.waypoint_merge.History" title="navtools.waypoint_merge.History"><code class="xref py py-class docutils literal notranslate"><span class="pre">History</span></code></a> objects,
+to reflect matches between the waypoints.</p>
+<p>This does a brute-force <span class="math notranslate nohighlight">\(m \times n\)</span> comparison
+of all items in both lists. It applies the <code class="xref py py-func docutils literal notranslate"><span class="pre">comparison()</span></code>
+function to all elements to locate
+matches.</p>
+<p>The remaining items are exclusive to list 1 or list 2,
+representing the unmatched items.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.List_Compare.rule_name">
+<span class="sig-name descname"><span class="pre">rule_name</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'Invalid'</span></em><a class="headerlink" href="#navtools.waypoint_merge.List_Compare.rule_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.List_Compare.rule">
+<span class="sig-name descname"><span class="pre">rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wp_1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#navtools.waypoint_merge.Waypoint_Plot" title="navtools.waypoint_merge.Waypoint_Plot"><span class="pre">navtools.waypoint_merge.Waypoint_Plot</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">wp_2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#navtools.waypoint_merge.Waypoint_Plot" title="navtools.waypoint_merge.Waypoint_Plot"><span class="pre">navtools.waypoint_merge.Waypoint_Plot</span></a></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#navtools.waypoint_merge.List_Compare.rule" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.List_Compare.compare">
+<span class="sig-name descname"><span class="pre">compare</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wp_1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wp_2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#navtools.waypoint_merge.List_Compare.compare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies the rule to the History to accumulate all matches.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByName">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.waypoint_merge.</span></span><span class="sig-name descname"><span class="pre">CompareByName</span></span><a class="headerlink" href="#navtools.waypoint_merge.CompareByName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compares names simply.  Levenshtein distance might be helpful.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByName.rule_name">
+<span class="sig-name descname"><span class="pre">rule_name</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'ByName'</span></em><a class="headerlink" href="#navtools.waypoint_merge.CompareByName.rule_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByName.rule">
+<span class="sig-name descname"><span class="pre">rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pt1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#navtools.waypoint_merge.Waypoint_Plot" title="navtools.waypoint_merge.Waypoint_Plot"><span class="pre">navtools.waypoint_merge.Waypoint_Plot</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pt2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#navtools.waypoint_merge.Waypoint_Plot" title="navtools.waypoint_merge.Waypoint_Plot"><span class="pre">navtools.waypoint_merge.Waypoint_Plot</span></a></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#navtools.waypoint_merge.CompareByName.rule" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByName.history_1">
+<span class="sig-name descname"><span class="pre">history_1</span></span><em class="property"><span class="pre">:</span> <span class="pre">list</span></em><a class="headerlink" href="#navtools.waypoint_merge.CompareByName.history_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByName.history_2">
+<span class="sig-name descname"><span class="pre">history_2</span></span><em class="property"><span class="pre">:</span> <span class="pre">list</span></em><a class="headerlink" href="#navtools.waypoint_merge.CompareByName.history_2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByGUID">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.waypoint_merge.</span></span><span class="sig-name descname"><span class="pre">CompareByGUID</span></span><a class="headerlink" href="#navtools.waypoint_merge.CompareByGUID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compares GUID’s. Assumes collection 1 is OpenCPN.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByGUID.rule_name">
+<span class="sig-name descname"><span class="pre">rule_name</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'ByGUID'</span></em><a class="headerlink" href="#navtools.waypoint_merge.CompareByGUID.rule_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByGUID.rule">
+<span class="sig-name descname"><span class="pre">rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pt1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#navtools.waypoint_merge.Waypoint_Plot" title="navtools.waypoint_merge.Waypoint_Plot"><span class="pre">navtools.waypoint_merge.Waypoint_Plot</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pt2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#navtools.waypoint_merge.Waypoint_Plot" title="navtools.waypoint_merge.Waypoint_Plot"><span class="pre">navtools.waypoint_merge.Waypoint_Plot</span></a></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#navtools.waypoint_merge.CompareByGUID.rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assumes pt1 is OpenCPN and pt2 is from the chartplotter.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByGUID.history_1">
+<span class="sig-name descname"><span class="pre">history_1</span></span><em class="property"><span class="pre">:</span> <span class="pre">list</span></em><a class="headerlink" href="#navtools.waypoint_merge.CompareByGUID.history_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByGUID.history_2">
+<span class="sig-name descname"><span class="pre">history_2</span></span><em class="property"><span class="pre">:</span> <span class="pre">list</span></em><a class="headerlink" href="#navtools.waypoint_merge.CompareByGUID.history_2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByDistance">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.waypoint_merge.</span></span><span class="sig-name descname"><span class="pre">CompareByDistance</span></span><a class="headerlink" href="#navtools.waypoint_merge.CompareByDistance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses <code class="xref py py-class docutils literal notranslate"><span class="pre">Waypoint</span></code> definition of <code class="xref py py-meth docutils literal notranslate"><span class="pre">near()</span></code>.
+Has a hard-coded distance threshold of ±0.05 nmi.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByDistance.rule_name">
+<span class="sig-name descname"><span class="pre">rule_name</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'ByDist'</span></em><a class="headerlink" href="#navtools.waypoint_merge.CompareByDistance.rule_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByDistance.rule">
+<span class="sig-name descname"><span class="pre">rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pt1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#navtools.waypoint_merge.Waypoint_Plot" title="navtools.waypoint_merge.Waypoint_Plot"><span class="pre">navtools.waypoint_merge.Waypoint_Plot</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pt2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#navtools.waypoint_merge.Waypoint_Plot" title="navtools.waypoint_merge.Waypoint_Plot"><span class="pre">navtools.waypoint_merge.Waypoint_Plot</span></a></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#navtools.waypoint_merge.CompareByDistance.rule" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByDistance.history_1">
+<span class="sig-name descname"><span class="pre">history_1</span></span><em class="property"><span class="pre">:</span> <span class="pre">list</span></em><a class="headerlink" href="#navtools.waypoint_merge.CompareByDistance.history_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByDistance.history_2">
+<span class="sig-name descname"><span class="pre">history_2</span></span><em class="property"><span class="pre">:</span> <span class="pre">list</span></em><a class="headerlink" href="#navtools.waypoint_merge.CompareByDistance.history_2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByGeocode">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.waypoint_merge.</span></span><span class="sig-name descname"><span class="pre">CompareByGeocode</span></span><a class="headerlink" href="#navtools.waypoint_merge.CompareByGeocode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses OLC matching to a given number of positions.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>positions</p></td>
+<td><p>degrees</p></td>
+<td><p>distance</p></td>
+</tr>
+<tr class="row-even"><td><p>8</p></td>
+<td><p>1/400</p></td>
+<td><p>278 meters, .15 nmi</p></td>
+</tr>
+<tr class="row-odd"><td><p>10</p></td>
+<td><p>1/8000</p></td>
+<td><p>13.9 meters, 45 feet</p></td>
+</tr>
+</tbody>
+</table>
+<p>default size is 8.</p>
+<p>Usaage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">c</span> <span class="o">=</span> <span class="n">CompareByGeocode</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="mi">8</span><span class="p">)()</span>
+<span class="n">c</span><span class="o">.</span><span class="n">compare</span><span class="p">(</span><span class="n">l1</span><span class="p">,</span> <span class="n">l2</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByGeocode.rule_name">
+<span class="sig-name descname"><span class="pre">rule_name</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'ByCode'</span></em><a class="headerlink" href="#navtools.waypoint_merge.CompareByGeocode.rule_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByGeocode.size">
+<span class="sig-name descname"><span class="pre">size</span></span><em class="property"> <span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#navtools.waypoint_merge.CompareByGeocode.size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByGeocode.rule">
+<span class="sig-name descname"><span class="pre">rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pt1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#navtools.waypoint_merge.Waypoint_Plot" title="navtools.waypoint_merge.Waypoint_Plot"><span class="pre">navtools.waypoint_merge.Waypoint_Plot</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pt2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#navtools.waypoint_merge.Waypoint_Plot" title="navtools.waypoint_merge.Waypoint_Plot"><span class="pre">navtools.waypoint_merge.Waypoint_Plot</span></a></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#navtools.waypoint_merge.CompareByGeocode.rule" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByGeocode.range">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.waypoint_merge.CompareByGeocode" title="navtools.waypoint_merge.CompareByGeocode"><span class="pre">navtools.waypoint_merge.CompareByGeocode</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.waypoint_merge.CompareByGeocode.range" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByGeocode.history_1">
+<span class="sig-name descname"><span class="pre">history_1</span></span><em class="property"><span class="pre">:</span> <span class="pre">list</span></em><a class="headerlink" href="#navtools.waypoint_merge.CompareByGeocode.history_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.CompareByGeocode.history_2">
+<span class="sig-name descname"><span class="pre">history_2</span></span><em class="property"><span class="pre">:</span> <span class="pre">list</span></em><a class="headerlink" href="#navtools.waypoint_merge.CompareByGeocode.history_2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.duplicates">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.waypoint_merge.</span></span><span class="sig-name descname"><span class="pre">duplicates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wp_list</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.waypoint_merge.duplicates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Report on duplicates. Also, returns a reduced list of waypoints with
+duplicates removed.</p>
+<p>Given a collection of duplicates, we use the we use the last_updated
+time to locate the newest copy and keep that.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>wp_list</strong> – list[Waypoint_Plot], usually from a derived list in a chartplotter</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list[Waypoint_Plot] with duplicates removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.survey">
+<span class="sig-prename descclassname"><span class="pre">navtools.waypoint_merge.</span></span><span class="sig-name descname"><span class="pre">survey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wp_1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wp_2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#navtools.waypoint_merge.survey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Report on the comparison of two waypoint lists.
+This is a human-readable DIFF-like report, it uses
+all of the comparison algorithms to locate candidate duplicates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wp_1</strong> – Waypoints, usually from the master list in OpenCPN</p></li>
+<li><p><strong>wp_2</strong> – Waypoints, usually from a derived list in a chartplotter</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+</section>
+<section id="output-writing">
+<span id="merge-output"></span><h2>Output Writing<a class="headerlink" href="#output-writing" title="Permalink to this headline">¶</a></h2>
+<p>We translae the two sequences of history information into a single
+stream of <a class="reference internal" href="#navtools.waypoint_merge.WP_Match" title="navtools.waypoint_merge.WP_Match"><code class="xref py py-class docutils literal notranslate"><span class="pre">WP_Match</span></code></a> instances. We can then summarize these.</p>
+<p>We use Jinja2 to write an XML-format file with the
+waypoints that need to be updated in OpenCPN.</p>
+<dl class="py class">
 <dt class="sig sig-object py" id="navtools.waypoint_merge.WP_Match">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.waypoint_merge.</span></span><span class="sig-name descname"><span class="pre">WP_Match</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wp_1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.waypoint_merge.Waypoint_Plot" title="navtools.waypoint_merge.Waypoint_Plot"><span class="pre">navtools.waypoint_merge.Waypoint_Plot</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wp_2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.waypoint_merge.Waypoint_Plot" title="navtools.waypoint_merge.Waypoint_Plot"><span class="pre">navtools.waypoint_merge.Waypoint_Plot</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.waypoint_merge.WP_Match" title="Permalink to this definition">¶</a></dt>
-<dd><p>The match result.
+<dd><p>The final match result.
 There are three states.</p>
 <ul class="simple">
-<li><p>Both – they passed a comparison test</p></li>
-<li><p>1 – From the first source (usually the computer) with no match</p></li>
-<li><p>2 – From the second source (usually the chart plotter) with no match</p></li>
+<li><p>Both – they passed the given comparison test, and appear to be the same</p></li>
+<li><p>1 only – From the first source (usually the computer) with no match</p></li>
+<li><p>2 only – From the second source (usually the chart plotter) with no match</p></li>
 </ul>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="navtools.waypoint_merge.WP_Match.wp_1">
@@ -313,6 +608,21 @@ There are three states.</p>
 <span class="sig-name descname"><span class="pre">wp_2</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.waypoint_merge.Waypoint_Plot" title="navtools.waypoint_merge.Waypoint_Plot"><span class="pre">navtools.waypoint_merge.Waypoint_Plot</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#navtools.waypoint_merge.WP_Match.wp_2" title="Permalink to this definition">¶</a></dt>
 <dd><p>Alias for field number 1</p>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.WP_Match.both">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">both</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#navtools.waypoint_merge.WP_Match.both" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.WP_Match.first">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">first</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#navtools.waypoint_merge.WP_Match.first" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.WP_Match.second">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">second</span></span><em class="property"><span class="pre">:</span> <span class="pre">bool</span></em><a class="headerlink" href="#navtools.waypoint_merge.WP_Match.second" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="navtools.waypoint_merge.WP_Match._asdict">
@@ -347,21 +657,16 @@ There are three states.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="navtools.waypoint_merge.match_gen">
 <span class="sig-prename descclassname"><span class="pre">navtools.waypoint_merge.</span></span><span class="sig-name descname"><span class="pre">match_gen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">history_1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">history_2</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.waypoint_merge.WP_Match" title="navtools.waypoint_merge.WP_Match"><span class="pre">navtools.waypoint_merge.WP_Match</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.waypoint_merge.match_gen" title="Permalink to this definition">¶</a></dt>
-<dd><p>Summarize a pair of match histories as a single sequence of matches.
-There are three subtypes of matches.</p>
+<dd><p>Merge two sequences of <a class="reference internal" href="#navtools.waypoint_merge.History" title="navtools.waypoint_merge.History"><code class="xref py py-class docutils literal notranslate"><span class="pre">History</span></code></a> instances into single sequence of <a class="reference internal" href="#navtools.waypoint_merge.WP_Match" title="navtools.waypoint_merge.WP_Match"><code class="xref py py-class docutils literal notranslate"><span class="pre">WP_Match</span></code></a>
+instances.</p>
+<p>There are three subtypes of matches in the final sequence:</p>
 <ul class="simple">
 <li><p>Something was the same.</p></li>
-<li><p>Only in the first history list.</p></li>
-<li><p>Only in the second history list.</p></li>
+<li><p>Only in the first history list (usually the computer) with no match.</p></li>
+<li><p>Only in the second history list (usually the chart plotter) with no match.</p></li>
 </ul>
 </dd></dl>
 
-</section>
-</section>
-<section id="output-writing">
-<span id="merge-output"></span><h2>Output Writing<a class="headerlink" href="#output-writing" title="Permalink to this headline">¶</a></h2>
-<p>We use Jinja2 to write an XML-format file with the
-waypoints that need to be updated in OpenCPN.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="navtools.waypoint_merge.waypoint_to_GPX">
 <span class="sig-prename descclassname"><span class="pre">navtools.waypoint_merge.</span></span><span class="sig-name descname"><span class="pre">waypoint_to_GPX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.waypoint_merge.Waypoint_Plot" title="navtools.waypoint_merge.Waypoint_Plot"><span class="pre">navtools.waypoint_merge.Waypoint_Plot</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#navtools.waypoint_merge.waypoint_to_GPX" title="Permalink to this definition">¶</a></dt>
@@ -374,6 +679,19 @@ waypoints that need to be updated in OpenCPN.</p>
 <dd class="field-even"><p>XML document as text.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="navtools.waypoint_merge.computer_upload">
+<span class="sig-prename descclassname"><span class="pre">navtools.waypoint_merge.</span></span><span class="sig-name descname"><span class="pre">computer_upload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matches</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.waypoint_merge.WP_Match" title="navtools.waypoint_merge.WP_Match"><span class="pre">navtools.waypoint_merge.WP_Match</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#navtools.waypoint_merge.computer_upload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Report on a list of <a class="reference internal" href="#navtools.waypoint_merge.WP_Match" title="navtools.waypoint_merge.WP_Match"><code class="xref py py-class docutils literal notranslate"><span class="pre">WP_Match</span></code></a> instances.
+This is a GPX Upload to get the computer up-to-date with what’s on the chartplotter.</p>
+<p>This has two clumps of data.</p>
+<ol class="arabic simple">
+<li><p>Common but not proximate: these may need to be updated on the computer to reflect
+changes on the chartplotter. (Or. They may need to be updated on the chartplotter.)</p></li>
+<li><p>Chartplotter only: these need to be transferred to the computer.</p></li>
+</ol>
 </dd></dl>
 
 </section>
@@ -389,13 +707,6 @@ then by Geogode for likely matches that have different names.</p>
 <p>The output is a list of points that have been created or changed in the
 chartplotter, plus a less-interesting list of points that are only
 in the computer.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="navtools.waypoint_merge.report">
-<span class="sig-prename descclassname"><span class="pre">navtools.waypoint_merge.</span></span><span class="sig-name descname"><span class="pre">report</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matches</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.waypoint_merge.WP_Match" title="navtools.waypoint_merge.WP_Match"><span class="pre">navtools.waypoint_merge.WP_Match</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#navtools.waypoint_merge.report" title="Permalink to this definition">¶</a></dt>
-<dd><p>Report on a list of <a class="reference internal" href="#navtools.waypoint_merge.WP_Match" title="navtools.waypoint_merge.WP_Match"><code class="xref py py-class docutils literal notranslate"><span class="pre">WP_Match</span></code></a> instances.
-This is a human-readable DIFF-like report.</p>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="navtools.waypoint_merge.main">
 <span class="sig-prename descclassname"><span class="pre">navtools.waypoint_merge.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#navtools.waypoint_merge.main" title="Permalink to this definition">¶</a></dt>

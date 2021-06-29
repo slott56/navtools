@@ -698,6 +698,10 @@ class Angle(float):
         """:meta public:"""
         return super().__gt__(other)
 
+    def __hash__(self) -> int:
+        """:meta public:"""
+        return super().__hash__()
+
 
 class Lat(Angle):
     """Latitude Angle, normal to the equator.
@@ -975,7 +979,7 @@ def declination(point: LatLon, date: Optional[datetime.date] = None) -> float:
     return decl
 
 
-@dataclass(eq=True)
+@dataclass(eq=True, unsafe_hash=True)
 class Waypoint:
     """
     A waypoint.

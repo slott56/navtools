@@ -3,32 +3,31 @@ Merges waypoints created by OpenCPN or B&G Zeus2 Chartplotter.
 
 Reads source files to gather waypoints in a unified internal model.
 
--   OpenCPN GPX  waypoints and routes dump
+-   OpenCPN provides a GPX waypoints and routes dump.
 
--   B&G Chartplotter ("Lowrance") GPX WaypointsRoutesTracks
+-   B&G Chartplotter can provide GPX WaypointsRoutesTracks; this doesn't have complete detail.
 
--   Lowrance USR WaypointsRoutesTracks
+-   B&G Chartplotter can provide a Lowrance USR WaypointsRoutesTracks; this has everything.
 
 Compare the internal model documents to locate the waypoints which are unchanged.
+These can be ignored.
 
 What's left are either new, deleted, or changed.
 
-We can emit GPX waypoints to add and change. The deletes must be done manually.
+-   Emit GPX waypoints to add.
 
-We can emit GPX routes to add and chnage. Algain, deletes must be done manually.
+-   We can produce a list of deletes to be done manually.
 
-To compare proximate waypoints, we translate Lat/Lon to OLC (Open Location Code.)
-OLC comparisons provide a very handy proximity test.
+-   For changes, we have a number of cases.
 
-Code length	Precision in degrees	Precision
-2	20	2226 km
-4	1	111.321 km
-6	1/20	5566 meters
-8	1/400	278 meters
-10	1/8000	13.9 meters
+    -   Same name (or same GUID) with a new location.
 
-Further geocode details narrow
-the space to spaces 2.8 x 3.5 meters or smaller.
+    -   New name but matching location.
+
+In principle, we can also emit GPX routes that have changed.
+This is more complex because "matching" requires a number of similar waypoints.
+Again, deletes must be done manually.
+
 """
 import argparse
 from collections import defaultdict
@@ -47,6 +46,9 @@ from typing import (
     NamedTuple,
     Callable,
     Iterable,
+    Type,
+    DefaultDict,
+    Union,
 )
 import uuid
 import xml.etree.ElementTree
@@ -59,7 +61,7 @@ from navtools import lowrance_usr
 from navtools import olc
 
 
-@dataclass(eq=True)
+@dataclass(eq=True, unsafe_hash=True)
 class Waypoint_Plot:
     """
     Plotted image of a waypoint.
@@ -72,33 +74,37 @@ class Waypoint_Plot:
     extensions: dict[str, str] = field(default_factory=dict)
 
 
-def parse_datetime(text: Optional[str]) -> Optional[datetime.datetime]:
-    """
-    There are two formats observed:
+class DateParser:
+    def parse(self, text: Optional[str]) -> Optional[datetime.datetime]:
+        """
+        There are two formats observed:
 
-    - ``2020-09-30T07:52:39Z``
+        - ``2020-09-30T07:52:39Z``
 
-    - ``2013-11-08T13:53:42-05:00``
+        - ``2013-11-08T13:53:42-05:00``
 
-    ..  todo:: Refactor to merge with :py:func:`analysis.parse_date`
+        ..  todo:: Refactor to merge with :py:func:`analysis.parse_date`
 
-    :param text: source text
-    :return: datetime.datetime
-    """
-    if text is None:
-        return None
+        :param text: source text
+        :return: datetime.datetime
+        """
+        if text is None:
+            return None
 
-    try:
-        dt = datetime.datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ")
-        return dt.replace(tzinfo=datetime.timezone.utc)
-    except ValueError:
-        pass
-    try:
-        dt = datetime.datetime.strptime(text, "%Y-%m-%dT%H:%M:%S%z")
-        return dt
-    except ValueError:
-        pass
-    raise ValueError(f"Can't parse {text!r}")
+        try:
+            dt = datetime.datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ")
+            return dt.replace(tzinfo=datetime.timezone.utc)
+        except ValueError:
+            pass
+        try:
+            dt = datetime.datetime.strptime(text, "%Y-%m-%dT%H:%M:%S%z")
+            return dt
+        except ValueError:
+            pass
+        raise ValueError(f"Can't parse {text!r}")
+
+
+parse_datetime = DateParser().parse
 
 
 def opencpn_GPX_to_WayPoint(source: TextIO) -> Iterator[Waypoint_Plot]:
@@ -188,7 +194,7 @@ def opencpn_GPX_to_WayPoint(source: TextIO) -> Iterator[Waypoint_Plot]:
         if extensions:
             row_dict = dict(xml_to_tuples(extensions))
         else:
-            row_dict = {}
+            row_dict = {}  # pragma: no cover
         yield Waypoint_Plot(
             Waypoint(lat=lat, lon=lon, name=name, description=None,),
             last_updated=dt,
@@ -317,108 +323,273 @@ def waypoint_to_GPX(source: Iterable[Waypoint_Plot]) -> str:
     return template.render(waypoints=source)
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class History:
     """
     The state of the matching operation.
-    This allows us to track waypoints that have matches.
+
+    Each History reflects a waypoint and the matches against other
+    waypoints from the same source, or waypoints from a different source.
     """
 
     wp: Waypoint_Plot
-    matched: Optional[Waypoint_Plot] = None
+    matches: DefaultDict[str, list[Waypoint_Plot]] = field(
+        default_factory=lambda: defaultdict(list)
+    )
+
+    @property
+    def all_matches(self) -> list[Waypoint_Plot]:
+        return list(m for r, m_list in self.matches.items() for m in m_list)
 
 
-class WP_Match(NamedTuple):
+class List_Compare:
     """
-    The match result.
-    There are three states.
-
-    -   Both -- they passed a comparison test
-
-    -   1 -- From the first source (usually the computer) with no match
-
-    -   2 -- From the second source (usually the chart plotter) with no match
-    """
-
-    wp_1: Optional[Waypoint_Plot]
-    wp_2: Optional[Waypoint_Plot]
-
-
-def history_update(
-    compare: Callable[[Waypoint_Plot, Waypoint_Plot], bool],
-    history_1: list[History],
-    history_2: list[History],
-) -> None:
-    """
-    Given a comparison function, and history objects,
-    update :py:class:`History` objects to reflect matches.
+    Given a comparison function, updates two collections of :py:class:`History` objects,
+    to reflect matches between the waypoints.
 
     This does a brute-force :math:`m \\times n` comparison
     of all items in both lists. It applies the :py:func:`comparison`
     function to all elements to locate
     matches.
 
-    The remaining items are in the list 1 or list 2,
-    and we use this to generate the the unmatched items.
-
-    :param compare: Comparison function to use.
-    :param wp_list_1: master list of waypoints (often the computer)
-    :param wp_list_2: other devices list of waypoints (iPad, Chart Plotter, Phone, etc.)
+    The remaining items are exclusive to list 1 or list 2,
+    representing the unmatched items.
     """
-    for pt_1 in history_1:
-        for pt_2 in history_2:
-            if compare(pt_1.wp, pt_2.wp):
-                pt_1.matched = pt_2.wp
-                pt_2.matched = pt_1.wp
+
+    rule_name = "Invalid"
+
+    def __init__(self) -> None:
+        self.history_1: list[History]
+        self.history_2: list[History]
+
+    def rule(self, wp_1: Waypoint_Plot, wp_2: Waypoint_Plot) -> bool:
+        raise NotImplementedError  # pragma: no cover
+
+    def compare(self, wp_1: list[History], wp_2: list[History]) -> None:
+        """
+        Applies the rule to the History to accumulate all matches.
+        """
+        self.history_1 = wp_1
+        self.history_2 = wp_2
+        for pt_1 in self.history_1:
+            for pt_2 in self.history_2:
+                if pt_1 is pt_2:
+                    # Skip comparisons against self.
+                    continue
+                if pt_1.wp in pt_2.all_matches:
+                    # Skip if already matched; don't rematch.
+                    pass
+                if self.rule(pt_1.wp, pt_2.wp):
+                    pt_1.matches[self.rule_name].append(pt_2.wp)
+                    pt_2.matches[self.rule_name].append(pt_1.wp)
+
+
+class CompareByName(List_Compare):
+    """Compares names simply.  Levenshtein distance might be helpful."""
+
+    rule_name = "ByName"
+
+    def rule(self, pt1: Waypoint_Plot, pt2: Waypoint_Plot) -> bool:
+        return pt1.waypoint.name == pt2.waypoint.name
+
+
+class CompareByGUID(List_Compare):
+    """Compares GUID's. Assumes collection 1 is OpenCPN."""
+
+    rule_name = "ByGUID"
+
+    def rule(self, pt1: Waypoint_Plot, pt2: Waypoint_Plot) -> bool:
+        """Assumes pt1 is OpenCPN and pt2 is from the chartplotter."""
+        uuid_1_u: Union[uuid.UUID, str] = pt1.extensions["opencpn:guid"]
+        uuid_1: uuid.UUID = uuid.UUID(uuid_1_u) if isinstance(
+            uuid_1_u, str
+        ) else uuid_1_u
+        uuid_2_u: Union[uuid.UUID, str, None] = pt2.extensions.get("uuid")
+        if uuid_2_u is None:
+            # A GPX file from the chartplotter often lacks UUID's.
+            return False
+        uuid_2: uuid.UUID = uuid.UUID(uuid_2_u) if isinstance(
+            uuid_2_u, str
+        ) else uuid_2_u
+        return uuid_1 == uuid_2
+
+
+class CompareByDistance(List_Compare):
+    """Uses :py:class:`Waypoint` definition of :py:meth:`near`.
+    Has a hard-coded distance threshold of ±0.05 nmi.
+    """
+
+    rule_name = "ByDist"
+
+    def rule(self, pt1: Waypoint_Plot, pt2: Waypoint_Plot) -> bool:
+        return isclose(pt1.waypoint.point.near(pt2.waypoint.point), 0.0, abs_tol=0.05)
+
+
+class CompareByGeocode(List_Compare):
+    """Uses OLC matching to a given number of positions.
+
+    ..  csv-table::
+
+        positions,degrees,distance
+        8,1/400,"278 meters, .15 nmi"
+        10,1/8000,"13.9 meters, 45 feet"
+
+    default size is 8.
+
+    Usaage::
+
+        c = CompareByGeocode.range(8)()
+        c.compare(l1, l2)
+
+    """
+
+    rule_name = "ByCode"
+    size = 8
+
+    def rule(self, pt1: Waypoint_Plot, pt2: Waypoint_Plot) -> bool:
+        return pt1.waypoint.geocode[: self.size] == pt2.waypoint.geocode[: self.size]
+
+    @classmethod
+    def range(cls, size: int) -> Type["CompareByGeocode"]:
+        class Geocode(CompareByGeocode):
+            pass
+
+        Geocode.size = size
+        Geocode.rule_name = f"ByCode{Geocode.size}"
+        return Geocode
+
+
+def duplicates(wp_list: list[Waypoint_Plot]) -> list[Waypoint_Plot]:
+    """
+    Report on duplicates. Also, returns a reduced list of waypoints with
+    duplicates removed.
+
+    Given a collection of duplicates, we use the we use the last_updated
+    time to locate the newest copy and keep that.
+
+    :param wp_list: list[Waypoint_Plot], usually from a derived list in a chartplotter
+    :returns: list[Waypoint_Plot] with duplicates removed.
+    """
+    # Locate CP duplicates
+    h_2 = [History(w) for w in wp_list]
+    CompareByGeocode.range(10)().compare(h_2, h_2)
+    unique = list(filter(lambda h: not h.matches, h_2))
+    non_unique = list(filter(lambda h: h.matches, h_2))
+    print("Chartplotter Duplicates")
+    seen_once: list[Waypoint_Plot] = []
+    preferred: list[Waypoint_Plot] = []
+    for h in non_unique:
+        alternatives = [h.wp] + h.all_matches
+        alternatives.sort(
+            key=lambda wp: wp.last_updated or datetime.datetime(1900, 1, 1)
+        )
+        keep = alternatives[-1]
+        remove = alternatives[:-1]
+        if keep not in seen_once:
+            print(keep.waypoint)
+            for r in remove:
+                print(f"  - {r.waypoint}")
+            seen_once.extend(alternatives)
+            preferred.append(keep)
+    return preferred
+
+
+def survey(wp_1: list[Waypoint_Plot], wp_2: list[Waypoint_Plot]) -> None:
+    """
+    Report on the comparison of two waypoint lists.
+    This is a human-readable DIFF-like report, it uses
+    all of the comparison algorithms to locate candidate duplicates.
+
+    :param wp_1: Waypoints, usually from the master list in OpenCPN
+    :param wp_2: Waypoints, usually from a derived list in a chartplotter
+    """
+
+    # Locate *all* matches; updating the History objects.
+    history_1 = [History(w) for w in wp_1]  # or list(map(History, wp_1))
+    history_2 = [History(w) for w in wp_2]  # or list(map(History, wp_2))
+    the_rules: tuple[Type[List_Compare], ...] = (
+        CompareByName,
+        CompareByGUID,
+        CompareByGeocode.range(8),
+    )
+    for C in the_rules:
+        C().compare(history_1, history_2)
+
+    # Rank by number of matches in the OpenCPN list of waypoints
+    history_1.sort(
+        key=lambda h: sum(len(m) for r, m in h.matches.items()), reverse=True
+    )
+
+    # Summarize the matches found
+    print(f"Computer (-) | Chartplotter (+)")
+    for h in history_1:
+        if bool(h.matches):
+            # Common -- two cases. Common and proximate; common and not proximate
+            matches = "\n    ".join(
+                f"{r}: {[m.waypoint for m in ml]}" for r, ml in h.matches.items()
+            )
+            print(f"  {h.wp.waypoint}\n    {matches}")
+        else:
+            # Source 1 (the computer) only. These can be ignored.
+            pass  # pragma: no cover
+    for h in history_2:
+        if bool(h.matches):
+            # Already reported
+            pass
+        else:
+            # Source 2 (the chartplotter) only. These must be added.
+            print(f"+ {h.wp.waypoint}")
+
+
+class WP_Match(NamedTuple):
+    """
+    The final match result.
+    There are three states.
+
+    -   Both -- they passed the given comparison test, and appear to be the same
+
+    -   1 only -- From the first source (usually the computer) with no match
+
+    -   2 only -- From the second source (usually the chart plotter) with no match
+    """
+
+    wp_1: Optional[Waypoint_Plot]
+    wp_2: Optional[Waypoint_Plot]
+
+    @property
+    def both(self) -> bool:
+        return self.wp_1 is not None and self.wp_2 is not None
+
+    @property
+    def first(self) -> bool:
+        return self.wp_1 is not None and self.wp_2 is None
+
+    @property
+    def second(self) -> bool:
+        return self.wp_1 is None and self.wp_2 is not None
 
 
 def match_gen(history_1: list[History], history_2: list[History]) -> Iterator[WP_Match]:
     """
-    Summarize a pair of match histories as a single sequence of matches.
-    There are three subtypes of matches.
+    Merge two sequences of :py:class:`History` instances into single sequence of :py:class:`WP_Match`
+    instances.
+
+    There are three subtypes of matches in the final sequence:
 
     -   Something was the same.
-    -   Only in the first history list.
-    -   Only in the second history list.
+
+    -   Only in the first history list (usually the computer) with no match.
+
+    -   Only in the second history list (usually the chart plotter) with no match.
     """
-    for pt_1 in (h for h in history_1 if h.matched is not None):
-        yield WP_Match(pt_1.wp, pt_1.matched)
-    for pt_1 in (h for h in history_1 if h.matched is None):
+    for pt_1 in (h for h in history_1 if h.matches):
+        for rule in pt_1.matches:
+            for m in pt_1.matches[rule]:
+                yield WP_Match(pt_1.wp, m)
+    for pt_1 in (h for h in history_1 if not h.matches):
         yield WP_Match(pt_1.wp, None)
-    for pt_2 in (h for h in history_2 if h.matched is None):
+    for pt_2 in (h for h in history_2 if not h.matches):
         yield WP_Match(None, pt_2.wp)
-
-
-def report(matches: Iterable[WP_Match]) -> None:
-    """
-    Report on a list of :py:class:`WP_Match` instances.
-    This is a human-readable DIFF-like report.
-    """
-    for m in matches:
-        # Common -- two cases. Common and proximate; common and not proximate
-        if m.wp_1 and m.wp_2:
-            if isclose(
-                d := m.wp_1.waypoint.point.near(m.wp_2.waypoint.point),
-                0.0,
-                abs_tol=0.05,
-            ):
-                # Common and proximate. Yay. No chnage required
-                print(f"  {m.wp_1.waypoint.name:24s}={m.wp_2.waypoint.name:24s}")
-            else:
-                # Common and not proximate. Must update the computer to reflect the chartplotter.
-                print(
-                    f"  {m.wp_1.waypoint.name:24s}={m.wp_2.waypoint.name:24s}  {m.wp_1.waypoint.point} ➡︎ {m.wp_2.waypoint.point}; {d:0.2f} NM"
-                )
-        # Source 1 (the computer) only. These can be ignored.
-        elif m.wp_1:
-            print(f"- {m.wp_1.waypoint.name:24s}={'':24s}  {m.wp_1.waypoint.point}")
-        # Source 2 (the chartplotter) only -- these need to be added to the computer
-        elif m.wp_2:
-            print(
-                f"+ {'':24s}={m.wp_2.waypoint.name:24s}  {'':24s} {m.wp_2.waypoint.point}"
-            )
-        else:
-            raise RuntimeError("WTF")  # pragma: no cover
 
 
 def computer_upload(matches: Iterable[WP_Match]) -> None:
@@ -433,7 +604,7 @@ def computer_upload(matches: Iterable[WP_Match]) -> None:
 
     2.  Chartplotter only: these need to be transferred to the computer.
     """
-    raise NotImplementedError
+    raise NotImplementedError  # pragma: no cover
 
 
 def main(argv: list[str]) -> None:
@@ -464,14 +635,16 @@ def main(argv: list[str]) -> None:
         action="append",
         type=str,
         choices=["name", "distance", "geocode", "guid"],
+        help="matching rule to use",
     )
     parser.add_argument(
         "-r",
         "--report",
         action="store",
         type=str,
-        choices=["summary", "gpx"],
-        default="summary",
+        choices=["survey", "gpx.new", "gpx.match"],
+        default="survey",
+        help="What kind of output? GPX or Display",
     )
     options = parser.parse_args(argv)
 
@@ -483,43 +656,40 @@ def main(argv: list[str]) -> None:
     with plotter.open("rb") as plotter_source:
         plotter_wp = list(lowrance_USR_to_WayPoint(plotter_source))
 
-    opencpn_history = [History(wp) for wp in opencpn_wp]
-    plotter_history = [History(wp) for wp in plotter_wp]
+    if options.report == "survey":
+        duplicates(plotter_wp)
+        print()
+        print("==========")
+        print()
+        survey(opencpn_wp, plotter_wp)
 
-    title = []
-    for compare in options.by:
-        if compare == "name":
-            title.append("By Name")
-            match_rule = lambda pt1, pt2: pt1.waypoint.name == pt2.waypoint.name
-        elif compare == "distance":
-            title.append("By Distance")
-            match_rule = lambda pt1, pt2: isclose(
-                pt1.waypoint.point.near(pt2.waypoint.point), 0.0, abs_tol=0.05
-            )
-        elif compare == "geocode":
-            title.append("By Geocode")
-            match_rule = (
-                lambda pt1, pt2: pt1.waypoint.geocode[:8] == pt2.waypoint.geocode[:8]
-            )
-        elif compare == "guid":
-            title.append("By GUID")
-            match_rule = (
-                lambda pt1, pt2: pt1.extensions["opencpn:guid"]
-                == pt2.extensions["uuid"]
-            )
-        else:
-            raise ValueError(
-                f"Unknown {compare} in {' --by '.join(options.by)}"
-            )  # pragma: no cover
-        history_update(match_rule, opencpn_history, plotter_history)
+    elif options.report.startswith("gpx"):
 
-    matches = match_gen(opencpn_history, plotter_history)
+        opencpn_history = [History(wp) for wp in opencpn_wp]
+        plotter_history = [History(wp) for wp in plotter_wp]
 
-    if options.report == "summary":
-        print(f"{', '.join(title)}\nComputer (-) | Chartplotter (+)")
-        report(matches)
-    elif options.report == "gpx":
+        rules: list[Type[List_Compare]] = []
+        for compare in options.by:
+            if compare == "name":
+                rules.append(CompareByName)
+            elif compare == "distance":
+                rules.append(CompareByDistance)
+            elif compare == "geocode":
+                rules.append(CompareByGeocode.range(8))
+            elif compare == "guid":
+                rules.append(CompareByGUID)
+            else:
+                raise ValueError(
+                    f"Unknown {compare} in {' --by '.join(options.by)}"
+                )  # pragma: no cover
+            for C in rules:
+                C().compare(opencpn_history, plotter_history)
+
+        # TODO: Separate changed from new.
+        matches = match_gen(opencpn_history, plotter_history)
+
         # computer_upload(matches)
+
         # Spike Solution...
         unique_plotter = (
             m.wp_2 for m in matches if m.wp_1 is None and m.wp_2 is not None

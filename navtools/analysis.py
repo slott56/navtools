@@ -29,58 +29,9 @@ from navtools import navigation
 from navtools import olc
 
 
-default_date_formats = [
-    "%H%M",
-    "%H:%M",
-    "%I:%M %p",
-]
-
-default_year_formats = [
-    "%m/%d %H%M",
-    "%m/%d %H:%M",
-    "%m/%d %I:%M %p",
-    "%b %d %H%M",
-    "%b %d %H:%M",
-    "%b %d %I:%M %p",
-    "%d %b %H%M",
-    "%d %b %H:%M",
-    "%d %b %I:%M %p",
-    "%b-%d %H%M",
-    "%b-%d %H:%M",
-    "%b-%d %I:%M %p",
-    "%d-%b %H%M",
-    "%d-%b %H:%M",
-    "%d-%b %I:%M %p",
-    "%B %d %H%M",
-    "%B %d %H:%M",
-    "%B %d %I:%M %p",
-]
-
-full_formats = [
-    "%m/%d/%Y %H%M",
-    "%m/%d/%Y %H:%M",
-    "%m/%d/%Y %I:%M %p",
-    "%m/%d/%y %H%M",
-    "%m/%d/%y %H:%M",
-    "%m/%d/%y %I:%M %p",
-    "%Y-%m-%d %H%M",
-    "%Y-%m-%d %H:%M",
-    "%Y-%m-%d %I:%M %p",
-    "%y-%m-%d %H%M",
-    "%y-%m-%d %H:%M",
-    "%y-%m-%d %I:%M %p",
-    "%m-%d-%Y %H%M",
-    "%m-%d-%Y %H:%M",
-    "%m-%d-%Y %I:%M %p",
-    "%m-%d-%y %H%M",
-    "%m-%d-%y %H:%M",
-    "%m-%d-%y %I:%M %p",
-]
-
-
-def parse_date(date: str, default: Optional[datetime.date] = None) -> datetime.datetime:
+class DateParser:
     """
-    March through all of the known date formats until we find one that works.
+    Parses input dates in a variety of formats.
 
     For more complex situations (i.e., multi-day voyages with partial
     date-time stamps in the log) this function isn't quite appropriate.
@@ -90,33 +41,92 @@ def parse_date(date: str, default: Optional[datetime.date] = None) -> datetime.d
 
     ..  todo:: Refactor to merge with :py:func:`opencpn_table.parse_datetime`
 
-    :param date: string in some known format
-    :param default: default date to use when only a time is given.
-    :returns: datetime
     """
-    if default is None:
-        default = datetime.date.today()
-    for fmt in default_date_formats:
-        try:
-            dt = datetime.datetime.strptime(date, fmt)
-            dt = dt.replace(year=default.year, month=default.month, day=default.day)
-            return dt
-        except ValueError as e:
-            pass
-    for fmt in default_year_formats:
-        try:
-            dt = datetime.datetime.strptime(date, fmt)
-            dt = dt.replace(year=default.year)
-            return dt
-        except ValueError as e:
-            pass
-    for fmt in full_formats:
-        try:
-            dt = datetime.datetime.strptime(date, fmt)
-            return dt
-        except ValueError as e:
-            pass
-    raise ValueError(f"Cannot parse {date!r}")
+
+    default_date_formats = [
+        "%H%M",
+        "%H:%M",
+        "%I:%M %p",
+    ]
+
+    default_year_formats = [
+        "%m/%d %H%M",
+        "%m/%d %H:%M",
+        "%m/%d %I:%M %p",
+        "%b %d %H%M",
+        "%b %d %H:%M",
+        "%b %d %I:%M %p",
+        "%d %b %H%M",
+        "%d %b %H:%M",
+        "%d %b %I:%M %p",
+        "%b-%d %H%M",
+        "%b-%d %H:%M",
+        "%b-%d %I:%M %p",
+        "%d-%b %H%M",
+        "%d-%b %H:%M",
+        "%d-%b %I:%M %p",
+        "%B %d %H%M",
+        "%B %d %H:%M",
+        "%B %d %I:%M %p",
+    ]
+
+    full_formats = [
+        "%m/%d/%Y %H%M",
+        "%m/%d/%Y %H:%M",
+        "%m/%d/%Y %I:%M %p",
+        "%m/%d/%y %H%M",
+        "%m/%d/%y %H:%M",
+        "%m/%d/%y %I:%M %p",
+        "%Y-%m-%d %H%M",
+        "%Y-%m-%d %H:%M",
+        "%Y-%m-%d %I:%M %p",
+        "%y-%m-%d %H%M",
+        "%y-%m-%d %H:%M",
+        "%y-%m-%d %I:%M %p",
+        "%m-%d-%Y %H%M",
+        "%m-%d-%Y %H:%M",
+        "%m-%d-%Y %I:%M %p",
+        "%m-%d-%y %H%M",
+        "%m-%d-%y %H:%M",
+        "%m-%d-%y %I:%M %p",
+    ]
+
+    def parse(
+        self, date: str, default: Optional[datetime.date] = None
+    ) -> datetime.datetime:
+        """
+        March through all of the known date formats until we find one that works.
+
+        :param date: string in some known format
+        :param default: default date to use when only a time is given.
+        :returns: datetime
+        """
+        if default is None:
+            default = datetime.date.today()
+        for fmt in self.default_date_formats:
+            try:
+                dt = datetime.datetime.strptime(date, fmt)
+                dt = dt.replace(year=default.year, month=default.month, day=default.day)
+                return dt
+            except ValueError as e:
+                pass
+        for fmt in self.default_year_formats:
+            try:
+                dt = datetime.datetime.strptime(date, fmt)
+                dt = dt.replace(year=default.year)
+                return dt
+            except ValueError as e:
+                pass
+        for fmt in self.full_formats:
+            try:
+                dt = datetime.datetime.strptime(date, fmt)
+                return dt
+            except ValueError as e:
+                pass
+        raise ValueError(f"Cannot parse {date!r}")
+
+
+parse_date = DateParser().parse
 
 
 @dataclass(eq=True)

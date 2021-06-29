@@ -111,6 +111,8 @@ def test_angle():
     assert a >= a
     assert not (a > a)
 
+    assert set([a, a, a]) == set([a])
+
 
 def test_lat():
     a = Lat.fromstring("10 20 30N")
@@ -134,6 +136,7 @@ def test_LatLon():
     assert latlon_1.dm == ("50 21.833N", "004 9.417W")
     assert latlon_1.d == ("50.364N", "004.157W")
     assert repr(latlon_1) == "LatLon(50°21.833′N, 004°09.417′W)"
+    assert str(latlon_1) == "50°21.833′N 004°09.417′W"
 
     ll_2 = LatLon(Lat.fromstring("50 21 50N"), Lon.fromstring("004 09 25W"))
     assert ll_2.lat == latlon_1.lat and ll_2.lon == latlon_1.lon

@@ -229,7 +229,7 @@ def test_History():
     h = waypoint_merge.History(
         waypoint_merge.Waypoint_Plot(30.0, -80.0),
     )
-    assert h.matched is None
+    assert not h.matches
 
 def test_WP_Match():
     m = waypoint_merge.WP_Match(
@@ -239,34 +239,102 @@ def test_WP_Match():
     assert m.wp_1.waypoint.point.near(waypoint_merge.Waypoint_Plot(waypoint_merge.Waypoint(30.0, -80.0)).waypoint.point) < 1E-05
     assert m.wp_2.waypoint.point.near(waypoint_merge.Waypoint_Plot(waypoint_merge.Waypoint(30.0, -80.0)).waypoint.point) < 1E-05
     assert m.wp_1.waypoint.geocode == m.wp_2.waypoint.geocode
+    assert m.both
+    assert not m.first
+    assert not m.second
 
-
-def test_history_update_match(lowrance_GPX_wp):
-    compare = Mock(return_value=True)
+def test_compare_by_name_match(lowrance_GPX_wp):
     h1 = list(map(waypoint_merge.History, lowrance_GPX_wp))
     h2 = list(map(waypoint_merge.History, lowrance_GPX_wp))
-    waypoint_merge.history_update(compare, h1, h2)
+    waypoint_merge.CompareByName().compare(h1, h2)
     assert h1[0].wp == lowrance_GPX_wp[0]
     assert h2[0].wp == lowrance_GPX_wp[0]
-    assert h1[0].matched == h2[0].wp
-    assert h2[0].matched == h1[0].wp
-    compare.assert_called_once_with(lowrance_GPX_wp[0], lowrance_GPX_wp[0])
+    assert h1[0].matches['ByName'] == [h2[0].wp]
+    assert h2[0].matches['ByName'] == [h1[0].wp]
 
-def test_history_update_nomatch_1(lowrance_GPX_wp, opencpn_GPX_wp):
-    compare = Mock(return_value=False)
+@fixture
+def lowrance_USR_duplicate():
+    return [
+        waypoint_merge.Waypoint_Plot(
+            waypoint_merge.Waypoint(
+                lat=navigation.Lat(radians(37.18093682)),
+                lon=navigation.Lon(radians(-76.41148230)),
+                name='Chisman Creek',
+                description='',
+            ),
+            last_updated=datetime.date(2017, 6, 11),
+            sym='anchor,blue',
+            type=None,
+            extensions={
+                'uuid': UUID('34de7898-f37e-458c-8ccb-e4e03fa325ec'),
+                'UID_unit_number': 12988,
+                'UID_sequence_number': 328,
+                'waypt_stream_version': 2,
+                'waypt_name_length': 18,
+                'waypt_name': 'Chisman Creek',
+                'UID_unit_number_2': 12988,
+                'longitude': -76.41148230,
+                'latitude': 37.18093682,
+                'flags': 4,
+                'icon_id': 0,
+                'color_id': 0,
+                'waypt_description_length': -1,
+                'waypt_description': '',
+                'alarm_radius': 0.0,
+                'waypt_creation_date': datetime.date(2017, 6, 11),
+                'waypt_creation_time': datetime.timedelta(seconds=36080, microseconds=754000),
+                'unknown_2': -1,
+                'depth': 0.0,
+                'LORAN_GRI': -1,
+                'LORAN_Tda': 0,
+                'LORAN_Tdb': 0
+            }
+        ),
+    ]
+
+def test_compare_by_guid_match(opencpn_GPX_wp, lowrance_USR_duplicate):
+    h1 = list(map(waypoint_merge.History, opencpn_GPX_wp))
+    h2 = list(map(waypoint_merge.History, lowrance_USR_duplicate))
+    waypoint_merge.CompareByGUID().compare(h1, h2)
+    assert h1[0].wp == opencpn_GPX_wp[0]
+    assert h2[0].wp == lowrance_USR_duplicate[0]
+    assert h1[0].matches['ByGUID'] == [h2[0].wp]
+    assert h2[0].matches['ByGUID'] == [h1[0].wp]
+
+def test_compare_by_code_match(lowrance_GPX_wp):
     h1 = list(map(waypoint_merge.History, lowrance_GPX_wp))
     h2 = list(map(waypoint_merge.History, lowrance_GPX_wp))
-    waypoint_merge.history_update(compare, h1, h2)
+    waypoint_merge.CompareByGeocode.range(8)().compare(h1, h2)
     assert h1[0].wp == lowrance_GPX_wp[0]
     assert h2[0].wp == lowrance_GPX_wp[0]
-    assert h1[0].matched is None
-    assert h2[0].matched is None
-    compare.assert_called_once_with(lowrance_GPX_wp[0], lowrance_GPX_wp[0])
+    assert h1[0].matches['ByCode8'] == [h2[0].wp]
+    assert h2[0].matches['ByCode8'] == [h1[0].wp]
+
+def test_compare_by_distance_match(lowrance_GPX_wp):
+    h1 = list(map(waypoint_merge.History, lowrance_GPX_wp))
+    h2 = list(map(waypoint_merge.History, lowrance_GPX_wp))
+    waypoint_merge.CompareByDistance().compare(h1, h2)
+    assert h1[0].wp == lowrance_GPX_wp[0]
+    assert h2[0].wp == lowrance_GPX_wp[0]
+    assert h1[0].matches['ByDist'] == [h2[0].wp]
+    assert h2[0].matches['ByDist'] == [h1[0].wp]
+
+
+def test_history_update_nomatch_1(monkeypatch, opencpn_GPX_wp, lowrance_GPX_wp):
+    h1 = list(map(waypoint_merge.History, lowrance_GPX_wp))
+    h2 = list(map(waypoint_merge.History, lowrance_GPX_wp))
+    monkeypatch.setattr(waypoint_merge.CompareByDistance, 'rule', Mock(return_value=False))
+    waypoint_merge.CompareByDistance().compare(h1, h2)
+    assert h1[0].wp == lowrance_GPX_wp[0]
+    assert h2[0].wp == lowrance_GPX_wp[0]
+    assert h1[0].matches['ByDist'] == []
+    assert h2[0].matches['ByDist'] == []
+
 
 
 def test_match_gen(lowrance_GPX_wp, opencpn_GPX_wp, lowrance_USR_wp):
     history_1 = [
-        waypoint_merge.History(lowrance_GPX_wp[0], opencpn_GPX_wp[0]),
+        waypoint_merge.History(lowrance_GPX_wp[0], {"ByName": [opencpn_GPX_wp[0]]}),
         waypoint_merge.History(opencpn_GPX_wp[0]),
     ]
     history_2 = [
@@ -280,20 +348,51 @@ def test_match_gen(lowrance_GPX_wp, opencpn_GPX_wp, lowrance_USR_wp):
 
     ]
 
-def test_report(lowrance_GPX_wp, opencpn_GPX_wp, lowrance_USR_wp, capsys):
-    matches = [
-        waypoint_merge.WP_Match(lowrance_GPX_wp[0], lowrance_GPX_wp[0]),
-        waypoint_merge.WP_Match(lowrance_GPX_wp[0], None),
-        waypoint_merge.WP_Match(None, opencpn_GPX_wp[0]),
-        waypoint_merge.WP_Match(lowrance_USR_wp[0], opencpn_GPX_wp[0])
-    ]
-    waypoint_merge.report(matches)
+def test_duplicates_none(opencpn_GPX_wp, capsys):
+    waypoint_merge.duplicates(opencpn_GPX_wp)
     out, err = capsys.readouterr()
     assert out.splitlines() == [
-        '  Coconut Grove           =Coconut Grove           ',
-        '- Coconut Grove           =                          25°42.925′N 080°13.617′W',
-        '+                         =Chisman Creek                                      37°11.099′N 076°25.332′W',
-        '  ALLIGTR C               =Chisman Creek             24°23.298′N 076°38.802′W ➡︎ 37°11.099′N 076°25.332′W; 768.41 NM',
+        'Chartplotter Duplicates'
+    ]
+
+def test_duplicates_one(opencpn_GPX_wp, capsys):
+    dup_waypoint = opencpn_GPX_wp + opencpn_GPX_wp
+    waypoint_merge.duplicates(dup_waypoint)
+    out, err = capsys.readouterr()
+    assert out.splitlines() == [
+        'Chartplotter Duplicates',
+        "Waypoint(lat=37°11.099′N, lon=076°25.332′W, name='Chisman Creek', description=None, point=LatLon(37°11.099′N, 076°25.332′W), geocode='87955HMH+X4V')",
+        "  - Waypoint(lat=37°11.099′N, lon=076°25.332′W, name='Chisman Creek', description=None, point=LatLon(37°11.099′N, 076°25.332′W), geocode='87955HMH+X4V')",
+        "  - Waypoint(lat=37°11.099′N, lon=076°25.332′W, name='Chisman Creek', description=None, point=LatLon(37°11.099′N, 076°25.332′W), geocode='87955HMH+X4V')",
+    ]
+
+def test_survey(opencpn_GPX_wp, lowrance_USR_wp, capsys):
+    waypoint_merge.survey(opencpn_GPX_wp, lowrance_USR_wp)
+    out, err = capsys.readouterr()
+    assert out.splitlines() == [
+        'Computer (-) | Chartplotter (+)',
+        "+ Waypoint(lat=24°23.298′N, lon=076°38.802′W, name='ALLIGTR C', description='', point=LatLon(24°23.298′N, 076°38.802′W), geocode='77P599Q3+887')"]
+
+def test_survey_2(opencpn_GPX_wp, lowrance_USR_duplicate, capsys):
+    """Lines 525-528: a match in OpenCPN"""
+    waypoint_merge.survey(opencpn_GPX_wp, lowrance_USR_duplicate)
+    out, err = capsys.readouterr()
+    assert out.splitlines() == [
+        'Computer (-) | Chartplotter (+)',
+        "  Waypoint(lat=37°11.099′N, lon=076°25.332′W, name='Chisman Creek', description=None, point=LatLon(37°11.099′N, 076°25.332′W), geocode='87955HMH+X4V')",
+        "    ByName: [Waypoint(lat=37°10.856′N, lon=076°24.689′W, name='Chisman Creek', description='', point=LatLon(37°10.856′N, 076°24.689′W), geocode='87955HJQ+9CC')]",
+        "    ByGUID: [Waypoint(lat=37°10.856′N, lon=076°24.689′W, name='Chisman Creek', description='', point=LatLon(37°10.856′N, 076°24.689′W), geocode='87955HJQ+9CC')]",
+    ]
+
+def test_survey_3(opencpn_GPX_wp, lowrance_GPX_wp, capsys):
+    """Lines 531: Unique to OpenCPN
+    test fixtures have unique OpenCPN waypoint.
+    """
+    waypoint_merge.survey(opencpn_GPX_wp, lowrance_GPX_wp)
+    out, err = capsys.readouterr()
+    assert out.splitlines() == [
+        'Computer (-) | Chartplotter (+)',
+        "+ Waypoint(lat=25°42.925′N, lon=080°13.617′W, name='Coconut Grove', description=None, point=LatLon(25°42.925′N, 080°13.617′W), geocode='76QXPQ8F+567')"
     ]
 
 @fixture
@@ -322,53 +421,24 @@ def mock_lowrance_usr(monkeypatch, lowrance_USR_wp):
     monkeypatch.setattr(waypoint_merge, 'lowrance_USR_to_WayPoint', mock_function)
     return mock_function
 
-
-def test_main_name_summary(mock_gpx_usr, mock_opencpn_gpx, mock_lowrance_usr, capsys):
+def test_main_survery(mock_gpx_usr, mock_opencpn_gpx, mock_lowrance_usr, capsys):
     f_1, f_2 = mock_gpx_usr
-    waypoint_merge.main(["-c", str(f_1), "-p", str(f_2), "-b", "name"])
+    waypoint_merge.main(["-c", str(f_1), "-p", str(f_2), "-r", "survey"])
     out, err = capsys.readouterr()
     assert out.splitlines() == [
-        'By Name',
+        'Chartplotter Duplicates',
+        '',
+        '==========',
+        '',
         'Computer (-) | Chartplotter (+)',
-        '- Chisman Creek           =                          37°11.099′N 076°25.332′W',
-        '+                         =ALLIGTR C                                          24°23.298′N 076°38.802′W',
+        "+ Waypoint(lat=24°23.298′N, lon=076°38.802′W, name='ALLIGTR C', "
+        "description='', point=LatLon(24°23.298′N, 076°38.802′W), "
+        "geocode='77P599Q3+887')",
     ]
 
-def test_main_distance_summary(mock_gpx_usr, mock_opencpn_gpx, mock_lowrance_usr, capsys):
-    f_1, f_2 = mock_gpx_usr
-    waypoint_merge.main(["-c", str(f_1), "-p", str(f_2), "-b", "distance"])
-    out, err = capsys.readouterr()
-    assert out.splitlines() == [
-        'By Distance',
-        'Computer (-) | Chartplotter (+)',
-        '- Chisman Creek           =                          37°11.099′N 076°25.332′W',
-        '+                         =ALLIGTR C                                          24°23.298′N 076°38.802′W',
-    ]
-
-def test_main_geocode_summary(mock_gpx_usr, mock_opencpn_gpx, mock_lowrance_usr, capsys):
-    f_1, f_2 = mock_gpx_usr
-    waypoint_merge.main(["-c", str(f_1), "-p", str(f_2), "-b", "geocode"])
-    out, err = capsys.readouterr()
-    assert out.splitlines() == [
-        'By Geocode',
-        'Computer (-) | Chartplotter (+)',
-        '- Chisman Creek           =                          37°11.099′N 076°25.332′W',
-        '+                         =ALLIGTR C                                          24°23.298′N 076°38.802′W',
-    ]
-
-def test_main_guid_summary(mock_gpx_usr, mock_opencpn_gpx, mock_lowrance_usr, capsys):
-    f_1, f_2 = mock_gpx_usr
-    waypoint_merge.main(["-c", str(f_1), "-p", str(f_2), "-b", "guid"])
-    out, err = capsys.readouterr()
-    assert out.splitlines() == [
-        'By GUID',
-        'Computer (-) | Chartplotter (+)',
-        '- Chisman Creek           =                          37°11.099′N 076°25.332′W',
-        '+                         =ALLIGTR C                                          24°23.298′N 076°38.802′W',
-    ]
 def test_main_name_gpx(mock_gpx_usr, mock_opencpn_gpx, mock_lowrance_usr, capsys):
     f_1, f_2 = mock_gpx_usr
-    waypoint_merge.main(["-c", str(f_1), "-p", str(f_2), "-b", "name", "-r", "gpx"])
+    waypoint_merge.main(["-c", str(f_1), "-p", str(f_2), "-b", "name", "-b", "distance", "-b", "geocode", "-b", "guid", "-r", "gpx.new"])
     out, err = capsys.readouterr()
     assert out.splitlines() == [
         '<?xml version="1.0"?>',

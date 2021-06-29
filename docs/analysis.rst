@@ -103,6 +103,10 @@ identical with the tracks created directly by iNavX.
 Date parsing
 -------------
 
+..  autoclass:: DateParser
+    :members:
+    :undoc-members:
+
 ..  autofunction:: parse_date
 
 Base Log Entry
