@@ -21,7 +21,7 @@ import datetime
 from math import degrees, radians
 import os
 from pathlib import Path
-from typing import Any, Optional, TextIO, Iterator, Iterable, Union, NamedTuple
+from typing import Any, Optional, TextIO, Iterator, Iterable, Union, NamedTuple, cast
 import sys
 import xml.etree.ElementTree
 from xml.etree.ElementTree import QName
@@ -156,112 +156,117 @@ class LogEntry:
         self.geocode = olc.OLC().encode(degrees(self.lat), degrees(self.lon))
 
 
-def csv_sniff_header(source: TextIO) -> bool:
+GPS_NAVX_HEADER = [
+    "date",
+    "latitude",
+    "longitude",
+    "cog",
+    "sog",
+    "heading",
+    "speed",
+    "depth",
+    "windAngle",
+    "windSpeed",
+    "comment",
+]
+
+
+def csv_reader(source: TextIO) -> csv.DictReader[str]:
     """
     There are two formats:
 
     -   Standard (i.e., OpenCPN). These files have no header.
-        This function returns False. An assumed header must be provided to build a ``DictReader``.
+        This function returns the assumed header which must be provided to build a ``DictReader``.
 
     -   Manual. These files **must** include a heading row for it to be processed.
         This function returns True. A ``DictReader`` can then use the headers that are found.
-        A heading row **must** use labels like the following:
 
-        ::
+    A heading row **must** use labels drawn from this domain of known labels:
 
-            "date", "latitude", "longitude", "cog", "sog", "heading", "speed",
-            "depth", "windAngle", "windSpeed", "comment"
+    ::
+
+        "date", "latitude", "longitude", "cog", "sog", "heading", "speed",
+        "depth", "windAngle", "windSpeed", "comment"
 
     This leads to two, separate, csv readers for
 
-    -   OpenCPN files without headers;  a default header is assumed
+    -   OpenCPN files without headers;  a default header is assumed.
+        See ``GPS_NAVX_HEADER``.
 
-    -   Manual files with headers
+    -   Manual files with headers from the defined set of headers.
 
     :param source: Open File
-    :return: True (which means there are headers a DictReader can use.)
-        Or. False (which means external headers must be provided.)
+    :return: DictReader instance with the headers present or a default set of headers
     """
     sample = source.read(512)
     source.seek(0)
-    hdr = csv.Sniffer().has_header(sample)
-    return hdr
+    if csv.Sniffer().has_header(sample):
+        reader = csv.DictReader(source)
+    else:
+        reader = csv.DictReader(source, GPS_NAVX_HEADER)
+    return reader
 
 
-def csv_internheader_to_LogEntry(
-    source: TextIO, date: Optional[datetime.date] = None
+def csv_to_LogEntry(
+    reader: csv.DictReader[str], date: Optional[datetime.date] = None,
 ) -> Iterator[LogEntry]:
     """
     Parses a CSV file to yield an iterable sequence
-    of :py:class:`LogEntry` objects.
+    of :py:class:`LogEntry` objects. Headers must be provided, otherwise GPS_NAVX_HEADERS
+    will be assumed.
 
-    :param source: Open file or file-like object that can be read.
+    The headers issue.
+
+    -   GPS NavX doesn't provide headers. The list ``GPS_NAVX_HEADER`` is used as an external schema.
+
+    -   Other sources may use ['Time', 'Lat', 'Lon', 'COG', 'SOG', 'Rig', 'Engine', 'windAngle', 'windSpeed', ...
+
+    We "canonicalize" this by looking for ``date`` or ``time``, something starting with ``lat``
+    and something starting with ``lon``. These are the minimum required to compute distance and duration.
+
+    :param reader: csv.DictReader with proper headers
     :param date: :py:class:`datetime.datetime` object used to fill in default
         values for incomplete dates. By default, it's "now".
     :returns: An iterator over :py:class:`LogEntry` objects.
+
+    ..  todo:: Refactor :func:`csv_to_LogEntry` into a class that can be extended.
     """
+
+    def best_match(field_names: list[str], target: str) -> str:
+        """Given a list of field_names, which field starts with the hoped-for target?"""
+        for nm in field_names:
+            if nm.lower().startswith(target.lower()):
+                return nm
+        raise TypeError(f"Can't find a field like {target!r} in {field_names!r}")
+
+    header: list[str] = cast(list[str], reader.fieldnames)
+
+    if set(["date", "latitude", "longitude"]) <= set(header):
+        date_field = "date"
+        lat_field = "latitude"
+        lon_field = "longitude"
+    else:
+        try:
+            date_field = best_match(header, "date")
+        except TypeError:
+            date_field = best_match(header, "time")
+        lat_field = best_match(header, "lat")
+        lon_field = best_match(header, "lon")
 
     if date is None:
         date = datetime.date.today()
 
-    trk = csv.DictReader(source)
-    if trk.fieldnames and set(trk.fieldnames) < set(
-        "Time,Lat,Lon,COG,SOG,Rig,Engine,windAngle,windSpeed,Location".split(",")
-    ):
-        raise TypeError("Column Headings aren't valid")  # pragma: no cover
-
-    for row in trk:
+    for row in reader:
         try:
-            dt = parse_date(row["Time"], default=date)
-            lat = navigation.Lat.fromstring(row["Lat"])
-            lon = navigation.Lon.fromstring(row["Lon"])
-            yield LogEntry(time=dt, lat=lat, lon=lon, source_row=row)
-        except ValueError as e:
-            print(row)
-            print(e)
-
-
-def csv_externheader_to_LogEntry(
-    source: TextIO,
-    header: Optional[list[str]] = None,
-    date: Optional[datetime.date] = None,
-) -> Iterator[LogEntry]:
-    """
-
-    :param source:
-    :param header:
-    :param date:
-    :return:
-    """
-    if date is None:
-        date = datetime.date.today()
-
-    if header is None:
-        header = [
-            "date",
-            "latitude",
-            "longitude",
-            "cog",
-            "sog",
-            "heading",
-            "speed",
-            "depth",
-            "windAngle",
-            "windSpeed",
-            "comment",
-        ]
-
-    # GPSNavX CSV file columns.
-    trk = csv.DictReader(source, header)
-
-    for row in trk:
-        try:
-            lat = navigation.Lat.fromstring(row["latitude"])
-            lon = navigation.Lon.fromstring(row["longitude"])
-            # Typical time: 2011-06-04 13:12:32 +0000
-            dt = datetime.datetime.strptime(
-                row["date"], "%Y-%m-%d %H:%M:%S +0000"
-            ).replace(tzinfo=datetime.timezone.utc)
+            lat = navigation.Lat.fromstring(row[lat_field])
+            lon = navigation.Lon.fromstring(row[lon_field])
+            try:
+                # Typical time: 2011-06-04 13:12:32 +0000
+                dt = datetime.datetime.strptime(
+                    row[date_field], "%Y-%m-%d %H:%M:%S +0000"
+                ).replace(tzinfo=datetime.timezone.utc)
+            except ValueError:
+                dt = parse_date(row[date_field], default=date)
             yield LogEntry(time=dt, lat=lat, lon=lon, source_row=row)
         except ValueError as e:
             print(row)
@@ -368,7 +373,6 @@ def gen_rhumb(log_entry_iter: Iterator[LogEntry]) -> Iterator[LogEntry_Rhumb]:
     :return: iterable sequence of  :py:class:`LogEntry_Rhumb` instances.
     """
     p1 = next(log_entry_iter)
-    # TODO: At this point, we know the header for the p1.source_row.
     for p2 in log_entry_iter:
         # print( repr(p1), repr(p2) )
         r, theta = navigation.range_bearing(p1.point, p2.point)
@@ -382,7 +386,11 @@ def nround(value: Optional[float], digits: Optional[Any]) -> Union[int, float, N
     return None if value is None else round(value, digits)
 
 
-def write_csv(target: TextIO, log_entry_rhumb_iter: Iterator[LogEntry_Rhumb]) -> None:
+def write_csv(
+    target: TextIO,
+    log_entry_rhumb_iter: Iterator[LogEntry_Rhumb],
+    source_headers: list[str],
+) -> None:
     """
     Writes a sequence of :py:class:`LogEntry_Rhumb`
     objects to a given target file.   The objects are usually built by the
@@ -392,31 +400,23 @@ def write_csv(target: TextIO, log_entry_rhumb_iter: Iterator[LogEntry_Rhumb]) ->
     we emit just a few additional attributes joined onto the original,
     untouched row.
 
+    :param target: File to which to write the analyzed rows.
     :param log_entry_rhumb_iter:  iterable sequence of  :py:class:`LogEntry_Rhumb` instances.
         This is often the output of :py:func:`gen_rhumb`.
-    :param target: File to which to write the analyzed rows.
+    :param source_headers: Headers from source to which additional details are added.
 
     Note that we apply some rounding rules to these values before writing them
     to a CSV file. The distances are rounded to :math:`10^{-5}` which is about
     an inch, or 2 cm: more accurate than the GPS position.
     The bearing is rounded to an 0 places.
-
-    ..  todo:: Refactor to eliminate (if possible) sniffing the source_row keys to create CSV headers.
-
-        Option 1. Replace with a class. An iterator method to update the source_row
-        with LogEntry_Rhumb and accumulated sub-totals. Essentially, ``build_row_dict``.
-        A method to write CSV preserving original headers
-        and adding new headers based on values computed by the iterator.
-
-        Option 2. The client provides the source_row keys, doing the sniffing for us.
-    
     """
 
     def build_row_dict(
         log: LogEntry_Rhumb, td: Optional[float], tt: Optional[datetime.timedelta]
     ) -> dict[str, Any]:
         """Most entries have total distance and total time. The final entry"""
-        row = {
+        row = log.point.source_row.copy()
+        calc = {
             "calc_distance": nround(log.distance, 5),
             "calc_bearing": None
             if log.bearing is None
@@ -426,20 +426,14 @@ def write_csv(target: TextIO, log_entry_rhumb_iter: Iterator[LogEntry_Rhumb]) ->
             "calc_total_dist": nround(td, 5),
             "calc_total_time": tt,
         }
-        row.update(log.point.source_row)
+        row.update(calc)
         return row
 
     td = 0.0
     tt = datetime.timedelta(0)
 
-    try:
-        # Get the first LogEntry_Rhumb to get the original headings.
-        first = next(log_entry_rhumb_iter)
-    except StopIteration:
-        return  # No data.
-
     # Extract the existing headings from the "source_row"; and our additional fields
-    headings = list(first.point.source_row.keys())
+    headings = source_headers
     headings += [
         "calc_distance",
         "calc_bearing",
@@ -450,12 +444,6 @@ def write_csv(target: TextIO, log_entry_rhumb_iter: Iterator[LogEntry_Rhumb]) ->
     ]
     rte_rhumb = csv.DictWriter(target, headings)
     rte_rhumb.writeheader()
-
-    # Emit the first point with information on the leg to the next point.
-    # Ugh on this repetition.
-    td += first.distance or 0.0
-    tt += first.delta_time or datetime.timedelta(0)
-    rte_rhumb.writerow(build_row_dict(first, td, tt))
 
     # For all other points, update the accumulators and emit the data.
     for log in log_entry_rhumb_iter:
@@ -471,10 +459,6 @@ def analyze(log_filepath: Path, date: Optional[datetime.date] = None) -> None:
 
     The :py:func:`gen_rhumb` calculation is applied to each row.
 
-    ..  todo:: Refactor to extract the ``source_row`` keys from the first row.
-
-        This should be done outside :py:func:`gen_rhumb` and provided to :py:func:`write_csv`.
-
     :param log_filepath: Path of a log file to analyze.
         If the input is :samp:`{some_name}.csv` or :samp:`{some_name}.gpx`
         the output will be :samp:`{some_name} Distance.csv`.
@@ -488,22 +472,20 @@ def analyze(log_filepath: Path, date: Optional[datetime.date] = None) -> None:
     ext = log_filepath.suffix.lower()
     distance_path = log_filepath.parent / (log_filepath.stem + " Distance" + ".csv")
 
-    # print( distance_path )
+    # print(distance_path)
     if ext == ".csv":
         with log_filepath.open() as source:
             with distance_path.open("w", newline="") as target:
-                header = csv_sniff_header(source)
-                if header:
-                    log_iter = csv_internheader_to_LogEntry(source, date)
-                else:
-                    log_iter = csv_externheader_to_LogEntry(source, None, date)
+                reader = csv_reader(source)
+                log_iter = csv_to_LogEntry(reader, date)
                 track = gen_rhumb(log_iter)
-                write_csv(target, track)
+                write_csv(target, track, cast(list[str], reader.fieldnames))
     elif ext == ".gpx":
         with log_filepath.open() as source:
             with distance_path.open("w", newline="") as target:
-                track = gen_rhumb(gpx_to_LogEntry(source))
-                write_csv(target, track)
+                log_iter = gpx_to_LogEntry(source)
+                track = gen_rhumb(log_iter)
+                write_csv(target, track, ["lat", "lon", "time"])
     else:
         raise ValueError("Can't process {0}: unknown extension".format(log_filepath))
 

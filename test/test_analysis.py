@@ -13,6 +13,52 @@ from navtools import analysis
 from navtools import navigation
 
 
+from itertools import zip_longest
+from pprint import pformat
+
+
+def equalCSV(expected_txt, actual_txt, row_builder=None):
+    """
+    Compare CSV output files.
+
+    Prior to Python 3.6, CSV column orders can't easily be controlled.
+    There's no compelling reason to force a specific logical layout.
+    Instead, we'll compare the actual and expected CSV files while
+    permitting column orders to vary.
+
+    The number of rows must be the same. We use :py:func:`zip_longest`, to
+    inject ``None`` objects and fail the comparison.
+
+    We'll compare two CSV files by building the list-of-dict objects that we can
+    then compare for equality. We're comparing text values only.
+    In the case where float values must be compared, a row-comparison
+    function must be injected to convert float fields and apply the
+    :py:func:`pytest.approx` function as needed.
+
+    :param expected_txt: CSV file text
+    :param actual_txt: CSV file text
+    :return: True if the match
+    :raises: :exc:`AssertionError` if they don't match.
+
+    ..  todo:: The :func:`equalCSV` function needs to be shared with test_planning, also.
+    """
+    if row_builder is None:
+        row_builder = lambda row: row
+    ex_rdr = csv.DictReader(StringIO(expected_txt))
+    ex_data = list(ex_rdr)
+    ac_rdr = csv.DictReader(StringIO(actual_txt))
+    ac_data = list(ac_rdr)
+    assert ex_data == ac_data
+    mismatches = list(
+        filter(
+            lambda row: row_builder(row[0]) != row_builder(row[1]),
+            zip_longest(ex_data, ac_data)
+        )
+    )
+    assert len(mismatches) == 0, f"Mismatches: {pformat(mismatches)}"
+    return True
+
+
 @fixture
 def mock_today(monkeypatch):
     date_class = Mock(today=Mock(return_value=datetime.date(2021, 1, 18)))
@@ -41,8 +87,8 @@ def iNavX_csv_file():
 
 
 def test_csv_to_LogEntry_no_header(iNavX_csv_file):
-    assert not csv_sniff_header(iNavX_csv_file)
-    generator = csv_externheader_to_LogEntry(iNavX_csv_file, None)
+    reader = csv_reader(iNavX_csv_file)
+    generator = csv_to_LogEntry(reader, None)
     points = list(generator)
     assert len(points) == 2
     assert (
@@ -71,8 +117,11 @@ def manual_csv_file():
 
 
 def test_csv_to_LogEntry_header(manual_csv_file):
-    assert csv_sniff_header(manual_csv_file)
-    generator = csv_internheader_to_LogEntry(manual_csv_file)
+    reader = csv_reader(manual_csv_file)
+    assert reader.fieldnames == [
+        'Time', 'Lat', 'Lon', 'COG', 'SOG', 'Rig', 'Engine',
+        'windAngle', 'windSpeed', 'Location']
+    generator = csv_to_LogEntry(reader)
     points = list(generator)
     # for p in points: print( repr(p) )
     assert len(points) == 2
@@ -99,8 +148,11 @@ def bad_manual_csv_file():
 
 
 def test_bad_csv_to_LogEntry(bad_manual_csv_file, capsys):
-    assert csv_sniff_header(bad_manual_csv_file)
-    generator = csv_internheader_to_LogEntry(bad_manual_csv_file)
+    reader = csv_reader(bad_manual_csv_file)
+    assert reader.fieldnames == [
+        'Time', 'Lat', 'Lon', 'COG', 'SOG', 'Rig', 'Engine',
+        'windAngle', 'windSpeed', 'Location']
+    generator = csv_to_LogEntry(reader)
     points = list(generator)
     output, error = capsys.readouterr()
     assert output == dedent(
@@ -124,8 +176,11 @@ def bad_noheader_csv_file():
     return StringIO(bad_manual_csv_data)
 
 def test_bad_noheader_csv_to_LogEntry(bad_noheader_csv_file, capsys):
-    assert not csv_sniff_header(bad_noheader_csv_file)
-    generator = csv_externheader_to_LogEntry(bad_noheader_csv_file)
+    reader = csv_reader(bad_noheader_csv_file)
+    assert reader.fieldnames == [
+        'date', 'latitude', 'longitude', 'cog', 'sog', 'heading',
+        'speed', 'depth', 'windAngle', 'windSpeed', 'comment',]
+    generator = csv_to_LogEntry(reader)
     points = list(generator)
     output, error = capsys.readouterr()
     assert output == dedent(
@@ -335,46 +390,6 @@ def test_gen_rhumb(gen_rhumb_1):
     assert points[1].delta_time is None
 
 
-from itertools import zip_longest
-
-
-def equalCSV(expected_txt, actual_txt, row_builder=None):
-    """
-    Compare CSV output files.
-
-    Prior to Python 3.6, CSV column orders can't easily be controlled.
-    There's no compelling reason to force a specific logical layout.
-    Instead, we'll compare the actual and expected CSV files while
-    permitting column orders to vary.
-
-    The number of rows must be the same. We use :py:func:`zip_longest`, to
-    inject ``None`` objects and fail the comparison.
-
-    We'll compare two CSV files by building the list-of-dict objects that we can
-    then compare for equality. We're comparing text values only.
-    In the case where float values must be compared, a row-comparison
-    function must be injected to convert float fields and apply the
-    :py:func:`pytest.approx` function as needed.
-
-    :param expected_txt: CSV file text
-    :param actual_txt: CSV file text
-    :return: True if the match
-    :raises: :exc:`AssertionError` if they don't match.
-
-    ..  todo:: The :func:`equalCSV` function needs to be shared with test_planning, also.
-    """
-    if row_builder is None:
-        row_builder = lambda row: row
-    ex_rdr = csv.DictReader(StringIO(expected_txt))
-    ex_data = list(ex_rdr)
-    ac_rdr = csv.DictReader(StringIO(actual_txt))
-    ac_data = list(ac_rdr)
-    for ex_row, ac_row in zip_longest(ex_data, ac_data):
-        assert row_builder(ex_row) == row_builder(
-            ac_row
-        ), f"Expected {ex_row!r} != Actual {ac_row!r}"
-    return True
-
 
 @fixture
 def sample_track_1():
@@ -435,8 +450,11 @@ def test_write_csv(sample_track_1):
         1500 RPM,7.0,None,,6.6,10:06 AM,37 47.988N,None,076 16.056W,315,,,2012-04-17 10:06:00,,0.59945,0:45:00\r
         """
     )
+    headers = [
+        "Engine", "windSpeed", "COG", "Location", "SOG", "Time", "Lat", "Rig", "Lon", "windAngle"
+    ]
     target = StringIO()
-    write_csv(target, iter(sample_track_1))
+    write_csv(target, iter(sample_track_1), headers)
     assert equalCSV(expected, target.getvalue())
 
 
@@ -448,8 +466,10 @@ def sample_track_empty():
 
 def test_empty_write_csv(sample_track_empty):
     target = StringIO()
-    write_csv(iter(sample_track_empty), target)
-    assert target.getvalue() == ""
+    write_csv(target, iter(sample_track_empty), [])
+    assert target.getvalue().splitlines() == [
+        'calc_distance,calc_bearing,calc_time,calc_elapsed,calc_total_dist,calc_total_time'
+    ]
 
 
 @fixture
@@ -468,9 +488,9 @@ def test_NavX_analyze_CSV(sample_csv_1):
     target = sample_csv_1.parent / f"{sample_csv_1.stem} Distance.csv"
     expected = dedent(
         """\
-        comment,sog,windSpeed,longitude,latitude,depth,cog,date,speed,heading,windAngle,calc_distance,calc_bearing,calc_time,calc_elapsed,calc_total_dist,calc_total_time
-        ,3.6,,-76.330536,37.549225,,219,2011-06-04 13:12:32 +0000,,,,0.01092,219.0,2011-06-04 13:12:32+00:00,0:00:11,0.01092,0:00:11
-        ,3.0,,-76.330681,37.549084,,186,2011-06-04 13:12:43 +0000,,,,,,2011-06-04 13:12:43+00:00,,0.01092,0:00:11
+        calc_bearing,calc_distance,calc_elapsed,calc_time,calc_total_dist,calc_total_time,cog,comment,date,depth,heading,latitude,longitude,sog,speed,windAngle,windSpeed
+        219.0,0.01092,0:00:11,2011-06-04 13:12:32+00:00,0.01092,0:00:11,219,,2011-06-04 13:12:32 +0000,,,37.549225,-76.330536,3.6,,,
+        ,,,2011-06-04 13:12:43+00:00,0.01092,0:00:11,186,,2011-06-04 13:12:43 +0000,,,37.549084,-76.330681,3.0,,,
         """
     )
     with target.open() as result:
@@ -493,9 +513,9 @@ def test_Manual_analyze_CSV(sample_csv_2):
     target = sample_csv_2.parent / f"{sample_csv_2.stem} Distance.csv"
     expected = dedent(
         """\
-        Engine,SOG,Lon,windSpeed,Location,COG,Time,Lat,Rig,windAngle,calc_distance,calc_bearing,calc_time,calc_elapsed,calc_total_dist,calc_total_time
-        1200 RPM,0,076 16.385W,,Cockrell Creek,None,9:21 AM,37 50.424N,None,,2.45148,174.0,2012-04-18 09:21:00,0:45:00,2.45148,0:45:00
-        1500 RPM,6.6,076 16.056W,7.0,,None,10:06 AM,37 47.988N,None,315,,,2012-04-18 10:06:00,,2.45148,0:45:00
+        COG,Engine,Lat,Location,Lon,Rig,SOG,Time,calc_bearing,calc_distance,calc_elapsed,calc_time,calc_total_dist,calc_total_time,windAngle,windSpeed
+        None,1200 RPM,37 50.424N,Cockrell Creek,076 16.385W,None,0,9:21 AM,174.0,2.45148,0:45:00,2012-04-18 09:21:00,2.45148,0:45:00,,
+        None,1500 RPM,37 47.988N,,076 16.056W,None,6.6,10:06 AM,,,,2012-04-18 10:06:00,2.45148,0:45:00,315,7.0
         """
     )
     with target.open() as result:

@@ -99,6 +99,8 @@ The iPhone iNavX can save track information via
 http://x-traverse.com/.  These are standard GPX files, and are
 identical with the tracks created directly by iNavX.
 
+In effect, the GPX file is a sequence of ``lat``, ``lon``, ``time`` triples.
+This is vaguely similar to the CSV file, but with a slightly different schema.
 
 Date parsing
 -------------
@@ -119,11 +121,9 @@ Base Log Entry
 CSV input parsing
 -----------------
 
-..  autofunction:: csv_sniff_header
+..  autofunction:: csv_reader
 
-..  autofunction:: csv_internheader_to_LogEntry
-
-..  autofunction:: csv_externheader_to_LogEntry
+..  autofunction:: csv_to_LogEntry
 
 GPX input parsing
 -----------------

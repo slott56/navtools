@@ -56,6 +56,14 @@ These provide a number of navigation planning and analysis capabilities.
 These are not intended for use while sailing, however, that is better
 done by tools like OpenCPN, iNavX, and chartplotters.
 
+Documentation
+=============
+
+::
+
+    cd docs
+    make html
+
 Development
 ============
 
@@ -64,37 +72,34 @@ See https://plantuml.com.
 
 The Sphinx-PlantUML plugin is used to transform ``..  uml::`` markup into a diagram.
 
-- Use **conda** to install ``graphviz``. as well as installing the ``plantuml-markdown`` tools.
-  The ``markdown_py`` application can create an HTML draft of a Markdown doc.
-  It needs to be installed separately, if this is needed.
+-   Use **conda** to install ``graphviz``, as well as installing the ``plantuml-markdown`` tools.
+    and the Sphinx-PlantUML extension.
+    The ``markdown_py`` application can create an HTML draft of a Markdown doc.
+    It needs to be installed separately, if this is needed.
 
-  ::
+    ::
 
-      conda install graphviz
-      python -m pip install plantuml-markdown sphinxcontrib-plantuml
+        conda install graphviz
+        python -m pip install plantuml-markdown sphinxcontrib-plantuml
 
--   Depending on which release of PlantUML, you may need to
-    update the OS environment settings to set a ``GRAPHVIZ_DOT`` environment variable
+-   Older PlantUML versions require a ``GRAPHVIZ_DOT`` environment variable
     to name the conda virtual environment where ``graphviz`` was installed.
-    The macOS and Linux users should update their ``~/.zshrc`` or ``~/.bashrc`` file, depending on which shell is in use.
+    The macOS and Linux users can update ``~/.zshrc`` or ``~/.bashrc`` file, depending on which shell is in use.
     Windows users should set their system environment variables.
 
 -   It may be necessary to create a ``plantuml`` shell script in ``/usr/local/bin``.
     See https://github.com/mikitex70/plantuml-markdown for details on installation.
-    Generally, this should have may be done when plantuml-markdown was installed.
-
-The ``plantuml`` command can be used to manually tranform UML files to PNG images.
+    This may be done automatically by the plantuml-markdown installation. If not,
+    it needs to be added.
 
 A tool like https://pypi.org/project/py2puml/ can be used to create PlantUML text
 from the source code.
 
-Additionally...
+Additionally, plantuml can also be incorporated into a markdown processing plug-in used by the PyCharm IDE.
+The plugin depends on **graphviz**.
 
-    This can also be incorporated into a markdown processing plug-in used by the PyCharm IDE.
-    The plugin depends on **graphviz**, making the installation fairly complex.
+- Add the Markdown tool to PyCharm.
 
-    - Add the Markdown tool to PyCharm.
+- In the preferences for Markdown, install and enable PlantUML.
 
-    - In the preferences for Markdown, install and enable PlantUML.
-
-    This can be useful for documents in Markdown. This documentation, however, is in RST.
+While this can be useful for documents created with Markdown, this project's documentation is in RST.

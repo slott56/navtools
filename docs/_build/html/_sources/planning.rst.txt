@@ -49,29 +49,6 @@ There are a number of potential improvements to this approach:
 
 -   Include a Noon position on any leg that spans local noon.
 
-An event more sophisticated planner would allow for two kinds of plans:
-
--   A "forward" plan uses a Desired Time of Departure (DTD) to compute a sequence of ETE and ETA's.
-
--   A "reverse" plan would use a Desired Time of Arrival (DTA) and work backwords to
-    compute departures and times enroute. This would lead to a Desired Time of Departure (DTD).
-
-The idea is to reduce the amount of work done with a spreadsheet outside :py:mod:`navtools`.
-
-
-Improvements
-------------
-
-There are several improvements required.
-
-..  todo:: Locate the sunrise equation and include anticipated time-of-day for an ETA
-
-    See https://gml.noaa.gov/grad/solcalc/solareqns.PDF
-
-..  todo:: Compute the locations at noon of each day.
-
-    This requires looking at waypoints before and after local noon, Splitting the segment
-    to find noon, and adding a waypoint with no course change.
 
 The goal is to match the output content of :py:mod:`opencpn_table`:
 
@@ -86,6 +63,91 @@ The goal is to match the output content of :py:mod:`opencpn_table`:
     - bearing: Optional[float]
     - course: Optional[float] = None
 
+
+Improvements
+============
+
+There are several improvements required.
+
+Time-of-Day
+-----------
+
+..  todo:: Locate the sunrise equation and include anticipated time-of-day for an ETA
+
+    See https://gml.noaa.gov/grad/solcalc/solareqns.PDF
+
+Noon Location
+-------------
+
+..  todo:: Compute the locations at noon of each day.
+
+    This requires looking at waypoints before and after local noon, Splitting the segment
+    to find noon, and adding a waypoint with no course change.
+
+A route is a sequence of points. Of those, two points, :math:`A` and :math:`B`, have times, :math:`T(x)`, that bracket noon, :math:`N`.
+
+..  math::
+
+    T(A) \leq N \leq T(B)
+
+There are three cases here, two of which are trivial. If :math:`T(A) = N` or :math:`N = T(B)`, there's
+no further computation required. The interesting case, then, is :math:`T(A) < N < T(B)`.
+
+We know the distance, :math:`d = D(A, B)`, and bearing, :math:`\theta = \Theta(A, B)`.
+
+We also know the time, :math:`t`, to traverse the leg, given a speed, :math:`s`.
+
+..  math::
+
+    t = \frac{D(A, B)}{s}
+
+The time until noon, :math:`N - T(A)`, is a fraction of the overall duration of the leg, :math:`t`.
+Which gives us distance until noon, :math:`d_n`,
+
+..  math::
+
+    \frac{N - T(A)}{t} = \frac{d_n}{d}
+
+or,
+
+..  math::
+
+    d_n = \frac{D(A, B)[N - T(A)]}{\frac{D(A, B)}{s}} = s[N - T(A)]
+
+We can then offset from point :math:`A` by distance :math:`d_n` in direction :math:`\theta` to compute
+the noon location. This is the :py:func:`navigation.destination` function.
+
+The destination function, :math:`D( p_1, d, \theta )`, is defined like this.
+
+..  math::
+
+    D_{\phi}( p_1, d, \theta ), &\text{ latitude at distance $d$, angle $\theta$ from $p_1$}\\
+    D_{\lambda}( p_1, d, \theta ), &\text{ longitude at distance $d$, angle $\theta$ from $p_1$}
+
+    D( p_1, d, \theta ) = \Bigl( D_{\phi}( p_1, d, \theta ), D_{\lambda}( p_1, d, \theta ) \Bigr)
+
+The definition of these two functions are in :ref:`calc.destination`.
+
+Forward and Reverse Plans
+--------------------------
+
+An event more sophisticated planner would allow for two kinds of plans:
+
+-   A "forward" plan uses a Scheduled Time of Departure (STD) to compute a sequence of ETE and ETA's.
+
+-   A "reverse" plan would use a Scheduled Time of Arrival (STA) and work backwords to
+    compute departures and times enroute. This would lead to a Scheduled Time of Departure (STD).
+
+The idea is to reduce the amount of work done with a spreadsheet outside :py:mod:`navtools`.
+
+We can also imagine a plan with both STD and STA information from which speed is deduced
+to meet the scheduled times. This is a two pass operation.
+
+1. Starting from STD or STA, compute a plan that involves pre-dawn or post-dusk arrivals or departures.
+
+2. Adjust departure to be earlier or arrival to be later -- within daylight times -- and compute the speed required.
+
+This is a more sophisticated planning operation, but can be automated because the constraints are well-defined.
 
 Implementation
 ==============

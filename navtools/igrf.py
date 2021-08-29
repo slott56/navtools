@@ -240,7 +240,7 @@ class IGRF:
         :param file_name: the path to the :file:`igrf11coeffs.txt` file.
             Ideally this  is a :class:`pathlib.Path`, but a string will do.
 
-        ..  todo:: Use urllib2
+        ..  todo:: Use urllib.request
 
             We can then use :mod:`urllib` instead of simple
             :func:`Path.open` so that we could use

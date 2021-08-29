@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>planning – Route Planning Application &#8212; Navtools 2021.06.01 documentation</title>
+    <title>planning – Route Planning Application &#8212; Navtools 2021.08.29 documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
@@ -74,27 +74,6 @@ This is direct enrichment of the <code class="xref py py-class docutils literal 
 <li><p>Include the position of the sun for each ETA.</p></li>
 <li><p>Include a Noon position on any leg that spans local noon.</p></li>
 </ul>
-<p>An event more sophisticated planner would allow for two kinds of plans:</p>
-<ul class="simple">
-<li><p>A “forward” plan uses a Desired Time of Departure (DTD) to compute a sequence of ETE and ETA’s.</p></li>
-<li><p>A “reverse” plan would use a Desired Time of Arrival (DTA) and work backwords to
-compute departures and times enroute. This would lead to a Desired Time of Departure (DTD).</p></li>
-</ul>
-<p>The idea is to reduce the amount of work done with a spreadsheet outside <code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools</span></code>.</p>
-<section id="improvements">
-<h3>Improvements<a class="headerlink" href="#improvements" title="Permalink to this headline">¶</a></h3>
-<p>There are several improvements required.</p>
-<div class="admonition-todo admonition" id="id1">
-<p class="admonition-title">Todo</p>
-<p>Locate the sunrise equation and include anticipated time-of-day for an ETA</p>
-<p>See <a class="reference external" href="https://gml.noaa.gov/grad/solcalc/solareqns.PDF">https://gml.noaa.gov/grad/solcalc/solareqns.PDF</a></p>
-</div>
-<div class="admonition-todo admonition" id="id2">
-<p class="admonition-title">Todo</p>
-<p>Compute the locations at noon of each day.</p>
-<p>This requires looking at waypoints before and after local noon, Splitting the segment
-to find noon, and adding a waypoint with no course change.</p>
-</div>
 <p>The goal is to match the output content of <code class="xref py py-mod docutils literal notranslate"><span class="pre">opencpn_table</span></code>:</p>
 <blockquote>
 <div><ul class="simple">
@@ -110,6 +89,66 @@ to find noon, and adding a waypoint with no course change.</p>
 <li><p>course: Optional[float] = None</p></li>
 </ul>
 </div></blockquote>
+</section>
+<section id="improvements">
+<h2>Improvements<a class="headerlink" href="#improvements" title="Permalink to this headline">¶</a></h2>
+<p>There are several improvements required.</p>
+<section id="time-of-day">
+<h3>Time-of-Day<a class="headerlink" href="#time-of-day" title="Permalink to this headline">¶</a></h3>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>Locate the sunrise equation and include anticipated time-of-day for an ETA</p>
+<p>See <a class="reference external" href="https://gml.noaa.gov/grad/solcalc/solareqns.PDF">https://gml.noaa.gov/grad/solcalc/solareqns.PDF</a></p>
+</div>
+</section>
+<section id="noon-location">
+<h3>Noon Location<a class="headerlink" href="#noon-location" title="Permalink to this headline">¶</a></h3>
+<div class="admonition-todo admonition" id="id2">
+<p class="admonition-title">Todo</p>
+<p>Compute the locations at noon of each day.</p>
+<p>This requires looking at waypoints before and after local noon, Splitting the segment
+to find noon, and adding a waypoint with no course change.</p>
+</div>
+<p>A route is a sequence of points. Of those, two points, <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span>, have times, <span class="math notranslate nohighlight">\(T(x)\)</span>, that bracket noon, <span class="math notranslate nohighlight">\(N\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[T(A) \leq N \leq T(B)\]</div>
+<p>There are three cases here, two of which are trivial. If <span class="math notranslate nohighlight">\(T(A) = N\)</span> or <span class="math notranslate nohighlight">\(N = T(B)\)</span>, there’s
+no further computation required. The interesting case, then, is <span class="math notranslate nohighlight">\(T(A) &lt; N &lt; T(B)\)</span>.</p>
+<p>We know the distance, <span class="math notranslate nohighlight">\(d = D(A, B)\)</span>, and bearing, <span class="math notranslate nohighlight">\(\theta = \Theta(A, B)\)</span>.</p>
+<p>We also know the time, <span class="math notranslate nohighlight">\(t\)</span>, to traverse the leg, given a speed, <span class="math notranslate nohighlight">\(s\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[t = \frac{D(A, B)}{s}\]</div>
+<p>The time until noon, <span class="math notranslate nohighlight">\(N - T(A)\)</span>, is a fraction of the overall duration of the leg, <span class="math notranslate nohighlight">\(t\)</span>.
+Which gives us distance until noon, <span class="math notranslate nohighlight">\(d_n\)</span>,</p>
+<div class="math notranslate nohighlight">
+\[\frac{N - T(A)}{t} = \frac{d_n}{d}\]</div>
+<p>or,</p>
+<div class="math notranslate nohighlight">
+\[d_n = \frac{D(A, B)[N - T(A)]}{\frac{D(A, B)}{s}} = s[N - T(A)]\]</div>
+<p>We can then offset from point <span class="math notranslate nohighlight">\(A\)</span> by distance <span class="math notranslate nohighlight">\(d_n\)</span> in direction <span class="math notranslate nohighlight">\(\theta\)</span> to compute
+the noon location. This is the <code class="xref py py-func docutils literal notranslate"><span class="pre">navigation.destination()</span></code> function.</p>
+<p>The destination function, <span class="math notranslate nohighlight">\(D( p_1, d, \theta )\)</span>, is defined like this.</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\begin{split}D_{\phi}( p_1, d, \theta ), &amp;\text{ latitude at distance $d$, angle $\theta$ from $p_1$}\\
+D_{\lambda}( p_1, d, \theta ), &amp;\text{ longitude at distance $d$, angle $\theta$ from $p_1$}\end{split}\\D( p_1, d, \theta ) = \Bigl( D_{\phi}( p_1, d, \theta ), D_{\lambda}( p_1, d, \theta ) \Bigr)\end{aligned}\end{align} \]</div>
+<p>The definition of these two functions are in <a class="reference internal" href="navigation.html#calc-destination"><span class="std std-ref">Destination Calculation</span></a>.</p>
+</section>
+<section id="forward-and-reverse-plans">
+<h3>Forward and Reverse Plans<a class="headerlink" href="#forward-and-reverse-plans" title="Permalink to this headline">¶</a></h3>
+<p>An event more sophisticated planner would allow for two kinds of plans:</p>
+<ul class="simple">
+<li><p>A “forward” plan uses a Scheduled Time of Departure (STD) to compute a sequence of ETE and ETA’s.</p></li>
+<li><p>A “reverse” plan would use a Scheduled Time of Arrival (STA) and work backwords to
+compute departures and times enroute. This would lead to a Scheduled Time of Departure (STD).</p></li>
+</ul>
+<p>The idea is to reduce the amount of work done with a spreadsheet outside <code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools</span></code>.</p>
+<p>We can also imagine a plan with both STD and STA information from which speed is deduced
+to meet the scheduled times. This is a two pass operation.</p>
+<ol class="arabic simple">
+<li><p>Starting from STD or STA, compute a plan that involves pre-dawn or post-dusk arrivals or departures.</p></li>
+<li><p>Adjust departure to be earlier or arrival to be later – within daylight times – and compute the speed required.</p></li>
+</ol>
+<p>This is a more sophisticated planning operation, but can be automated because the constraints are well-defined.</p>
 </section>
 </section>
 <section id="implementation">

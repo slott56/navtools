@@ -22,7 +22,7 @@ copyright = '2021, S.Lott'
 author = 'S.Lott'
 
 # The full version, including alpha/beta/rc tags
-release = '2021.06.01'
+release = '2021.08.29'
 
 
 # -- General configuration ---------------------------------------------------
