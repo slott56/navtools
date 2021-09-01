@@ -46,47 +46,94 @@ Also, this paper seems to have a number of small errors in it. (See “cost”, 
 different, more accurate results. The associated Excel spreadsheet seems more
 useful because it seems to be the preferred approach and provides test data.</p>
 <p>Generally,
-the <span class="math notranslate nohighlight">\(\phi\)</span> values are N-S latitude, and <span class="math notranslate nohighlight">\(\lambda\)</span> values are E-W longitude.</p>
+the <span class="math notranslate nohighlight">\(\phi\)</span> values are N-S latitude, and <span class="math notranslate nohighlight">\(\lambda\)</span> values are E-W longitude.
+Also, the final time requires a time zone offet, <span class="math notranslate nohighlight">\(t\)</span>, to convert to local time,
+and account for savings vs. daylight time.</p>
 <p>The procedure is as follows:</p>
-<ol class="arabic simple">
+<ol class="arabic">
 <li><p>D is the given date as an ordinal number after 1900.
 The spreadsheet representation of dates provides a helpful approximation.
 <code class="docutils literal notranslate"><span class="pre">date</span> <span class="pre">-</span> <span class="pre">(1900-1-1)</span> <span class="pre">+</span> <span class="pre">2</span></code>.</p></li>
-<li><p>E is the time past midnight as a float in minutes.</p></li>
-<li><p>F is the Julian day number.</p></li>
-<li><p>G is the Julian century.
-<span class="math notranslate nohighlight">\(\frac{F - 2451545}{36525}\)</span></p></li>
-<li><p>I is the sun’s geometric mean longitude (in degrees).
-<span class="math notranslate nohighlight">\(280.46646 + G(36000.76983 + 0.0003032 G) \mod 360\)</span></p></li>
-<li><p>J is the sun’s geometric mean anomaly (in degrees).
-<span class="math notranslate nohighlight">\(357.52911 + 35999.05029 G - 0.0001537 G^2\)</span></p></li>
-<li><p>K is the eccentricity of earth’s orbit.
-<span class="math notranslate nohighlight">\(0.016708634 - 0.000042037 G + 0.0000001267 G^2\)</span></p></li>
-<li><p>L is the sun’s equation of center.
-<span class="math notranslate nohighlight">\((1.914602 - 0.004817 G + 0.000014 G^2) \sin J + (0.019993 - 0.000101 G) \sin 2 J + 0.000289 \sin 2 J\)</span></p></li>
+<li><p>E is the time past midnight of D as a float, in minutes.</p></li>
+<li><p>F is the Julian day number.  (<span class="math notranslate nohighlight">\(t\)</span> is the timezone offset, in hours.)</p>
+<div class="math notranslate nohighlight">
+\[F = D + 2415018.5 + E - \frac{t}{24}\]</div>
+</li>
+<li><p>G is the Julian century.</p>
+<div class="math notranslate nohighlight">
+\[G = \frac{F - 2451545}{36525}\]</div>
+</li>
+<li><p>I is the sun’s geometric mean longitude (in degrees).</p>
+<div class="math notranslate nohighlight">
+\[I = (280.46646 + 36000.76983 G + 0.0003032 G^2) \mod 360\]</div>
+</li>
+<li><p>J is the sun’s geometric mean anomaly (in degrees).</p>
+<div class="math notranslate nohighlight">
+\[J = 357.52911 + 35999.05029 G - 0.0001537 G^2\]</div>
+</li>
+<li><p>K is the eccentricity of earth’s orbit.</p>
+<div class="math notranslate nohighlight">
+\[K  = 0.016708634 - 0.000042037 G + 0.0000001267 G^2\]</div>
+</li>
+<li><p>L is the sun’s equation of center.</p>
+<div class="math notranslate nohighlight">
+\[L = (1.914602 - 0.004817 G + 0.000014 G^2) \sin J + (0.019993 - 0.000101 G) \sin 2 J + 0.000289 \sin 2 J\]</div>
+</li>
 <li><p>M is the sun’s true longitude (in degrees),
-<span class="math notranslate nohighlight">\(I + L\)</span>.</p></li>
+<span class="math notranslate nohighlight">\(M = I + L\)</span>.</p></li>
 <li><p>N is the sub’s true anomaly (in degrees),
-<span class="math notranslate nohighlight">\(J + L\)</span>.</p></li>
-<li><p>(Not required, but in the original spreadsheet anyway.) O is the sun’s radius vector (in Astronomical Units).
-<span class="math notranslate nohighlight">\(\frac{1.000001018 (1 - K^2)}{1 + K \cos(N)}\)</span></p></li>
-<li><p>P is the sun’s apparent longitude (in degrees).
-<span class="math notranslate nohighlight">\(M - 0.00569 - 0.00478 \sin (125.04 - 1934.136 G)\frac{\pi}{180}\)</span></p></li>
-<li><p>Q is the mean obliquity to the ecliptic (in degrees).
-<span class="math notranslate nohighlight">\(23 + \frac{26}{60} + \frac{21.448 - 46.815 G + 0.00059 G^2 - 0.001813 G^3}{3600}\)</span></p></li>
-<li><p>R is the obliquity correction (degrees). <span class="math notranslate nohighlight">\(Q + 0.00256 \cos(125.04 - 1934.136 G) \frac{\pi}{180}\)</span></p></li>
-<li><p>S is the sun’s right ascension (degrees). <span class="math notranslate nohighlight">\(\arctan \frac{\cos R \sin P} {\cos P}\)</span></p></li>
-<li><p>T is the sun’s declination (degrees). <span class="math notranslate nohighlight">\(\arcsin (\sin R \sin P)\)</span></p></li>
-<li><p>U is the “variable Y”. <span class="math notranslate nohighlight">\(\tan^2 \frac{R}{2}\)</span>. This is referenced as <span class="math notranslate nohighlight">\(y\)</span> in several
-variations. See <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/1989MNRAS.238.1529H/abstract">https://ui.adsabs.harvard.edu/abs/1989MNRAS.238.1529H/abstract</a> for an example.</p></li>
-<li><p>V is the “Equation” of time (in minutes) how apparent time equates to measured time.
-<span class="math notranslate nohighlight">\(4 U \sin(2I) - 2K\sin J + 4KU\sin J \cos 2I - 0.5 U^2 \sin 4I - 1.25 K^2 \sin 2J\)</span></p></li>
-<li><p>W is the Hour Angle of Sunrise (degrees)
-<span class="math notranslate nohighlight">\(\arccos (\frac{\cos 90.833}{\cos \phi \cos T} - \tan \phi \tan T)\)</span></p></li>
-<li><p>X is Solar Noon in Local Standard Time.
-<span class="math notranslate nohighlight">\(\frac{720 - 4 \lambda - V + t}{1440}\)</span></p></li>
-<li><p>Y is sunrise. <span class="math notranslate nohighlight">\(X - 4 W / 1440\)</span>.</p></li>
-<li><p>Z is sunset. <span class="math notranslate nohighlight">\(X + 4 W / 1440\)</span>.</p></li>
+<span class="math notranslate nohighlight">\(M = J + L\)</span>.</p></li>
+<li><p>(Not required, but is in the original spreadsheet.) O is the sun’s radius vector (in Astronomical Units).</p>
+<div class="math notranslate nohighlight">
+\[O = \frac{1.000001018 (1 - K^2)}{1 + K \cos N}\]</div>
+</li>
+<li><p>P is the sun’s apparent longitude (in degrees).</p>
+<div class="math notranslate nohighlight">
+\[P = M - 0.00569 - 0.00478 \sin (125.04 - 1934.136 G)\frac{\pi}{180}\]</div>
+</li>
+<li><p>Q is the mean obliquity to the ecliptic (in degrees).</p>
+<div class="math notranslate nohighlight">
+\[Q = 23 + \frac{26}{60} + \frac{21.448 - 46.815 G + 0.00059 G^2 - 0.001813 G^3}{3600}\]</div>
+</li>
+<li><p>R is the obliquity correction (degrees).</p>
+<div class="math notranslate nohighlight">
+\[R = Q + 0.00256 \cos(125.04 - 1934.136 G) \frac{\pi}{180}\]</div>
+</li>
+<li><p>S is the sun’s right ascension (degrees).</p>
+<div class="math notranslate nohighlight">
+\[S = \arctan \frac{\cos R \sin P} {\cos P}\]</div>
+</li>
+<li><p>T is the sun’s declination (degrees).</p>
+<div class="math notranslate nohighlight">
+\[T = \arcsin (\sin R \sin P)\]</div>
+</li>
+<li><p>U is the “variable Y”. This is referenced as <span class="math notranslate nohighlight">\(y\)</span> in several
+variations. See <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/1989MNRAS.238.1529H/abstract">https://ui.adsabs.harvard.edu/abs/1989MNRAS.238.1529H/abstract</a> for an example.</p>
+<div class="math notranslate nohighlight">
+\[U = \tan^2 \frac{R}{2}\]</div>
+</li>
+<li><p>V is the “Equation” of time (in minutes) how apparent time equates to measured time.</p>
+<div class="math notranslate nohighlight">
+\[V = 4 U \sin(2I) - 2K\sin J + 4KU\sin J \cos 2I - 0.5 U^2 \sin 4I - 1.25 K^2 \sin 2J\]</div>
+</li>
+<li><p>W is the Local Hour Angle of Sunrise (degrees). The baseline for a visible sun is <span class="math notranslate nohighlight">\(90^{\circ}50^{\prime}\)</span>,
+or 90.833. Other values account for civil, nautical, or astronomial twilight.</p>
+<div class="math notranslate nohighlight">
+\[W = \arccos \left(\frac{\cos 90.833}{\cos \phi \cos T} - \tan \phi \tan T\right)\]</div>
+</li>
+<li><p>X is Solar Noon in Local Standard Time. Note that <span class="math notranslate nohighlight">\(1440 = 24 \times 60\)</span>, the number
+of minutes in a day. The equation of time is in minutes.</p>
+<div class="math notranslate nohighlight">
+\[X = \frac{720 - 4 \lambda - V + t}{1440}\]</div>
+</li>
+<li><p>Y is sunrise.</p>
+<div class="math notranslate nohighlight">
+\[Y = \frac{X - 4 W}{1440}\]</div>
+</li>
+<li><p>Z is sunset.</p>
+<div class="math notranslate nohighlight">
+\[Z = \frac{X + 4 W}{1440}\]</div>
+</li>
 </ol>
 <section id="twilight">
 <h2>Twilight<a class="headerlink" href="#twilight" title="Permalink to this headline">¶</a></h2>
@@ -96,10 +143,200 @@ This is 12° beyond the horizon.</p>
 <p>This appears to be an offset to the Hour Angle of sunrise. The following
 uses 90.833 as the horizon with a correction for refraction of the atmosphere:</p>
 <div class="math notranslate nohighlight">
-\[W = \arccos \left[ \frac{\cos 90.833}{\cos {\phi} \cos T} - \tan{\phi}\tan T \right]\]</div>
+\[W = \arccos \left( \frac{\cos 90.833}{\cos {\phi} \cos T} - \tan{\phi}\tan T \right)\]</div>
 <p>If so, then Nautical twilight could be:</p>
 <div class="math notranslate nohighlight">
-\[W_n = \arccos \left[ \frac{\cos 102}{\cos {\phi} \cos T} - \tan{\phi}\tan T \right]\]</div>
+\[W_n = \arccos \left( \frac{\cos 102}{\cos {\phi} \cos T} - \tan{\phi}\tan T \right)\]</div>
+</section>
+<section id="alternative">
+<h2>Alternative<a class="headerlink" href="#alternative" title="Permalink to this headline">¶</a></h2>
+<p>See <a class="reference external" href="https://edwilliams.org/sunrise_sunset_algorithm.htm">https://edwilliams.org/sunrise_sunset_algorithm.htm</a></p>
+<p>This is a reference to the <em>Almanac for computers</em>, 1990 edition.</p>
+<p>The official citation:</p>
+<blockquote>
+<div><p>United States Naval Observatory. Nautical Almanac Office. (19801991).
+<em>Almanac for computers</em>. Washington, D.C.: Nautical Almanac Office, United States Naval Observatory.</p>
+</div></blockquote>
+<section id="day-of-the-year">
+<h3>Day of the Year<a class="headerlink" href="#day-of-the-year" title="Permalink to this headline">¶</a></h3>
+<p>Preliminary Information from Page B1 and B2.</p>
+<dl class="field-list simple">
+<dt class="field-odd"><span class="math notranslate nohighlight">\(N\)</span></dt>
+<dd class="field-odd"><p>Day of year, integer; the time in days since the beginning of the year
+Range is 1 to 365 for non-leap years, 1 to 366 for leap years.</p>
+</dd>
+</dl>
+<div class="math notranslate nohighlight">
+\[N = \left\lfloor \frac{275 M}{9} \right\rfloor – \left\lfloor \frac{M+9}{12} \right\rfloor \left(1+\left\lfloor \frac{K \mod 4+2}{3} \right\rfloor \right) + I - 30\]</div>
+<p>Where <span class="math notranslate nohighlight">\(N\)</span> is the day of the year, <span class="math notranslate nohighlight">\(K\)</span> is the year, <span class="math notranslate nohighlight">\(M\)</span> is the month (<span class="math notranslate nohighlight">\(1 \leq M \leq 12\)</span>),
+and <span class="math notranslate nohighlight">\(I\)</span> is the day of the month (<span class="math notranslate nohighlight">\(1 \leq I \leq 31\)</span>).</p>
+<p>This is valid for any year except centurial years not evenly divisible by 400. This is valid
+for 2000, but not for 1900 or 2100.</p>
+</section>
+<section id="sunrise-sunset-and-twilight">
+<h3>Sunrise, Sunset and Twilight<a class="headerlink" href="#sunrise-sunset-and-twilight" title="Permalink to this headline">¶</a></h3>
+<p>This starts on Page B5.</p>
+<p>For locations between latitudes 65° North and 65° South, the following algorithm
+provides times of sunrise, sunset and twilight to an accuracy of <span class="math notranslate nohighlight">\(\pm 2 ^m\)</span>,
+for any date in the latter half of the twentieth century.</p>
+<p>Notation:</p>
+<dl class="field-list">
+<dt class="field-odd"><span class="math notranslate nohighlight">\(\phi\)</span></dt>
+<dd class="field-odd"><p>latitude of observer (north is positive; south is negative)</p>
+</dd>
+<dt class="field-even"><span class="math notranslate nohighlight">\(\lambda\)</span></dt>
+<dd class="field-even"><p>longitude of observer (east is positive; west is negative)</p>
+</dd>
+<dt class="field-odd"><span class="math notranslate nohighlight">\(M\)</span></dt>
+<dd class="field-odd"><p>Sun’s mean anomaly</p>
+</dd>
+<dt class="field-even"><span class="math notranslate nohighlight">\(L\)</span></dt>
+<dd class="field-even"><p>Sun’s true longitude</p>
+</dd>
+<dt class="field-odd"><span class="math notranslate nohighlight">\(RA\)</span></dt>
+<dd class="field-odd"><p>Sun’s right ascension</p>
+</dd>
+<dt class="field-even"><span class="math notranslate nohighlight">\(\delta\)</span></dt>
+<dd class="field-even"><p>Sun’s declination</p>
+</dd>
+<dt class="field-odd"><span class="math notranslate nohighlight">\(H\)</span></dt>
+<dd class="field-odd"><p>Sun’s local hour angle</p>
+</dd>
+<dt class="field-even"><span class="math notranslate nohighlight">\(z\)</span></dt>
+<dd class="field-even"><p>Sun’s zenith distance for sunrise or sunset.
+One of the following:</p>
+<table class="docutils align-left" id="id8">
+<caption><span class="caption-text">Zenith Choices</span><a class="headerlink" href="#id8" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 58%" />
+<col style="width: 19%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Phenomenon</p></th>
+<th class="head"><p>z</p></th>
+<th class="head"><p>cos z</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Sunrise Sunset</p></td>
+<td><p>90°50′</p></td>
+<td><p>-0.01454</p></td>
+</tr>
+<tr class="row-odd"><td><p>Civil Twilight</p></td>
+<td><p>96°</p></td>
+<td><p>-0.10453</p></td>
+</tr>
+<tr class="row-even"><td><p>Nautical Twilight</p></td>
+<td><p>102°</p></td>
+<td><p>-0.20791</p></td>
+</tr>
+<tr class="row-odd"><td><p>Astronomical Twilight</p></td>
+<td><p>108°</p></td>
+<td><p>-0.30902</p></td>
+</tr>
+<tr class="row-even"><td><p>Noon</p></td>
+<td><p>0°</p></td>
+<td><p>+1.00000</p></td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd"><span class="math notranslate nohighlight">\(t\)</span></dt>
+<dd class="field-odd"><p>approximate time of phenomenon in days since 0 January, <span class="math notranslate nohighlight">\(O^h\)</span> UT</p>
+</dd>
+<dt class="field-even"><span class="math notranslate nohighlight">\(T\)</span></dt>
+<dd class="field-even"><p>local mean time of phenomenon</p>
+</dd>
+<dt class="field-odd"><span class="math notranslate nohighlight">\(T_U\)</span></dt>
+<dd class="field-odd"><p>universal time of phenomenon</p>
+</dd>
+</dl>
+<p>Formulas:</p>
+<div class="math notranslate nohighlight" id="id1">
+<span id="equation-1"></span><span class="eqno">(1)<a class="headerlink" href="#id1" title="Permalink to this equation">¶</a></span>\[M = 0^{\circ}\!.985600 t - 3^{\circ}\!.289\]</div>
+<div class="math notranslate nohighlight" id="id2">
+<span id="equation-2"></span><span class="eqno">(2)<a class="headerlink" href="#id2" title="Permalink to this equation">¶</a></span>\[L = M + 1^{\circ}\!.916 \sin M + 0^{\circ}\!.020 \sin 2M + 282^{\circ}\!.634\]</div>
+<div class="math notranslate nohighlight" id="id3">
+<span id="equation-3"></span><span class="eqno">(3)<a class="headerlink" href="#id3" title="Permalink to this equation">¶</a></span>\[\tan {RA} = 0.91746 \tan L\]</div>
+<div class="math notranslate nohighlight" id="id4">
+<span id="equation-4"></span><span class="eqno">(4)<a class="headerlink" href="#id4" title="Permalink to this equation">¶</a></span>\[\sin \delta = 0.39782 \sin L\]</div>
+<div class="math notranslate nohighlight" id="id5">
+<span id="equation-5"></span><span class="eqno">(5)<a class="headerlink" href="#id5" title="Permalink to this equation">¶</a></span>\[x = \cos H = \frac{\cos z - \sin \delta \sin \phi}{\cos \delta \cos \phi}\]</div>
+<div class="math notranslate nohighlight" id="id6">
+<span id="equation-6"></span><span class="eqno">(6)<a class="headerlink" href="#id6" title="Permalink to this equation">¶</a></span>\[T = H + {RA} - 0^{h}\!.65710 t - 6^{h}\!.622\]</div>
+<div class="math notranslate nohighlight" id="id7">
+<span id="equation-7"></span><span class="eqno">(7)<a class="headerlink" href="#id7" title="Permalink to this equation">¶</a></span>\[T_U = T - \lambda\]</div>
+<p>Procedure:</p>
+<ol class="arabic">
+<li><p>With an initial valueof <span class="math notranslate nohighlight">\(t\)</span>, compute <span class="math notranslate nohighlight">\(M\)</span> from eq. (<a class="reference internal" href="#id1">1</a>) and then <span class="math notranslate nohighlight">\(L\)</span> from eq. (<a class="reference internal" href="#id2">2</a>).
+If a morning phenomenon (sunrise or the beginning of morning twilight) is being computed,
+construct an initial value of <span class="math notranslate nohighlight">\(t\)</span> from the formula</p>
+<div class="math notranslate nohighlight">
+\[t=N+(6^{h}-\lambda)/24\]</div>
+<p>Where <span class="math notranslate nohighlight">\(N\)</span> is the day of the year (see calendar formulas on page B1)
+and <span class="math notranslate nohighlight">\(\lambda\)</span> is the observer’s longitude expressed in hours.</p>
+<p>If an evening phenomenon is being computed, use</p>
+<div class="math notranslate nohighlight">
+\[t=N+(18^{h}-\lambda)/24\]</div>
+<p>For transit of the local meridian (i.e., noon), use</p>
+<div class="math notranslate nohighlight">
+\[t=N+(12^{h}-\lambda)/24\]</div>
+</li>
+<li><p>Solve eq. (<a class="reference internal" href="#id3">3</a>) for <span class="math notranslate nohighlight">\(RA\)</span>, nothing that <span class="math notranslate nohighlight">\(RA\)</span> is in the same quadrant as <span class="math notranslate nohighlight">\(L\)</span>.
+Transform <span class="math notranslate nohighlight">\(RA\)</span> to hours for later use in eq. (<cite>6</cite>).</p></li>
+<li><p>Solve eq. (<a class="reference internal" href="#id4">4</a>) for <span class="math notranslate nohighlight">\(\sin \delta\)</span>, which appears in eq. (<a class="reference internal" href="#id5">5</a>);
+<span class="math notranslate nohighlight">\(\cos \delta\)</span>, which also is required in eq. (<a class="reference internal" href="#id5">5</a>), should be determined
+from <span class="math notranslate nohighlight">\(\sin \delta\)</span>. While <span class="math notranslate nohighlight">\(\sin \delta\)</span> may be positive or negative,
+<span class="math notranslate nohighlight">\(\cos \delta\)</span> is always positive.</p></li>
+<li><p>Solve eq. (<a class="reference internal" href="#id5">5</a>) for <span class="math notranslate nohighlight">\(H\)</span>. Since computers and calculators normally give arccosine
+in the range 0°-180°, the correct quadrant for <span class="math notranslate nohighlight">\(H\)</span> can be selected according to
+the following rules:</p>
+<p>rising phenomena: <span class="math notranslate nohighlight">\(H = 360^{\circ} - \arccos x\)</span>;</p>
+<p>setting phenomena: <span class="math notranslate nohighlight">\(H = \arccos x\)</span>.</p>
+<p>In other words, for rising phenomena, <span class="math notranslate nohighlight">\(H\)</span> must be in quadrant 3 or 4 (depending on the sign of <span class="math notranslate nohighlight">\(\cos H\)</span>),
+whereas <span class="math notranslate nohighlight">\(H\)</span> must be either in quadrant 1 or 2 for setting phenomena.
+Convert <span class="math notranslate nohighlight">\(H\)</span> from degrees to hours for use in eq. (<a class="reference internal" href="#id6">6</a>).</p>
+</li>
+<li><p>Compute <span class="math notranslate nohighlight">\(T\)</span> from eq. (<a class="reference internal" href="#id6">6</a>), recalling that <span class="math notranslate nohighlight">\(H\)</span> and <span class="math notranslate nohighlight">\(RA\)</span> must be expressed in hours.
+If <span class="math notranslate nohighlight">\(T\)</span> is negative or greater than <span class="math notranslate nohighlight">\(24^h\)</span>, it should be converted to the
+range <span class="math notranslate nohighlight">\(0^h - 24^h\)</span> by adding or subtracting multiples of <span class="math notranslate nohighlight">\(24^h\)</span>.</p></li>
+<li><p>Compute <span class="math notranslate nohighlight">\(T_U\)</span> from eq. (<a class="reference internal" href="#id7">7</a>), where <span class="math notranslate nohighlight">\(\lambda\)</span> must be expression in hours.
+<span class="math notranslate nohighlight">\(T_U\)</span> is an approximation to the time of the desired rising or setting phenomenon,
+referred to the Greenwich meridian.  If <span class="math notranslate nohighlight">\(T_U\)</span> is greater than <span class="math notranslate nohighlight">\(24^h\)</span>, the
+phenomenon occurs on the following day, Greenwich time. If <span class="math notranslate nohighlight">\(T_U\)</span> is negative,
+the phenomenon occurs on the previous day day, Greenwich time.</p></li>
+</ol>
+<p>Under certain conditions, eq. (<a class="reference internal" href="#id5">5</a>) will yield a value of <span class="math notranslate nohighlight">\(\lvert{\cos H}\rvert &gt; 1\)</span>,
+indicating the absence of the phenomenon on that day. At far northern latitudes,
+for example, there is continuous illumination during certain summer days and continuous
+darkness during winter days.</p>
+<p>Example:</p>
+<p>Compute the time of sunrise on 25 June at Wayne, New Jersey.</p>
+<p>Latitude: <span class="math notranslate nohighlight">\(40^{\circ}\!.9 \text{ North}\)</span>  <span class="math notranslate nohighlight">\(\phi=+40^{\circ}\!.9\)</span> <span class="math notranslate nohighlight">\(\sin \phi=+0.65474\)</span> <span class="math notranslate nohighlight">\(\cos \phi=+0.75585\)</span></p>
+<p>Longitude: <span class="math notranslate nohighlight">\(74^{\circ}\!.3 \text{ West}\)</span>  <span class="math notranslate nohighlight">\(\lambda=-74^{\circ}\!.3/15 = -4^{h}\!.953\)</span></p>
+<p>For sunrise: <span class="math notranslate nohighlight">\(z=90^{\circ} 50^{\prime}\)</span>   <span class="math notranslate nohighlight">\(\cos z = -0.01454\)</span></p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{flalign*}
+t&amp; = 176^{d} + (6^h + 4^{h}\!.953) / 24 = 176^{d}\!.456\\
+M&amp; = 0^{\circ}\!.985600(176^{d}\!.456) - 3^{\circ}\!.289 = 170^{\circ}\!.626\\
+L&amp; = 170^{\circ}\!.626 + 1^{\circ}\!.916 (0.16288) + 0^{\circ}\!.020 (-0.32141) + 282^{\circ}\!.634 = 453^{\circ}\!.566 = 93^{\circ}\!.566\\
+\tan {RA}&amp; = 0.91746 (-16.046) = -14.722\\
+&amp;\text{Since $L$ is in quadrant 2, so is $RA$}\\
+{RA}&amp; = 93^{\circ}\!.566/15 = 6^{h}\!.259\\
+\sin\delta&amp; = 0.39782 (0.99806) = 0.39705\\
+\cos\delta&amp; = 0.91780\\
+x&amp; = \cos H = \frac{-0.01454 - (0.39705)(0.65474)}{(0.91780)(0.75585)} = -0.39570\\
+\arccos x&amp; = 113^{\circ}\!.310\\
+&amp;\text{Since sunrise is being computed, $H = 360^{\circ} - 113^{\circ}\!.310 = 246^{\circ}\!.690$}\\
+H&amp; = 246^{\circ}\!.690 / 15 = 16^{h}\!.446\\
+T&amp; = 16^{h}\!.446 + 6^{h}\!.259 - 0^{h}\!.65710(176^{d}\!.456) - 6^{h}\!.622 = 4^{h}\!.488\\
+T_U&amp;= 4^{h}\!.488 + 4^{h}\!.953 = 9^{h}\!.441\\
+\end{flalign*}\end{split}\]</div>
+<p>Sunrise occurs at <span class="math notranslate nohighlight">\(9^{h} 26^{m}\)</span> UT = <span class="math notranslate nohighlight">\(5^{h} 26^{m}\)</span> EDT</p>
+</section>
 </section>
 </section>
 

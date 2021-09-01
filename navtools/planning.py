@@ -27,6 +27,7 @@ import sys
 import xml.etree.ElementTree
 from xml.etree.ElementTree import QName
 from navtools import olc
+from navtools import analysis
 from navtools.navigation import Waypoint
 
 
@@ -340,9 +341,13 @@ def plan(
     :param speed: Assumed speed; default is 5.0kn.
     :param date: Assumed date for magnetic declination; default is today.
     :param variance: Declination function to use.  Default is :py:func:`navigation.declination`
+
+    ..  todo:: Implement arrival-based planning to solve for departure.
+
+    ..  todo:: Implement departure and arrival planning to solve for speed.
     """
 
-    def planning_steps(
+    def forward_plan(
         route: Iterable[Waypoint],
         target: TextIO,
         speed: float,
@@ -352,6 +357,8 @@ def plan(
         """
         Given a source of waypoints, and a target Path,
         generate a schedule and write the CSV output.
+
+        This is "forward" planning: given departure and speed, it solves for arrival.
         """
         sched = gen_schedule(route, variance, departure, speed)
         write_csv(target, sched)
@@ -369,18 +376,21 @@ def plan(
             with route_path.open() as source, schedule_path.open(
                 "w", newline=""
             ) as target:
-                planning_steps(
+                forward_plan(
                     csv_to_Waypoint(source), target, speed, departure, variance
                 )
         elif ext == ".gpx":
             with route_path.open() as source, schedule_path.open(
                 "w", newline=""
             ) as target:
-                planning_steps(
+                forward_plan(
                     gpx_to_Waypoint(source), target, speed, departure, variance
                 )
         else:
             raise ValueError("Can't process {0}".format(route_path))
+
+
+parse_datetime = analysis.DateParser().parse_none
 
 
 def main(argv: list[str]) -> None:
@@ -398,21 +408,17 @@ def main(argv: list[str]) -> None:
     group.add_argument("-a", "--arrival", action="store", default=None)
     parser.add_argument("routes", nargs="*", type=Path)
     args = parser.parse_args(argv)
-    # TODO: Parse departure or arrival date to support ETA computations.
-    # Use parse_date from analysis.
     if args.departure:
-        departure = datetime.datetime.strptime(args.departure, "%Y-%m-%dT%H:%M")
+        departure = parse_datetime(args.departure)
     elif args.arrival:
-        arrival = datetime.datetime.strptime(
-            args.arrival, "%Y-%m-%dT:%H:%M"
-        )  # pragma: no cover
+        arrival = parse_datetime(args.arrival)  # pragma: no cover
     elif not args.arrival and not args.departure:
         # Default is departure from now
         departure = datetime.datetime.now()
     else:
+        # Actually... maybe we can...
+        # TODO: Given departure and arrival deduce a speed that would make both work.
         parser.error("Cannot have both arrival and departure")  # pragma: no cover
-        # Actually... maybe we can.
-        # Given departure and arrival deduce a speed that would make both work.
 
     for file in args.routes:
         plan(file, speed=args.speed, departure=departure)

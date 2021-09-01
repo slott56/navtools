@@ -71,6 +71,8 @@ def test_parse_date(mock_today):
     assert parse_date("11:12 PM") == datetime.datetime(2021, 1, 18, 23, 12)
     assert parse_date("Sep 10 11:12 PM") == datetime.datetime(2021, 9, 10, 23, 12)
     assert parse_date("9-10-2021 11:12 PM") == datetime.datetime(2021, 9, 10, 23, 12)
+    assert parse_date("2020-09-30T07:52:39Z") == datetime.datetime(2020, 9, 30, 7, 52, 39, tzinfo=datetime.timezone.utc)
+    assert parse_date("2013-11-08T13:53:42-05:00") == datetime.datetime(2013, 11, 8, 13, 53, 42, tzinfo=datetime.timezone(datetime.timedelta(days=0, seconds=-5*60*60)))
     with raises(ValueError):
         parse_date("9-10-2021 11:12 Nope")
 

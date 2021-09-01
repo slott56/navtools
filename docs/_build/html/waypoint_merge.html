@@ -129,25 +129,8 @@ information.</p></li>
 <h3>Input Processing<a class="headerlink" href="#input-processing" title="Permalink to this headline">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="navtools.waypoint_merge.parse_datetime">
-<span class="sig-prename descclassname"><span class="pre">navtools.waypoint_merge.</span></span><span class="sig-name descname"><span class="pre">parse_datetime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.waypoint_merge.parse_datetime" title="Permalink to this definition">¶</a></dt>
-<dd><p>There are two formats observed:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">2020-09-30T07:52:39Z</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">2013-11-08T13:53:42-05:00</span></code></p></li>
-</ul>
-<div class="admonition-todo admonition" id="id1">
-<p class="admonition-title">Todo</p>
-<p>Refactor to merge with <code class="xref py py-func docutils literal notranslate"><span class="pre">analysis.parse_date()</span></code></p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>text</strong> – source text</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>datetime.datetime</p>
-</dd>
-</dl>
-</dd></dl>
+<span class="sig-prename descclassname"><span class="pre">navtools.waypoint_merge.</span></span><span class="sig-name descname"><span class="pre">parse_datetime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.waypoint_merge.parse_datetime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="navtools.waypoint_merge.opencpn_GPX_to_WayPoint">
@@ -712,7 +695,7 @@ in the computer.</p>
 <span class="sig-prename descclassname"><span class="pre">navtools.waypoint_merge.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argv</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#navtools.waypoint_merge.main" title="Permalink to this definition">¶</a></dt>
 <dd><p>Waypoint merge. Parses the command line options.
 Compares two files, and emits a report/summary or GPX.</p>
-<div class="admonition-todo admonition" id="id2">
+<div class="admonition-todo admonition" id="id1">
 <p class="admonition-title">Todo</p>
 <p>parameterize the distance or geocode options.</p>
 </div>

@@ -21,8 +21,8 @@ S=92.2306899 T=23.42154087
 U=0.04302734 V=-2.246194634 W=112.5920774
 X=0.543226524 Y=0.230470754 Z=0.855982295
 
->>> print(f"{noon=:%H:%M:%S} {rise=:%H:%M:%S} {set=:%H:%M:%S}")
-noon=13:02:15 rise=05:31:53 set=20:32:37
+>>> print(f"{noon=:%d %H:%M:%S} {rise=:%d %H:%M:%S} {set=:%d %H:%M:%S}")
+noon=23 13:02:15 rise=23 05:31:53 set=23 20:32:37
 
 Twilight
 ========
@@ -41,6 +41,16 @@ This appears to be an offset to the Hour Angle of sunrise.
 This suggests the horizon where we're looking for the sun (90.833)
 can be switched to 102 to add 12° to compute the start and end of twilight.
 
+Computations
+============
+
+See     https://gml.noaa.gov/grad/solcalc/calcdetails.html
+
+See     https://edwilliams.org/sunrise_sunset_algorithm.htm
+
+..  todo::
+
+    Add nautical twilight offsets.
 """
 from __future__ import annotations
 import calendar
@@ -63,9 +73,8 @@ def sun_times(
     debug: bool = False,
 ) -> tuple[datetime.datetime, datetime.datetime, datetime.datetime]:
     """
-    A literal transcription of the NOAA
+    A literal transcription of the NOAA Spreadsheet.
     https://gml.noaa.gov/grad/solcalc/calcdetails.html
-    Spreadsheet.
 
     :param now: Date for which to compute sunrise and sunset.
     :param lat: Latitude
@@ -118,6 +127,8 @@ def sun_times(
         - 0.5 * U * U * sin(4 * radians(I))
         - 1.25 * K * K * sin(2 * radians(J))
     )  # Equation of time (minutes)
+    # NOTE: 90.833 is the 90° 50' zenith for sunrise/sunset.
+    # Use 102.0 to include Nautical Twilight.
     W = degrees(
         acos(
             cos(radians(90.833)) / (cos(lat) * cos(radians(T)))

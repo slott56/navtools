@@ -74,37 +74,7 @@ class Waypoint_Plot:
     extensions: dict[str, str] = field(default_factory=dict)
 
 
-class DateParser:
-    def parse(self, text: Optional[str]) -> Optional[datetime.datetime]:
-        """
-        There are two formats observed:
-
-        - ``2020-09-30T07:52:39Z``
-
-        - ``2013-11-08T13:53:42-05:00``
-
-        ..  todo:: Refactor to merge with :py:func:`analysis.parse_date`
-
-        :param text: source text
-        :return: datetime.datetime
-        """
-        if text is None:
-            return None
-
-        try:
-            dt = datetime.datetime.strptime(text, "%Y-%m-%dT%H:%M:%SZ")
-            return dt.replace(tzinfo=datetime.timezone.utc)
-        except ValueError:
-            pass
-        try:
-            dt = datetime.datetime.strptime(text, "%Y-%m-%dT%H:%M:%S%z")
-            return dt
-        except ValueError:
-            pass
-        raise ValueError(f"Can't parse {text!r}")
-
-
-parse_datetime = DateParser().parse
+parse_datetime = analysis.DateParser().parse_none
 
 
 def opencpn_GPX_to_WayPoint(source: TextIO) -> Iterator[Waypoint_Plot]:
@@ -613,6 +583,8 @@ def main(argv: list[str]) -> None:
     Compares two files, and emits a report/summary or GPX.
 
     ..  todo:: parameterize the distance or geocode options.
+
+    ..  todo: Filter changed points from new points
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -685,7 +657,7 @@ def main(argv: list[str]) -> None:
             for C in rules:
                 C().compare(opencpn_history, plotter_history)
 
-        # TODO: Separate changed from new.
+        # TODO: Separate changed from new into two output files.
         matches = match_gen(opencpn_history, plotter_history)
 
         # computer_upload(matches)

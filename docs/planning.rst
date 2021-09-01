@@ -38,8 +38,112 @@ Planning Approach
 =================
 
 Currently, the planning application computes distances and Estimated Time Enroute (ETE) for each leg.
-It does little more than this. The approach is embodied by creating a :py:class:`SchedulePoint` object.
+Given this information we can compute an arrival time based on a departure time.
+
+The approach is embodied by creating a :py:class:`SchedulePoint` object.
 This is direct enrichment of the :py:class:`Waypoint` instances along the route.
+
+Here's how the solution is based on source data.
+
+1.  A route can be understood as a sequence of :math:`n` waypoints.
+
+    ..  math::
+
+        r_w = \langle w_0, w_1, w_2, ..., w_{n-1} \rangle
+
+2.  A waypoint is a latitutde (:math:`\phi`), and longitude (:math:`\lambda`) pair.
+
+    ..  math::
+
+        w = \langle \phi, \lambda \rangle
+
+3.  A route can also be understood as a sequence of legs, :math:`l_i(f, t)`, formed from pairs of waypoints,
+    called "from" and "to".
+    Note that we provide a placeholder leg, :math:`l_{n-1}`, so that each waypoint, :math:`w_x`, is
+    the "from" item of a leg, :math:`l_x(w_x, w_{x+1} \cup \bot)`.
+
+    ..  math::
+
+        r_l = \langle l_0(w_0, w_1), l_1(w_1, w_2), ..., l_i(w_i, w_{i+1}), ..., l_{n-2}(w_{n-2}, w_{n-1}), l_{n-1}(w_{n-1}, \bot) \rangle
+
+3.  The distance, :math:`d(f, t)`,  and bearing, :math:`\theta(f, t)`,
+    are computed from legs, which are pairs of waypoints. We prefer nautical miles as the units.
+
+    ..  math::
+
+        d(l_i) = r(l_i \cdot f, l_i \cdot t) = r(w_i, w_{i+1}) \\
+        \theta(l_i) = \theta(l_i \cdot f, l_i \cdot t) = \theta(w_i, w_{i+1})
+
+4.  Given speed, :math:`s`, in knots, we can compute ETE for each leg, :math:`e(l_i; s)`.
+    This is a duration generally in hours. It's often more useful in minutes than hours.
+
+    ..  math::
+
+        e(l_i; s) = 60 \frac{d(l_i)}{s}
+
+We often summarize the ETE to a point, :math:`i`, on the route.
+If :math:`i = n`, then, this is the total elapsed time enroute.
+
+..  math::
+
+    \sum\limits_{0 \leq x < i}e(l_x; s) = \frac{\sum\limits_{0 \leq x < i}d(l_x)}{s}
+
+
+There are three summary computations:
+
+-   Final Arrival Time, given speed, and Departure Time. :math:`A_n(r; s, T_0)`.
+
+-   Initial Departure Time, given Arrival Time and speed. :math:`D_0(r; s, T_n)`.
+
+-   Speed, given Initial Departure Time and Final Arrival Time. :math:`s(r; T_0, T_n)`.
+
+We'll look at arrival time, first.
+
+1.  Given speed, :math:`s`, in knots, and a departure time, :math:`T_0`,
+    we can compute ETA's, :math:`A(l_i; s, T_0)`, for each leg.
+    These are date-time stamps. We formulate this to show how it accumulates and the final result.
+
+    ..  math::
+
+        A(l_i; s, T_0)
+            &= T_0 + e(l_i; s) + \left(\sum\limits_{0 \leq x < i}e(l_x; s)\right) \\
+            &= T_0 + \left( \frac{\sum\limits_{0 \leq x \leq i}d(l_x)}{s} \right)
+
+#.  The final arrival time, :math:`A_n`, then, is the last arrival time for the route, `r`,
+
+    ..  math::
+
+        A_n(r; s, T_0) = A(l_n; s, T_0)
+
+We can also do the computation in the reverse direction to compute departure times, :math:`D(l_i; s, T_n)`
+to work out the departure for leg :math:`l_i` required to have final arrival time `T_n`.
+We can use this to work out the initial departure time, :math:`D_0(r; s, T_n)`.
+
+1.  Given speed, :math:`s`, in knots, and an arrival time, :math:`T_n`,
+    we can compute ETD's, :math:`D(l_i; s, T_n)`, for each preceeding leg.
+
+    ..  math::
+
+        D(l_i; s, T_n)
+            &= T_n - e(l_i; s) - \left(\sum\limits_{0 \leq x < i}e(l_x; s)\right) \\
+            &= T_n - \left( \frac{\sum\limits_{0 \leq x \leq i}d(l_x)}{s} \right)
+
+#.  The initial departure time, :math:`D_0`, then, is the first departure time for the route, `r`,
+
+    ..  math::
+
+        D_0(r; s, T_n) = D(l_0; s, T_n)
+
+
+Speed for a route, :math:`r`, given departure, :math:`T_0`, and arrival, :math:`T_n`.
+
+    ..  math::
+
+        s(r; T_0, T_n) = \frac{\sum\limits_{0 \leq i < n}d(l_i)}{T_n-T_0}
+
+
+Improvements
+============
 
 There are a number of potential improvements to this approach:
 
@@ -84,70 +188,76 @@ Noon Location
     This requires looking at waypoints before and after local noon, Splitting the segment
     to find noon, and adding a waypoint with no course change.
 
-A route is a sequence of points. Of those, two points, :math:`A` and :math:`B`, have times, :math:`T(x)`, that bracket noon, :math:`N`.
+A route is a sequence of waypoints forming legs.
+One leg, :math:`l_a(w_a, w_{a+1})`, spans noon, :math:`N`.
+
+We can think of arrival time and departure for this leg.
 
 ..  math::
 
-    T(A) \leq N \leq T(B)
-
-There are three cases here, two of which are trivial. If :math:`T(A) = N` or :math:`N = T(B)`, there's
-no further computation required. The interesting case, then, is :math:`T(A) < N < T(B)`.
-
-We know the distance, :math:`d = D(A, B)`, and bearing, :math:`\theta = \Theta(A, B)`.
-
-We also know the time, :math:`t`, to traverse the leg, given a speed, :math:`s`.
+        T_a = A(l_a; s, T_0) \\
+        T_{a+1} = A(l_{a+1}; s, T_0)
 
 ..  math::
 
-    t = \frac{D(A, B)}{s}
+    T_a \leq N \leq T_{a+1}
 
-The time until noon, :math:`N - T(A)`, is a fraction of the overall duration of the leg, :math:`t`.
-Which gives us distance until noon, :math:`d_n`,
+There are three cases here, two of which are trivial. If :math:`T_a = N` or :math:`N = T_{a+1}`, there's
+no further computation required. The interesting case, then, is :math:`T_a < N < T_{a+1}`.
+
+We know the distance for this leg, :math:`d(l_a)`.
+This gives us time enroute, :math:`e(l_a; s)`, to traverse the leg, given a speed, :math:`s`.
 
 ..  math::
 
-    \frac{N - T(A)}{t} = \frac{d_n}{d}
+    e(l_a; s) = \frac{d(l_a)}{s}
+
+The time until noon, :math:`N - T_a`, is a fraction of the overall elapsed time of the leg, :math:`e(l_a; s)`.
+Which gives us distance until noon for a given leg, at a tiven speed, :math:`N_d(l_a; s)`,
+
+..  math::
+
+    \frac{N - T_a}{e(l_a; s)} = \frac{N_d(l_a; s)}{d(l_a)}
 
 or,
 
 ..  math::
 
-    d_n = \frac{D(A, B)[N - T(A)]}{\frac{D(A, B)}{s}} = s[N - T(A)]
+    N_d(l_a; s) = \frac{d(l_a)[N - T_a]}{\frac{d(l_a)}{s}} = s[N - T_a]
 
-We can then offset from point :math:`A` by distance :math:`d_n` in direction :math:`\theta` to compute
+We can then offset from point :math:`w_a` by distance :math:`N_d(la;s)` in direction :math:`\theta(l_a)` to compute
 the noon location. This is the :py:func:`navigation.destination` function.
 
-The destination function, :math:`D( p_1, d, \theta )`, is defined like this.
+The destination function, :math:`D( w, d, \theta )`, is defined like this.
 
 ..  math::
 
-    D_{\phi}( p_1, d, \theta ), &\text{ latitude at distance $d$, angle $\theta$ from $p_1$}\\
-    D_{\lambda}( p_1, d, \theta ), &\text{ longitude at distance $d$, angle $\theta$ from $p_1$}
+    D_{\phi}( w, d, \theta ), &\text{ latitude at distance $d$, angle $\theta$ from $w$}\\
+    D_{\lambda}( w, d, \theta ), &\text{ longitude at distance $d$, angle $\theta$ from $w$}
 
-    D( p_1, d, \theta ) = \Bigl( D_{\phi}( p_1, d, \theta ), D_{\lambda}( p_1, d, \theta ) \Bigr)
+    D( w, d, \theta ) = \langle D_{\phi}( w, d, \theta ), D_{\lambda}( w, d, \theta ) \rangle
 
 The definition of these two functions are in :ref:`calc.destination`.
 
 Forward and Reverse Plans
 --------------------------
 
-An event more sophisticated planner would allow for two kinds of plans:
+Currently, only forward plans are supported.
+
+An event more sophisticated planner would allow for all three kinds of plans:
 
 -   A "forward" plan uses a Scheduled Time of Departure (STD) to compute a sequence of ETE and ETA's.
 
 -   A "reverse" plan would use a Scheduled Time of Arrival (STA) and work backwords to
     compute departures and times enroute. This would lead to a Scheduled Time of Departure (STD).
 
+-   A "speed" plan would compute optimal speed to pass between given STD and STA.
+
+-   We can also imagine pinning specific waypoints to specific STA or STD to compute variant
+    speeds along a route.
+
 The idea is to reduce the amount of work done with a spreadsheet outside :py:mod:`navtools`.
 
-We can also imagine a plan with both STD and STA information from which speed is deduced
-to meet the scheduled times. This is a two pass operation.
-
-1. Starting from STD or STA, compute a plan that involves pre-dawn or post-dusk arrivals or departures.
-
-2. Adjust departure to be earlier or arrival to be later -- within daylight times -- and compute the speed required.
-
-This is a more sophisticated planning operation, but can be automated because the constraints are well-defined.
 
 Implementation
 ==============

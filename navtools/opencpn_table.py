@@ -37,13 +37,12 @@ Command-Line Interface
 =======================
 
 This writes to stdout.
-Most of the time, it's used like this to reformat
-a CSV report.
+Most of the time, it's used like this to create a more useful CSV report
+from the copy-and-paste output from OpenCPN's planner.
 
 ::
 
-    python navtools/opencpn_table.py my_input.csv >more_useful.csv
-
+    PYTHONPATH=/Users/slott/github/local/navtools python -m navtools.opencpn_table route.txt >route.csv
 
 """
 from __future__ import annotations
@@ -56,6 +55,7 @@ import re
 import sys
 from typing import Iterable, Callable, Any, Optional, ClassVar, cast
 from navtools import navigation
+from navtools import analysis
 from navtools.navigation import Waypoint
 
 
@@ -70,6 +70,8 @@ class Leg:
 
     This is a composite of a Waypoint
     plus some derived values.
+
+    ..  todo:: Unify with :py:class:`planning.SchedulePoint`.
     """
 
     waypoint: Waypoint
@@ -135,7 +137,9 @@ class Leg:
                 # lon=navigation.Lon.fromstring(details["Longitude"]),
                 ETE=Duration.parse(details["ETE"]),
                 ETA=(
-                    datetime.datetime.strptime(eta_time, "%m/%d/%Y %H:%M")
+                    analysis.parse_date(
+                        eta_time
+                    )  # datetime.datetime.strptime(eta_time, "%m/%d/%Y %H:%M")
                     if eta_time
                     else None
                 ),
@@ -380,4 +384,5 @@ def main(argv: list[str]) -> None:
 
 
 if __name__ == "__main__":  # pragma: no cover
-    main([str(Path.cwd() / "data" / "beaufort to st marys.txt")])
+    # Demo: main([str(Path.cwd() / "data" / "beaufort to st marys.txt")])
+    main(sys.argv[1:])

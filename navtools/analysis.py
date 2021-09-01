@@ -38,9 +38,6 @@ class DateParser:
     This assumes a single date field is sufficient to fill in all attributes of a date.
     In some cases, we might have timestamps that roll past midnight without an obvious
     indicator of date change. Or, we might have some notation like "d1, d2" or "+1d, +2d".
-
-    ..  todo:: Refactor to merge with :py:func:`opencpn_table.parse_datetime`
-
     """
 
     default_date_formats = [
@@ -83,12 +80,19 @@ class DateParser:
         "%y-%m-%d %H%M",
         "%y-%m-%d %H:%M",
         "%y-%m-%d %I:%M %p",
+        "%Y-%m-%dT%H:%M",
         "%m-%d-%Y %H%M",
         "%m-%d-%Y %H:%M",
         "%m-%d-%Y %I:%M %p",
         "%m-%d-%y %H%M",
         "%m-%d-%y %H:%M",
         "%m-%d-%y %I:%M %p",
+    ]
+
+    utc_formats = [
+        "%Y-%m-%dT%H:%M:%S%z",
+        # Timezone given as "Z", requires we replace tz with UTC
+        # "%Y-%m-%dT%H:%M:%SZ",
     ]
 
     def parse(
@@ -98,11 +102,12 @@ class DateParser:
         March through all of the known date formats until we find one that works.
 
         :param date: string in some known format
-        :param default: default date to use when only a time is given.
+        :param default: default date to use when only a time is given, otherwise "today()"
         :returns: datetime
         """
         if default is None:
             default = datetime.date.today()
+        # Try time-only formats
         for fmt in self.default_date_formats:
             try:
                 dt = datetime.datetime.strptime(date, fmt)
@@ -110,6 +115,7 @@ class DateParser:
                 return dt
             except ValueError as e:
                 pass
+        # Try yearless date-time formats
         for fmt in self.default_year_formats:
             try:
                 dt = datetime.datetime.strptime(date, fmt)
@@ -117,6 +123,15 @@ class DateParser:
                 return dt
             except ValueError as e:
                 pass
+        # Try long, full date-time formats
+        for fmt in self.utc_formats:
+            try:
+                dt = datetime.datetime.strptime(date, fmt)
+                assert dt.tzinfo is not None, f"Problem parsing {date!r}"
+                return dt
+            except ValueError as e:
+                pass
+        # Try shorter date-time formats
         for fmt in self.full_formats:
             try:
                 dt = datetime.datetime.strptime(date, fmt)
@@ -124,6 +139,13 @@ class DateParser:
             except ValueError as e:
                 pass
         raise ValueError(f"Cannot parse {date!r}")
+
+    def parse_none(
+        self, date: Optional[str], default: Optional[datetime.date] = None
+    ) -> Optional[datetime.datetime]:
+        if date is None:
+            return None
+        return self.parse(date, default)
 
 
 parse_date = DateParser().parse

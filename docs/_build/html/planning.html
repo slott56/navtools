@@ -66,8 +66,89 @@ Waypoint_Rhumb *-- Waypoint
 <section id="planning-approach">
 <h2>Planning Approach<a class="headerlink" href="#planning-approach" title="Permalink to this headline">¶</a></h2>
 <p>Currently, the planning application computes distances and Estimated Time Enroute (ETE) for each leg.
-It does little more than this. The approach is embodied by creating a <code class="xref py py-class docutils literal notranslate"><span class="pre">SchedulePoint</span></code> object.
+Given this information we can compute an arrival time based on a departure time.</p>
+<p>The approach is embodied by creating a <code class="xref py py-class docutils literal notranslate"><span class="pre">SchedulePoint</span></code> object.
 This is direct enrichment of the <code class="xref py py-class docutils literal notranslate"><span class="pre">Waypoint</span></code> instances along the route.</p>
+<p>Here’s how the solution is based on source data.</p>
+<ol class="arabic">
+<li><p>A route can be understood as a sequence of <span class="math notranslate nohighlight">\(n\)</span> waypoints.</p>
+<div class="math notranslate nohighlight">
+\[r_w = \langle w_0, w_1, w_2, ..., w_{n-1} \rangle\]</div>
+</li>
+<li><p>A waypoint is a latitutde (<span class="math notranslate nohighlight">\(\phi\)</span>), and longitude (<span class="math notranslate nohighlight">\(\lambda\)</span>) pair.</p>
+<div class="math notranslate nohighlight">
+\[w = \langle \phi, \lambda \rangle\]</div>
+</li>
+<li><p>A route can also be understood as a sequence of legs, <span class="math notranslate nohighlight">\(l_i(f, t)\)</span>, formed from pairs of waypoints,
+called “from” and “to”.
+Note that we provide a placeholder leg, <span class="math notranslate nohighlight">\(l_{n-1}\)</span>, so that each waypoint, <span class="math notranslate nohighlight">\(w_x\)</span>, is
+the “from” item of a leg, <span class="math notranslate nohighlight">\(l_x(w_x, w_{x+1} \cup \bot)\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[r_l = \langle l_0(w_0, w_1), l_1(w_1, w_2), ..., l_i(w_i, w_{i+1}), ..., l_{n-2}(w_{n-2}, w_{n-1}), l_{n-1}(w_{n-1}, \bot) \rangle\]</div>
+</li>
+</ol>
+<ol class="arabic" start="3">
+<li><p>The distance, <span class="math notranslate nohighlight">\(d(f, t)\)</span>,  and bearing, <span class="math notranslate nohighlight">\(\theta(f, t)\)</span>,
+are computed from legs, which are pairs of waypoints. We prefer nautical miles as the units.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}d(l_i) = r(l_i \cdot f, l_i \cdot t) = r(w_i, w_{i+1}) \\
+\theta(l_i) = \theta(l_i \cdot f, l_i \cdot t) = \theta(w_i, w_{i+1})\end{split}\]</div>
+</li>
+<li><p>Given speed, <span class="math notranslate nohighlight">\(s\)</span>, in knots, we can compute ETE for each leg, <span class="math notranslate nohighlight">\(e(l_i; s)\)</span>.
+This is a duration generally in hours. It’s often more useful in minutes than hours.</p>
+<div class="math notranslate nohighlight">
+\[e(l_i; s) = 60 \frac{d(l_i)}{s}\]</div>
+</li>
+</ol>
+<p>We often summarize the ETE to a point, <span class="math notranslate nohighlight">\(i\)</span>, on the route.
+If <span class="math notranslate nohighlight">\(i = n\)</span>, then, this is the total elapsed time enroute.</p>
+<div class="math notranslate nohighlight">
+\[\sum\limits_{0 \leq x &lt; i}e(l_x; s) = \frac{\sum\limits_{0 \leq x &lt; i}d(l_x)}{s}\]</div>
+<p>There are three summary computations:</p>
+<ul class="simple">
+<li><p>Final Arrival Time, given speed, and Departure Time. <span class="math notranslate nohighlight">\(A_n(r; s, T_0)\)</span>.</p></li>
+<li><p>Initial Departure Time, given Arrival Time and speed. <span class="math notranslate nohighlight">\(D_0(r; s, T_n)\)</span>.</p></li>
+<li><p>Speed, given Initial Departure Time and Final Arrival Time. <span class="math notranslate nohighlight">\(s(r; T_0, T_n)\)</span>.</p></li>
+</ul>
+<p>We’ll look at arrival time, first.</p>
+<ol class="arabic">
+<li><p>Given speed, <span class="math notranslate nohighlight">\(s\)</span>, in knots, and a departure time, <span class="math notranslate nohighlight">\(T_0\)</span>,
+we can compute ETA’s, <span class="math notranslate nohighlight">\(A(l_i; s, T_0)\)</span>, for each leg.
+These are date-time stamps. We formulate this to show how it accumulates and the final result.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}A(l_i; s, T_0)
+    &amp;= T_0 + e(l_i; s) + \left(\sum\limits_{0 \leq x &lt; i}e(l_x; s)\right) \\
+    &amp;= T_0 + \left( \frac{\sum\limits_{0 \leq x \leq i}d(l_x)}{s} \right)\end{split}\]</div>
+</li>
+<li><p>The final arrival time, <span class="math notranslate nohighlight">\(A_n\)</span>, then, is the last arrival time for the route, <cite>r</cite>,</p>
+<div class="math notranslate nohighlight">
+\[A_n(r; s, T_0) = A(l_n; s, T_0)\]</div>
+</li>
+</ol>
+<p>We can also do the computation in the reverse direction to compute departure times, <span class="math notranslate nohighlight">\(D(l_i; s, T_n)\)</span>
+to work out the departure for leg <span class="math notranslate nohighlight">\(l_i\)</span> required to have final arrival time <cite>T_n</cite>.
+We can use this to work out the initial departure time, <span class="math notranslate nohighlight">\(D_0(r; s, T_n)\)</span>.</p>
+<ol class="arabic">
+<li><p>Given speed, <span class="math notranslate nohighlight">\(s\)</span>, in knots, and an arrival time, <span class="math notranslate nohighlight">\(T_n\)</span>,
+we can compute ETD’s, <span class="math notranslate nohighlight">\(D(l_i; s, T_n)\)</span>, for each preceeding leg.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}D(l_i; s, T_n)
+    &amp;= T_n - e(l_i; s) - \left(\sum\limits_{0 \leq x &lt; i}e(l_x; s)\right) \\
+    &amp;= T_n - \left( \frac{\sum\limits_{0 \leq x \leq i}d(l_x)}{s} \right)\end{split}\]</div>
+</li>
+<li><p>The initial departure time, <span class="math notranslate nohighlight">\(D_0\)</span>, then, is the first departure time for the route, <cite>r</cite>,</p>
+<div class="math notranslate nohighlight">
+\[D_0(r; s, T_n) = D(l_0; s, T_n)\]</div>
+</li>
+</ol>
+<p>Speed for a route, <span class="math notranslate nohighlight">\(r\)</span>, given departure, <span class="math notranslate nohighlight">\(T_0\)</span>, and arrival, <span class="math notranslate nohighlight">\(T_n\)</span>.</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[s(r; T_0, T_n) = \frac{\sum\limits_{0 \leq i &lt; n}d(l_i)}{T_n-T_0}\]</div>
+</div></blockquote>
+</section>
+<section id="improvements">
+<h2>Improvements<a class="headerlink" href="#improvements" title="Permalink to this headline">¶</a></h2>
 <p>There are a number of potential improvements to this approach:</p>
 <ul class="simple">
 <li><p>Include an estimated time of departure (ETD) as a basis for computing ETE and ETA.</p></li>
@@ -90,12 +171,12 @@ This is direct enrichment of the <code class="xref py py-class docutils literal 
 </ul>
 </div></blockquote>
 </section>
-<section id="improvements">
-<h2>Improvements<a class="headerlink" href="#improvements" title="Permalink to this headline">¶</a></h2>
+<section id="id1">
+<h2>Improvements<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
 <p>There are several improvements required.</p>
 <section id="time-of-day">
 <h3>Time-of-Day<a class="headerlink" href="#time-of-day" title="Permalink to this headline">¶</a></h3>
-<div class="admonition-todo admonition" id="id1">
+<div class="admonition-todo admonition" id="id2">
 <p class="admonition-title">Todo</p>
 <p>Locate the sunrise equation and include anticipated time-of-day for an ETA</p>
 <p>See <a class="reference external" href="https://gml.noaa.gov/grad/solcalc/solareqns.PDF">https://gml.noaa.gov/grad/solcalc/solareqns.PDF</a></p>
@@ -103,52 +184,54 @@ This is direct enrichment of the <code class="xref py py-class docutils literal 
 </section>
 <section id="noon-location">
 <h3>Noon Location<a class="headerlink" href="#noon-location" title="Permalink to this headline">¶</a></h3>
-<div class="admonition-todo admonition" id="id2">
+<div class="admonition-todo admonition" id="id3">
 <p class="admonition-title">Todo</p>
 <p>Compute the locations at noon of each day.</p>
 <p>This requires looking at waypoints before and after local noon, Splitting the segment
 to find noon, and adding a waypoint with no course change.</p>
 </div>
-<p>A route is a sequence of points. Of those, two points, <span class="math notranslate nohighlight">\(A\)</span> and <span class="math notranslate nohighlight">\(B\)</span>, have times, <span class="math notranslate nohighlight">\(T(x)\)</span>, that bracket noon, <span class="math notranslate nohighlight">\(N\)</span>.</p>
+<p>A route is a sequence of waypoints forming legs.
+One leg, <span class="math notranslate nohighlight">\(l_a(w_a, w_{a+1})\)</span>, spans noon, <span class="math notranslate nohighlight">\(N\)</span>.</p>
+<p>We can think of arrival time and departure for this leg.</p>
 <div class="math notranslate nohighlight">
-\[T(A) \leq N \leq T(B)\]</div>
-<p>There are three cases here, two of which are trivial. If <span class="math notranslate nohighlight">\(T(A) = N\)</span> or <span class="math notranslate nohighlight">\(N = T(B)\)</span>, there’s
-no further computation required. The interesting case, then, is <span class="math notranslate nohighlight">\(T(A) &lt; N &lt; T(B)\)</span>.</p>
-<p>We know the distance, <span class="math notranslate nohighlight">\(d = D(A, B)\)</span>, and bearing, <span class="math notranslate nohighlight">\(\theta = \Theta(A, B)\)</span>.</p>
-<p>We also know the time, <span class="math notranslate nohighlight">\(t\)</span>, to traverse the leg, given a speed, <span class="math notranslate nohighlight">\(s\)</span>.</p>
+\[\begin{split}T_a = A(l_a; s, T_0) \\
+T_{a+1} = A(l_{a+1}; s, T_0)\end{split}\]</div>
 <div class="math notranslate nohighlight">
-\[t = \frac{D(A, B)}{s}\]</div>
-<p>The time until noon, <span class="math notranslate nohighlight">\(N - T(A)\)</span>, is a fraction of the overall duration of the leg, <span class="math notranslate nohighlight">\(t\)</span>.
-Which gives us distance until noon, <span class="math notranslate nohighlight">\(d_n\)</span>,</p>
+\[T_a \leq N \leq T_{a+1}\]</div>
+<p>There are three cases here, two of which are trivial. If <span class="math notranslate nohighlight">\(T_a = N\)</span> or <span class="math notranslate nohighlight">\(N = T_{a+1}\)</span>, there’s
+no further computation required. The interesting case, then, is <span class="math notranslate nohighlight">\(T_a &lt; N &lt; T_{a+1}\)</span>.</p>
+<p>We know the distance for this leg, <span class="math notranslate nohighlight">\(d(l_a)\)</span>.
+This gives us time enroute, <span class="math notranslate nohighlight">\(e(l_a; s)\)</span>, to traverse the leg, given a speed, <span class="math notranslate nohighlight">\(s\)</span>.</p>
 <div class="math notranslate nohighlight">
-\[\frac{N - T(A)}{t} = \frac{d_n}{d}\]</div>
+\[e(l_a; s) = \frac{d(l_a)}{s}\]</div>
+<p>The time until noon, <span class="math notranslate nohighlight">\(N - T_a\)</span>, is a fraction of the overall elapsed time of the leg, <span class="math notranslate nohighlight">\(e(l_a; s)\)</span>.
+Which gives us distance until noon for a given leg, at a tiven speed, <span class="math notranslate nohighlight">\(N_d(l_a; s)\)</span>,</p>
+<div class="math notranslate nohighlight">
+\[\frac{N - T_a}{e(l_a; s)} = \frac{N_d(l_a; s)}{d(l_a)}\]</div>
 <p>or,</p>
 <div class="math notranslate nohighlight">
-\[d_n = \frac{D(A, B)[N - T(A)]}{\frac{D(A, B)}{s}} = s[N - T(A)]\]</div>
-<p>We can then offset from point <span class="math notranslate nohighlight">\(A\)</span> by distance <span class="math notranslate nohighlight">\(d_n\)</span> in direction <span class="math notranslate nohighlight">\(\theta\)</span> to compute
+\[N_d(l_a; s) = \frac{d(l_a)[N - T_a]}{\frac{d(l_a)}{s}} = s[N - T_a]\]</div>
+<p>We can then offset from point <span class="math notranslate nohighlight">\(w_a\)</span> by distance <span class="math notranslate nohighlight">\(N_d(la;s)\)</span> in direction <span class="math notranslate nohighlight">\(\theta(l_a)\)</span> to compute
 the noon location. This is the <code class="xref py py-func docutils literal notranslate"><span class="pre">navigation.destination()</span></code> function.</p>
-<p>The destination function, <span class="math notranslate nohighlight">\(D( p_1, d, \theta )\)</span>, is defined like this.</p>
+<p>The destination function, <span class="math notranslate nohighlight">\(D( w, d, \theta )\)</span>, is defined like this.</p>
 <div class="math notranslate nohighlight">
-\[ \begin{align}\begin{aligned}\begin{split}D_{\phi}( p_1, d, \theta ), &amp;\text{ latitude at distance $d$, angle $\theta$ from $p_1$}\\
-D_{\lambda}( p_1, d, \theta ), &amp;\text{ longitude at distance $d$, angle $\theta$ from $p_1$}\end{split}\\D( p_1, d, \theta ) = \Bigl( D_{\phi}( p_1, d, \theta ), D_{\lambda}( p_1, d, \theta ) \Bigr)\end{aligned}\end{align} \]</div>
+\[ \begin{align}\begin{aligned}\begin{split}D_{\phi}( w, d, \theta ), &amp;\text{ latitude at distance $d$, angle $\theta$ from $w$}\\
+D_{\lambda}( w, d, \theta ), &amp;\text{ longitude at distance $d$, angle $\theta$ from $w$}\end{split}\\D( w, d, \theta ) = \langle D_{\phi}( w, d, \theta ), D_{\lambda}( w, d, \theta ) \rangle\end{aligned}\end{align} \]</div>
 <p>The definition of these two functions are in <a class="reference internal" href="navigation.html#calc-destination"><span class="std std-ref">Destination Calculation</span></a>.</p>
 </section>
 <section id="forward-and-reverse-plans">
 <h3>Forward and Reverse Plans<a class="headerlink" href="#forward-and-reverse-plans" title="Permalink to this headline">¶</a></h3>
-<p>An event more sophisticated planner would allow for two kinds of plans:</p>
+<p>Currently, only forward plans are supported.</p>
+<p>An event more sophisticated planner would allow for all three kinds of plans:</p>
 <ul class="simple">
 <li><p>A “forward” plan uses a Scheduled Time of Departure (STD) to compute a sequence of ETE and ETA’s.</p></li>
 <li><p>A “reverse” plan would use a Scheduled Time of Arrival (STA) and work backwords to
 compute departures and times enroute. This would lead to a Scheduled Time of Departure (STD).</p></li>
+<li><p>A “speed” plan would compute optimal speed to pass between given STD and STA.</p></li>
+<li><p>We can also imagine pinning specific waypoints to specific STA or STD to compute variant
+speeds along a route.</p></li>
 </ul>
 <p>The idea is to reduce the amount of work done with a spreadsheet outside <code class="xref py py-mod docutils literal notranslate"><span class="pre">navtools</span></code>.</p>
-<p>We can also imagine a plan with both STD and STA information from which speed is deduced
-to meet the scheduled times. This is a two pass operation.</p>
-<ol class="arabic simple">
-<li><p>Starting from STD or STA, compute a plan that involves pre-dawn or post-dusk arrivals or departures.</p></li>
-<li><p>Adjust departure to be earlier or arrival to be later – within daylight times – and compute the speed required.</p></li>
-</ol>
-<p>This is a more sophisticated planning operation, but can be automated because the constraints are well-defined.</p>
 </section>
 </section>
 <section id="implementation">
@@ -234,7 +317,7 @@ don’t seem to need them for planning.</p>
 
 </section>
 <section id="planning-computations">
-<span id="id3"></span><h2>Planning Computations<a class="headerlink" href="#planning-computations" title="Permalink to this headline">¶</a></h2>
+<span id="id4"></span><h2>Planning Computations<a class="headerlink" href="#planning-computations" title="Permalink to this headline">¶</a></h2>
 <p>The various navigation calculations use an immutable object (or functional
 programming) style.  A series of functions create new, richer objects
 from the initial <code class="xref py py-class docutils literal notranslate"><span class="pre">Waypoint</span></code> objects.</p>
@@ -260,7 +343,7 @@ stop
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">navtools.planning.</span></span><span class="sig-name descname"><span class="pre">SchedulePoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">point</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">navtools.navigation.Waypoint</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">true_bearing</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">magnetic</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">speed</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enroute_min</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next_course</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="navigation.html#navtools.navigation.Angle" title="navtools.navigation.Angle"><span class="pre">navtools.navigation.Angle</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arrival</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.datetime</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#navtools.planning.SchedulePoint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Scheduled waypoints.
 These include distance, bearing, and estimated time enroute (ETE).</p>
-<div class="admonition-todo admonition" id="id4">
+<div class="admonition-todo admonition" id="id5">
 <p class="admonition-title">Todo</p>
 <p>Unify with <code class="xref py py-class docutils literal notranslate"><span class="pre">opencpn_table.Leg</span></code>.</p>
 <ul class="simple">
@@ -478,6 +561,14 @@ an assumed start time can be plugged in to create ETA’s.</p>
 </ul>
 </dd>
 </dl>
+<div class="admonition-todo admonition" id="id6">
+<p class="admonition-title">Todo</p>
+<p>Implement arrival-based planning to solve for departure.</p>
+</div>
+<div class="admonition-todo admonition" id="id7">
+<p class="admonition-title">Todo</p>
+<p>Implement departure and arrival planning to solve for speed.</p>
+</div>
 </dd></dl>
 
 </section>
