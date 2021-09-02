@@ -87,10 +87,19 @@ class DateParser:
         "%m-%d-%y %H%M",
         "%m-%d-%y %H:%M",
         "%m-%d-%y %I:%M %p",
+        "%m/%d/%Y",
+        "%m/%d/%y",
+        "%Y-%m-%d",
+        "%y-%m-%d",
+        "%Y-%b-%d",
+        "%y-%b-%d",
+        "%Y-%B-%d",
+        "%y-%B-%d",
     ]
 
     utc_formats = [
         "%Y-%m-%dT%H:%M:%S%z",
+        "%Y-%m-%d %H:%M:%S %z",
         # Timezone given as "Z", requires we replace tz with UTC
         # "%Y-%m-%dT%H:%M:%SZ",
     ]
@@ -282,13 +291,7 @@ def csv_to_LogEntry(
         try:
             lat = navigation.Lat.fromstring(row[lat_field])
             lon = navigation.Lon.fromstring(row[lon_field])
-            try:
-                # Typical time: 2011-06-04 13:12:32 +0000
-                dt = datetime.datetime.strptime(
-                    row[date_field], "%Y-%m-%d %H:%M:%S +0000"
-                ).replace(tzinfo=datetime.timezone.utc)
-            except ValueError:
-                dt = parse_date(row[date_field], default=date)
+            dt = parse_date(row[date_field], default=date)
             yield LogEntry(time=dt, lat=lat, lon=lon, source_row=row)
         except ValueError as e:
             print(row)
@@ -359,9 +362,7 @@ def gpx_to_LogEntry(source: TextIO) -> Iterator[LogEntry]:
             raise ValueError(
                 f"Can't process {xml.etree.ElementTree.tostring(pt, encoding='unicode', method='xml')}"
             )
-        dt = datetime.datetime.strptime(raw_dt, "%Y-%m-%dT%H:%M:%SZ").replace(
-            tzinfo=datetime.timezone.utc
-        )
+        dt = parse_date(raw_dt)
         row_dict = dict(xml_to_tuples(pt))
         yield LogEntry(
             time=dt, lat=lat, lon=lon, source_row=row_dict,
@@ -512,18 +513,6 @@ def analyze(log_filepath: Path, date: Optional[datetime.date] = None) -> None:
         raise ValueError("Can't process {0}: unknown extension".format(log_filepath))
 
 
-date_formats = [
-    "%m/%d/%Y",
-    "%m/%d/%y",
-    "%Y-%m-%d",
-    "%y-%m-%d",
-    "%Y-%b-%d",
-    "%y-%b-%d",
-    "%Y-%B-%d",
-    "%y-%B-%d",
-]
-
-
 def main(argv: list[str]) -> None:
     """
     Parse command-line arguments to get the log file names and the default
@@ -540,12 +529,7 @@ def main(argv: list[str]) -> None:
     # Parse the assumed date for a time-only log in options.date
     dt: Optional[datetime.date]
     if args.date is not None:
-        for f in date_formats:
-            try:
-                dt = datetime.datetime.strptime(args.date, f).date()
-                break
-            except ValueError:
-                pass
+        dt = parse_date(args.date).date()
     else:
         dt = None
 

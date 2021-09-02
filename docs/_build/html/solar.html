@@ -37,18 +37,23 @@
 <h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">solar</span></code> – Sunrise and Sunset<a class="headerlink" href="#solar-sunrise-and-sunset" title="Permalink to this headline">¶</a></h1>
 <p>This module computes sunrise and sunset.</p>
 <p>See <a class="reference external" href="https://en.wikipedia.org/wiki/Sunrise_equation">https://en.wikipedia.org/wiki/Sunrise_equation</a></p>
-<p><a class="reference external" href="https://gml.noaa.gov/grad/solcalc/calcdetails.html">https://gml.noaa.gov/grad/solcalc/calcdetails.html</a></p>
-<p>Also see <a class="reference external" href="https://gml.noaa.gov/grad/solcalc/solareqns.PDF">https://gml.noaa.gov/grad/solcalc/solareqns.PDF</a>.
-This uses the deprecated Spencer equations <a class="reference external" href="https://www.mail-archive.com/sundial&#64;uni-koeln.de/msg01050.html">https://www.mail-archive.com/sundial&#64;uni-koeln.de/msg01050.html</a>.
-It appears the Fourier Transform approximations are no longer considered accurate enough.
-Also, this paper seems to have a number of small errors in it. (See “cost”, for example.)</p>
-<p>Also see <a class="reference external" href="https://gml.noaa.gov/grad/solcalc/sunrise.html">https://gml.noaa.gov/grad/solcalc/sunrise.html</a> which seems to produce
+<p>Finally, see <a class="reference external" href="https://gml.noaa.gov/grad/solcalc/sunrise.html">https://gml.noaa.gov/grad/solcalc/sunrise.html</a> which seems to produce
 different, more accurate results. The associated Excel spreadsheet seems more
 useful because it seems to be the preferred approach and provides test data.</p>
-<p>Generally,
-the <span class="math notranslate nohighlight">\(\phi\)</span> values are N-S latitude, and <span class="math notranslate nohighlight">\(\lambda\)</span> values are E-W longitude.
-Also, the final time requires a time zone offet, <span class="math notranslate nohighlight">\(t\)</span>, to convert to local time,
-and account for savings vs. daylight time.</p>
+<p>Supplemental information: <a class="reference external" href="https://gml.noaa.gov/grad/solcalc/calcdetails.html">https://gml.noaa.gov/grad/solcalc/calcdetails.html</a></p>
+<p>Notation:</p>
+<dl class="field-list simple">
+<dt class="field-odd"><span class="math notranslate nohighlight">\(\phi\)</span></dt>
+<dd class="field-odd"><p>Latitude, north is positive.</p>
+</dd>
+<dt class="field-even"><span class="math notranslate nohighlight">\(\lambda\)</span></dt>
+<dd class="field-even"><p>Longitude, east is positive.</p>
+</dd>
+<dt class="field-odd"><span class="math notranslate nohighlight">\(t\)</span></dt>
+<dd class="field-odd"><p>Time zone offset in hours. Converts UTC to local time,
+and accounts for savings vs. daylight time.</p>
+</dd>
+</dl>
 <p>The procedure is as follows:</p>
 <ol class="arabic">
 <li><p>D is the given date as an ordinal number after 1900.
@@ -77,7 +82,7 @@ The spreadsheet representation of dates provides a helpful approximation.
 </li>
 <li><p>L is the sun’s equation of center.</p>
 <div class="math notranslate nohighlight">
-\[L = (1.914602 - 0.004817 G + 0.000014 G^2) \sin J + (0.019993 - 0.000101 G) \sin 2 J + 0.000289 \sin 2 J\]</div>
+\[L = (1.914602 - 0.004817 G + 0.000014 G^2) \sin \frac{J \pi}{180} + (0.019993 - 0.000101 G) \sin \frac{2 J \pi}{180} + 0.000289 \sin \frac{2 J \pi}{180}\]</div>
 </li>
 <li><p>M is the sun’s true longitude (in degrees),
 <span class="math notranslate nohighlight">\(M = I + L\)</span>.</p></li>
@@ -89,7 +94,7 @@ The spreadsheet representation of dates provides a helpful approximation.
 </li>
 <li><p>P is the sun’s apparent longitude (in degrees).</p>
 <div class="math notranslate nohighlight">
-\[P = M - 0.00569 - 0.00478 \sin (125.04 - 1934.136 G)\frac{\pi}{180}\]</div>
+\[P = M - 0.00569 - 0.00478 \sin \left(\frac{(125.04 - 1934.136 G)\pi}{180}\right)\]</div>
 </li>
 <li><p>Q is the mean obliquity to the ecliptic (in degrees).</p>
 <div class="math notranslate nohighlight">
@@ -97,34 +102,36 @@ The spreadsheet representation of dates provides a helpful approximation.
 </li>
 <li><p>R is the obliquity correction (degrees).</p>
 <div class="math notranslate nohighlight">
-\[R = Q + 0.00256 \cos(125.04 - 1934.136 G) \frac{\pi}{180}\]</div>
+\[R = Q + 0.00256 \cos \left(\frac{(125.04 - 1934.136 G) \pi}{180} \right)\]</div>
 </li>
 <li><p>S is the sun’s right ascension (degrees).</p>
 <div class="math notranslate nohighlight">
-\[S = \arctan \frac{\cos R \sin P} {\cos P}\]</div>
+\[S = \frac{180}{\pi} \arctan \left( \frac{\cos R \sin P} {\cos P} \right)\]</div>
 </li>
 <li><p>T is the sun’s declination (degrees).</p>
 <div class="math notranslate nohighlight">
-\[T = \arcsin (\sin R \sin P)\]</div>
+\[T = \frac{180}{\pi} \arcsin \left(\sin R \sin P \right)\]</div>
 </li>
 <li><p>U is the “variable Y”. This is referenced as <span class="math notranslate nohighlight">\(y\)</span> in several
 variations. See <a class="reference external" href="https://ui.adsabs.harvard.edu/abs/1989MNRAS.238.1529H/abstract">https://ui.adsabs.harvard.edu/abs/1989MNRAS.238.1529H/abstract</a> for an example.</p>
 <div class="math notranslate nohighlight">
-\[U = \tan^2 \frac{R}{2}\]</div>
+\[U = \tan^2 \frac{\frac{R}{2}\pi}{180} = \tan^2 \frac{\pi R}{360}\]</div>
 </li>
-<li><p>V is the “Equation” of time (in minutes) how apparent time equates to measured time.</p>
+<li><p>V is the “Equation” of time (in minutes) how apparent time equates to measured time.
+(Note, <span class="math notranslate nohighlight">\(I\)</span>, and <span class="math notranslate nohighlight">\(J\)</span> are in degrees, and the radians conversions are omitted.)</p>
 <div class="math notranslate nohighlight">
-\[V = 4 U \sin(2I) - 2K\sin J + 4KU\sin J \cos 2I - 0.5 U^2 \sin 4I - 1.25 K^2 \sin 2J\]</div>
+\[V = 4 U \sin 2I  - 2K\sin J + 4KU\sin J \cos 2I - 0.5 U^2 \sin 4I - 1.25 K^2 \sin 2J\]</div>
 </li>
-<li><p>W is the Local Hour Angle of Sunrise (degrees). The baseline for a visible sun is <span class="math notranslate nohighlight">\(90^{\circ}50^{\prime}\)</span>,
-or 90.833. Other values account for civil, nautical, or astronomial twilight.</p>
+<li><p>W is the Local Hour Angle of Sunrise (degrees). The baseline for a visible sun is
+<span class="math notranslate nohighlight">\(90^{\circ}50^{\prime} = 90^{\circ}\!.833\)</span>.
+Other values account for civil, nautical, or astronomial twilight. (See the <a class="reference internal" href="#twilight-details">Twilight Details</a>.)</p>
 <div class="math notranslate nohighlight">
-\[W = \arccos \left(\frac{\cos 90.833}{\cos \phi \cos T} - \tan \phi \tan T\right)\]</div>
+\[W = \arccos \left(\frac{\cos \frac{90^{\circ}\!.833\pi}{180}}{\cos \phi \cos T} - \tan \phi \tan T\right)\]</div>
 </li>
 <li><p>X is Solar Noon in Local Standard Time. Note that <span class="math notranslate nohighlight">\(1440 = 24 \times 60\)</span>, the number
-of minutes in a day. The equation of time is in minutes.</p>
+of minutes in a day. The equation of time, <span class="math notranslate nohighlight">\(V\)</span>, is in minutes.</p>
 <div class="math notranslate nohighlight">
-\[X = \frac{720 - 4 \lambda - V + t}{1440}\]</div>
+\[X = \frac{720 - 4 \lambda - V + \frac{t}{60}}{1440}\]</div>
 </li>
 <li><p>Y is sunrise.</p>
 <div class="math notranslate nohighlight">
@@ -135,21 +142,104 @@ of minutes in a day. The equation of time is in minutes.</p>
 \[Z = \frac{X + 4 W}{1440}\]</div>
 </li>
 </ol>
-<section id="twilight">
-<h2>Twilight<a class="headerlink" href="#twilight" title="Permalink to this headline">¶</a></h2>
+<section id="twilight-details">
+<h2>Twilight Details<a class="headerlink" href="#twilight-details" title="Permalink to this headline">¶</a></h2>
 <p>Computing nautical twilight is Solar zenith angle is 102°, solar elevation angle is -12°.
 This is 12° beyond the horizon.</p>
 <p>For some information, see <a class="reference external" href="http://www.stargazing.net/kepler/sunrise.html">http://www.stargazing.net/kepler/sunrise.html</a></p>
 <p>This appears to be an offset to the Hour Angle of sunrise. The following
 uses 90.833 as the horizon with a correction for refraction of the atmosphere:</p>
 <div class="math notranslate nohighlight">
-\[W = \arccos \left( \frac{\cos 90.833}{\cos {\phi} \cos T} - \tan{\phi}\tan T \right)\]</div>
-<p>If so, then Nautical twilight could be:</p>
+\[W = \arccos \left( \frac{\cos 90^{\circ}\!.833}{\cos {\phi} \cos T} - \tan{\phi}\tan T \right)\]</div>
+<p>This means Nautical twilight is:</p>
 <div class="math notranslate nohighlight">
-\[W_n = \arccos \left( \frac{\cos 102}{\cos {\phi} \cos T} - \tan{\phi}\tan T \right)\]</div>
+\[W_n = \arccos \left( \frac{\cos 102^{\circ}}{\cos {\phi} \cos T} - \tan{\phi}\tan T \right)\]</div>
 </section>
-<section id="alternative">
-<h2>Alternative<a class="headerlink" href="#alternative" title="Permalink to this headline">¶</a></h2>
+<section id="alternative-1">
+<h2>Alternative 1<a class="headerlink" href="#alternative-1" title="Permalink to this headline">¶</a></h2>
+<p>See <a class="reference external" href="https://gml.noaa.gov/grad/solcalc/solareqns.PDF">https://gml.noaa.gov/grad/solcalc/solareqns.PDF</a> for a simpler (but less accurate) approach.</p>
+<p>The above solareqns.PDF uses what appear to be deprecated Spencer equations <a class="reference external" href="https://www.mail-archive.com/sundial&#64;uni-koeln.de/msg01050.html">https://www.mail-archive.com/sundial&#64;uni-koeln.de/msg01050.html</a>.
+It appears these old Fourier Transform approximations are no longer considered accurate enough.
+Also, this paper seems to have a number of small errors in it. (See “cost”, for example, which should be “cos”.)</p>
+<p>Inputs:</p>
+<dl class="field-list simple">
+<dt class="field-odd"><span class="math notranslate nohighlight">\(\phi\)</span></dt>
+<dd class="field-odd"><p>latitude of observer (north is positive; south is negative)</p>
+</dd>
+<dt class="field-even"><span class="math notranslate nohighlight">\(\lambda\)</span></dt>
+<dd class="field-even"><p>longitude of observer (east is positive; west is negative)</p>
+</dd>
+<dt class="field-odd"><span class="math notranslate nohighlight">\(N\)</span></dt>
+<dd class="field-odd"><p>Days after start of year.</p>
+</dd>
+<dt class="field-even">h, m, s</dt>
+<dd class="field-even"><p>Current local time.</p>
+</dd>
+<dt class="field-odd">tz</dt>
+<dd class="field-odd"><p>Timezone Hours offset from UTC. (For example, US_MST = -7).</p>
+</dd>
+</dl>
+<ol class="arabic">
+<li><p>Compute fraction of year, <span class="math notranslate nohighlight">\(\gamma\)</span>, from year, <span class="math notranslate nohighlight">\(y\)</span>, ordinal day, <span class="math notranslate nohighlight">\(N\)</span>, and hour, <span class="math notranslate nohighlight">\(h\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align}
+d(y)&amp; = \begin{cases}
+366&amp; \textbf{if $y \mod 4 = 0 \land (y \mod 100 \neq 0 \lor y \mod 400 = 0)$}\\
+365&amp; \textbf{otherwise}
+\end{cases}\\
+\gamma&amp; = \frac{2 \pi}{d(y)}\left( N - 1 + \frac{h-12}{24}\right)
+\end{align}\end{split}\]</div>
+</li>
+</ol>
+<ol class="arabic" start="2">
+<li><p>From <span class="math notranslate nohighlight">\(\gamma\)</span>, estimate the equation of time, <span class="math notranslate nohighlight">\(EqT\)</span> (in minutes).</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align}
+EqT&amp; = 229.18 (0.000075 \\
+&amp;+ 0.001868 \cos \gamma - 0.032077 \sin \gamma\\
+&amp;- 0.014615 \cos 2\gamma - 0.040849 \sin 2\gamma)
+\end{align}\end{split}\]</div>
+</li>
+<li><p>From <span class="math notranslate nohighlight">\(\gamma\)</span>, estimate the solar declension angle, <span class="math notranslate nohighlight">\(\delta\)</span> (in radians).</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align}
+\delta&amp; = 0.006918 - 0.399912 \cos \gamma + 0.070257 \sin \gamma \\
+&amp;- 0.006758 \cos 2 \gamma + 0.000907 \sin 2 \gamma \\
+&amp;- 0.002697 \cos 3 \gamma + 0.00148 \sin 3 \gamma
+\end{align}\end{split}\]</div>
+</li>
+<li><p>Find the time offset, in minutes, given the longitude, <span class="math notranslate nohighlight">\(\lambda\)</span>, and the timezone hours, <span class="math notranslate nohighlight">\(tz\)</span>, from UTC.
+(example US_MST = -7)</p>
+<div class="math notranslate nohighlight">
+\[t = EqT + 4 \lambda - 60 tz\]</div>
+</li>
+<li><p>Find the true solar time, in minutes.</p>
+<div class="math notranslate nohighlight">
+\[T = 60 h + m + \frac{s}{60} + t\]</div>
+</li>
+<li><p>Compute the Hour Angle at the Zenith.
+For the special case of sunrise or sunset, the zenith is set to <span class="math notranslate nohighlight">\(90^{\circ}\!.833\)</span>
+(the approximate correction for atmospheric refraction at sunrise and sunset, and the size of the solar disk),
+and the hour angle becomes:</p>
+<div class="math notranslate nohighlight">
+\[\cos H = \frac{\cos 90.833}{\cos \phi \cos \delta}-(\tan \phi \tan \delta)\]</div>
+</li>
+<li><p>Sunrise, <span class="math notranslate nohighlight">\(T_r\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[720-4(\lambda + H) - EqT\]</div>
+</li>
+<li><p>Sunset, <span class="math notranslate nohighlight">\(T_s\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[720-4(\lambda - H) - EqT\]</div>
+</li>
+<li><p>Noon, <span class="math notranslate nohighlight">\(T_n\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[720-4\lambda - EqT\]</div>
+</li>
+</ol>
+</section>
+<section id="alternative-2">
+<h2>Alternative 2<a class="headerlink" href="#alternative-2" title="Permalink to this headline">¶</a></h2>
 <p>See <a class="reference external" href="https://edwilliams.org/sunrise_sunset_algorithm.htm">https://edwilliams.org/sunrise_sunset_algorithm.htm</a></p>
 <p>This is a reference to the <em>Almanac for computers</em>, 1990 edition.</p>
 <p>The official citation:</p>
@@ -157,6 +247,7 @@ uses 90.833 as the horizon with a correction for refraction of the atmosphere:</
 <div><p>United States Naval Observatory. Nautical Almanac Office. (19801991).
 <em>Almanac for computers</em>. Washington, D.C.: Nautical Almanac Office, United States Naval Observatory.</p>
 </div></blockquote>
+<p>This  has a section, <a class="reference internal" href="#sunrise-sunset-and-twilight">Sunrise, Sunset and Twilight</a>, which we reproduce much of.</p>
 <section id="day-of-the-year">
 <h3>Day of the Year<a class="headerlink" href="#day-of-the-year" title="Permalink to this headline">¶</a></h3>
 <p>Preliminary Information from Page B1 and B2.</p>
@@ -167,7 +258,7 @@ Range is 1 to 365 for non-leap years, 1 to 366 for leap years.</p>
 </dd>
 </dl>
 <div class="math notranslate nohighlight">
-\[N = \left\lfloor \frac{275 M}{9} \right\rfloor – \left\lfloor \frac{M+9}{12} \right\rfloor \left(1+\left\lfloor \frac{K \mod 4+2}{3} \right\rfloor \right) + I - 30\]</div>
+\[N = \left\lfloor \frac{275 M}{9} \right\rfloor - \left\lfloor \frac{M+9}{12} \right\rfloor \left(1+\left\lfloor \frac{K \mod 4+2}{3} \right\rfloor \right) + I - 30\]</div>
 <p>Where <span class="math notranslate nohighlight">\(N\)</span> is the day of the year, <span class="math notranslate nohighlight">\(K\)</span> is the year, <span class="math notranslate nohighlight">\(M\)</span> is the month (<span class="math notranslate nohighlight">\(1 \leq M \leq 12\)</span>),
 and <span class="math notranslate nohighlight">\(I\)</span> is the day of the month (<span class="math notranslate nohighlight">\(1 \leq I \leq 31\)</span>).</p>
 <p>This is valid for any year except centurial years not evenly divisible by 400. This is valid
@@ -315,9 +406,9 @@ for example, there is continuous illumination during certain summer days and con
 darkness during winter days.</p>
 <p>Example:</p>
 <p>Compute the time of sunrise on 25 June at Wayne, New Jersey.</p>
-<p>Latitude: <span class="math notranslate nohighlight">\(40^{\circ}\!.9 \text{ North}\)</span>  <span class="math notranslate nohighlight">\(\phi=+40^{\circ}\!.9\)</span> <span class="math notranslate nohighlight">\(\sin \phi=+0.65474\)</span> <span class="math notranslate nohighlight">\(\cos \phi=+0.75585\)</span></p>
-<p>Longitude: <span class="math notranslate nohighlight">\(74^{\circ}\!.3 \text{ West}\)</span>  <span class="math notranslate nohighlight">\(\lambda=-74^{\circ}\!.3/15 = -4^{h}\!.953\)</span></p>
-<p>For sunrise: <span class="math notranslate nohighlight">\(z=90^{\circ} 50^{\prime}\)</span>   <span class="math notranslate nohighlight">\(\cos z = -0.01454\)</span></p>
+<p>Latitude: <span class="math notranslate nohighlight">\(40^{\circ}\!.9 \text{ North} \quad \phi=+40^{\circ}\!.9 \quad \sin \phi=+0.65474 \quad \cos \phi=+0.75585\)</span></p>
+<p>Longitude: <span class="math notranslate nohighlight">\(74^{\circ}\!.3 \text{ West} \quad \lambda=-74^{\circ}\!.3/15 = -4^{h}\!.953\)</span></p>
+<p>For sunrise: <span class="math notranslate nohighlight">\(z=90^{\circ} 50^{\prime} \quad \cos z = -0.01454\)</span></p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{flalign*}
 t&amp; = 176^{d} + (6^h + 4^{h}\!.953) / 24 = 176^{d}\!.456\\
@@ -336,6 +427,70 @@ T&amp; = 16^{h}\!.446 + 6^{h}\!.259 - 0^{h}\!.65710(176^{d}\!.456) - 6^{h}\!.622
 T_U&amp;= 4^{h}\!.488 + 4^{h}\!.953 = 9^{h}\!.441\\
 \end{flalign*}\end{split}\]</div>
 <p>Sunrise occurs at <span class="math notranslate nohighlight">\(9^{h} 26^{m}\)</span> UT = <span class="math notranslate nohighlight">\(5^{h} 26^{m}\)</span> EDT</p>
+</section>
+</section>
+<section id="alternative-3">
+<h2>Alternative 3<a class="headerlink" href="#alternative-3" title="Permalink to this headline">¶</a></h2>
+<p>The official citation:</p>
+<blockquote>
+<div><p>United States Naval Observatory. Nautical Almanac Office. (19801991).
+<em>Almanac for computers</em>. Washington, D.C.: Nautical Almanac Office, United States Naval Observatory.</p>
+</div></blockquote>
+<p>This  has a section, <a class="reference internal" href="#equation-of-time-and-time-of-solar-transit">Equation of Time and Time of Solar Transit</a>.
+This computes local mean time (LMT) of noon.</p>
+<p>We can offset this using the hour angle to compute sunrise and sunset.
+The hour angle requires the zenith, <span class="math notranslate nohighlight">\(z\)</span>, declension of the sun, <span class="math notranslate nohighlight">\(\delta\)</span>, and the latitude, <span class="math notranslate nohighlight">\(\phi\)</span>.
+This amounts to the <a class="reference internal" href="#alternative-2">Alternative 2</a> solution, and doesn’t offer any benefit.</p>
+<section id="equation-of-time-and-time-of-solar-transit">
+<h3>Equation of Time and Time of Solar Transit<a class="headerlink" href="#equation-of-time-and-time-of-solar-transit" title="Permalink to this headline">¶</a></h3>
+<p>This starts on Page B8.</p>
+<p>The equation of time <span class="math notranslate nohighlight">\(EqT\)</span> is the hour angle of the true Sun minus the hour angle of the mean sun.
+Thus it is the difference: apparent solar (sundial) time minus mean solar (clock) time.</p>
+<dl class="field-list simple">
+<dt class="field-odd"><span class="math notranslate nohighlight">\(N\)</span></dt>
+<dd class="field-odd"><p>Integer number of days since 0 January, <span class="math notranslate nohighlight">\(0^{h}\)</span> UT.</p>
+</dd>
+<dt class="field-even"><span class="math notranslate nohighlight">\(t\)</span></dt>
+<dd class="field-even"><p>Time since 0 January, <span class="math notranslate nohighlight">\(0^{h}\)</span> UT, in fractional days.</p>
+</dd>
+</dl>
+<p>Approximation 1.</p>
+<div class="math notranslate nohighlight">
+\[EqT = -7^{m}\!.66 sin(0^{\circ}\!.9856 t - 3^{\circ}\!.80) – 9^{m}\!.78 \sin(1^{\circ}\!.9712 t + 17^{\circ}\!.96)\]</div>
+<p>For higher accurancy, here is approximation 2.</p>
+<div class="math notranslate nohighlight">
+\[ \begin{align}\begin{aligned}\begin{split}\theta = 9^{\circ}\!.397 + 0^{\circ}\!.98561 t + 1^{\circ}\!.915 \sin(0^{\circ}\!.9856 t + 3^{\circ}\!.798)\\
++ 0^{\circ}\!.014 \cos(0^{\circ}\!.9856 t + 3^{\circ}\!.798)\\
++ 0^{\circ}\!.020 \sin(1^{\circ}\!.9712 t - 7^{\circ}\!.596)\end{split}\\EqT = 37^{m}\!.589 + 3^{m}\!.94244 t - 4^{m}\!.0 \arctan\left(\frac{\tan \theta}{0.91747}\right)\end{aligned}\end{align} \]</div>
+<p>In eq. (3), <span class="math notranslate nohighlight">\(EqT\)</span>, the arctangent should yield a result in degrees that is in the same quadrant as <span class="math notranslate nohighlight">\(\theta\)</span>.
+Near the end of the year <span class="math notranslate nohighlight">\(\theta\)</span> becomes greater than 360°. When this occurs the arctangent in eq. (3)
+should also be greater than 360°.</p>
+<p>… [C]ompute <span class="math notranslate nohighlight">\(EqT\)</span> for <span class="math notranslate nohighlight">\(t=N + \frac{12^{h}-\lambda}{24}\)</span>, where <span class="math notranslate nohighlight">\(N\)</span> is the day of the year … and
+<span class="math notranslate nohighlight">\(\lambda\)</span> is the longitude (east positive, west negative) expressed in hours. Then the local mean time (LMT) of transit
+is given to an accurace of <span class="math notranslate nohighlight">\(\pm 2\)</span> seconds by <span class="math notranslate nohighlight">\(LMT = 12^{h} - EqT\)</span>. The univeral time of transit is
+then obtained with <span class="math notranslate nohighlight">\(UT = LMT - \lambda\)</span>.</p>
+<p>Procedure:</p>
+<ol class="arabic simple">
+<li><p>Compute <span class="math notranslate nohighlight">\(t\)</span> from <span class="math notranslate nohighlight">\(N\)</span> and <span class="math notranslate nohighlight">\(\lambda\)</span>. <span class="math notranslate nohighlight">\(t=N + \frac{12^{h}-\lambda}{24}\)</span></p></li>
+<li><p>Compute <span class="math notranslate nohighlight">\(EqT\)</span> using one of the two approximations.</p></li>
+<li><p>Compute LMT. <span class="math notranslate nohighlight">\(LMT = 12^{h} - EqT\)</span>.</p></li>
+<li><p>If needed, compute UT. <span class="math notranslate nohighlight">\(UT = LMT - \lambda\)</span>.</p></li>
+</ol>
+<p>Example:</p>
+<p>Compute the time of solar transit at longitude <span class="math notranslate nohighlight">\(73^{\circ}58^{\prime}\)</span> West on 17 June 1990.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{flalign*}
+\lambda&amp; = -73^{\circ}\!.967 / 15 = -4^{h}\!.9311 = -4^{h}56^{m}\!.87 \\
+&amp;\text{for solar transit: } N = 168^{d} \quad t = 168^{d} + (12^{h} + 4^{h}\!.9311)/24 =  168^{d}\!.7055\\
+\theta&amp; =  9^{\circ}\!.397 + 0^{\circ}\!.98561 (168^{d}\!.7055) + 1^{\circ}\!.915 (0.3010)\\
+ &amp;\quad + 0^{\circ}\!.014 (-0.9536) + 0^{\circ}\!.020 (-0.5742) \\
+&amp; = 176^{\circ}\!.226 \\
+EqT&amp; = 37^{m}\!.589 + 3^{m}\!.94244 (168^{d}\!.7055) - 4^{m}\!.0 \arctan\left(\frac{-0.06596}{0.91747}\right)\\
+&amp;= 37^{m}\!.589 + 665^{m}\!.111 - 4^{m}\!.0(175^{\circ}.888)\\
+&amp;= -0^{m}\!.85 \\
+LMT&amp; = 12^{h} + 0^{m}\!.85 = 12^{h}0^{m}\!.85\\
+UT&amp; = 12^{h}0^{m}\!.85 + 4^{h}56^{m}\!.87 = 16^{h}57^{m}\!.72 \text{UT}
+\end{flalign*}\end{split}\]</div>
 </section>
 </section>
 </section>

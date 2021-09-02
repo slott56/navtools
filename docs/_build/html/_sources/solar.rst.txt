@@ -4,24 +4,26 @@
 
 This module computes sunrise and sunset.
 
+
 See https://en.wikipedia.org/wiki/Sunrise_equation
 
-https://gml.noaa.gov/grad/solcalc/calcdetails.html
-
-Also see https://gml.noaa.gov/grad/solcalc/solareqns.PDF.
-This uses the deprecated Spencer equations https://www.mail-archive.com/sundial@uni-koeln.de/msg01050.html.
-It appears the Fourier Transform approximations are no longer considered accurate enough.
-Also, this paper seems to have a number of small errors in it. (See "cost", for example.)
-
-Also see https://gml.noaa.gov/grad/solcalc/sunrise.html which seems to produce
+Finally, see https://gml.noaa.gov/grad/solcalc/sunrise.html which seems to produce
 different, more accurate results. The associated Excel spreadsheet seems more
 useful because it seems to be the preferred approach and provides test data.
 
+Supplemental information: https://gml.noaa.gov/grad/solcalc/calcdetails.html
 
-Generally,
-the :math:`\phi` values are N-S latitude, and :math:`\lambda` values are E-W longitude.
-Also, the final time requires a time zone offet, :math:`t`, to convert to local time,
-and account for savings vs. daylight time.
+Notation:
+
+:|phi|:
+    Latitude, north is positive.
+
+:|lambda|:
+    Longitude, east is positive.
+
+:|t|:
+    Time zone offset in hours. Converts UTC to local time,
+    and accounts for savings vs. daylight time.
 
 The procedure is as follows:
 
@@ -65,7 +67,7 @@ The procedure is as follows:
 
     ..  math::
 
-        L = (1.914602 - 0.004817 G + 0.000014 G^2) \sin J + (0.019993 - 0.000101 G) \sin 2 J + 0.000289 \sin 2 J
+        L = (1.914602 - 0.004817 G + 0.000014 G^2) \sin \frac{J \pi}{180} + (0.019993 - 0.000101 G) \sin \frac{2 J \pi}{180} + 0.000289 \sin \frac{2 J \pi}{180}
 
 #.  M is the sun's true longitude (in degrees),
     :math:`M = I + L`.
@@ -83,7 +85,7 @@ The procedure is as follows:
 
     ..  math::
 
-        P = M - 0.00569 - 0.00478 \sin (125.04 - 1934.136 G)\frac{\pi}{180}
+        P = M - 0.00569 - 0.00478 \sin \left(\frac{(125.04 - 1934.136 G)\pi}{180}\right)
 
 #.  Q is the mean obliquity to the ecliptic (in degrees).
 
@@ -95,46 +97,48 @@ The procedure is as follows:
 
     ..  math::
 
-        R = Q + 0.00256 \cos(125.04 - 1934.136 G) \frac{\pi}{180}
+        R = Q + 0.00256 \cos \left(\frac{(125.04 - 1934.136 G) \pi}{180} \right)
 
 #.  S is the sun's right ascension (degrees).
 
     ..  math::
 
-        S = \arctan \frac{\cos R \sin P} {\cos P}
+        S = \frac{180}{\pi} \arctan \left( \frac{\cos R \sin P} {\cos P} \right)
 
 #.  T is the sun's declination (degrees).
 
     ..  math::
 
-        T = \arcsin (\sin R \sin P)
+        T = \frac{180}{\pi} \arcsin \left(\sin R \sin P \right)
 
 #.  U is the "variable Y". This is referenced as :math:`y` in several
     variations. See https://ui.adsabs.harvard.edu/abs/1989MNRAS.238.1529H/abstract for an example.
 
     ..  math::
 
-        U = \tan^2 \frac{R}{2}
+        U = \tan^2 \frac{\frac{R}{2}\pi}{180} = \tan^2 \frac{\pi R}{360}
 
 #.  V is the "Equation" of time (in minutes) how apparent time equates to measured time.
+    (Note, :math:`I`, and :math:`J` are in degrees, and the radians conversions are omitted.)
 
     ..  math::
 
-        V = 4 U \sin(2I) - 2K\sin J + 4KU\sin J \cos 2I - 0.5 U^2 \sin 4I - 1.25 K^2 \sin 2J
+        V = 4 U \sin 2I  - 2K\sin J + 4KU\sin J \cos 2I - 0.5 U^2 \sin 4I - 1.25 K^2 \sin 2J
 
-#.  W is the Local Hour Angle of Sunrise (degrees). The baseline for a visible sun is :math:`90^{\circ}50^{\prime}`,
-    or 90.833. Other values account for civil, nautical, or astronomial twilight.
+#.  W is the Local Hour Angle of Sunrise (degrees). The baseline for a visible sun is
+    :math:`90^{\circ}50^{\prime} = 90^{\circ}\!.833`.
+    Other values account for civil, nautical, or astronomial twilight. (See the `Twilight Details`_.)
 
     ..  math::
 
-        W = \arccos \left(\frac{\cos 90.833}{\cos \phi \cos T} - \tan \phi \tan T\right)
+        W = \arccos \left(\frac{\cos \frac{90^{\circ}\!.833\pi}{180}}{\cos \phi \cos T} - \tan \phi \tan T\right)
 
 #.  X is Solar Noon in Local Standard Time. Note that :math:`1440 = 24 \times 60`, the number
-    of minutes in a day. The equation of time is in minutes.
+    of minutes in a day. The equation of time, :math:`V`, is in minutes.
 
     ..  math::
 
-        X = \frac{720 - 4 \lambda - V + t}{1440}
+        X = \frac{720 - 4 \lambda - V + \frac{t}{60}}{1440}
 
 #.  Y is sunrise.
 
@@ -149,8 +153,8 @@ The procedure is as follows:
         Z = \frac{X + 4 W}{1440}
 
 
-Twilight
-========
+Twilight Details
+================
 
 Computing nautical twilight is Solar zenith angle is 102°, solar elevation angle is -12°.
 This is 12° beyond the horizon.
@@ -162,16 +166,121 @@ uses 90.833 as the horizon with a correction for refraction of the atmosphere:
 
 ..  math::
 
-    W = \arccos \left( \frac{\cos 90.833}{\cos {\phi} \cos T} - \tan{\phi}\tan T \right)
+    W = \arccos \left( \frac{\cos 90^{\circ}\!.833}{\cos {\phi} \cos T} - \tan{\phi}\tan T \right)
 
-If so, then Nautical twilight could be:
+This means Nautical twilight is:
 
 ..  math::
 
-    W_n = \arccos \left( \frac{\cos 102}{\cos {\phi} \cos T} - \tan{\phi}\tan T \right)
+    W_n = \arccos \left( \frac{\cos 102^{\circ}}{\cos {\phi} \cos T} - \tan{\phi}\tan T \right)
 
-Alternative
-===========
+Alternative 1
+=============
+
+See https://gml.noaa.gov/grad/solcalc/solareqns.PDF for a simpler (but less accurate) approach.
+
+The above solareqns.PDF uses what appear to be deprecated Spencer equations https://www.mail-archive.com/sundial@uni-koeln.de/msg01050.html.
+It appears these old Fourier Transform approximations are no longer considered accurate enough.
+Also, this paper seems to have a number of small errors in it. (See "cost", for example, which should be "cos".)
+
+Inputs:
+
+
+:|phi|:
+    latitude of observer (north is positive; south is negative)
+
+:|lambda|:
+    longitude of observer (east is positive; west is negative)
+
+:|N|:
+    Days after start of year.
+
+:h, m, s:
+    Current local time.
+
+:tz:
+    Timezone Hours offset from UTC. (For example, US_MST = -7).
+
+.. |gamma| replace:: :math:`\gamma`
+
+1.  Compute fraction of year, |gamma|, from year, :math:`y`, ordinal day, :math:`N`, and hour, :math:`h`.
+
+    ..  math::
+
+        \begin{align}
+        d(y)& = \begin{cases}
+        366& \textbf{if $y \mod 4 = 0 \land (y \mod 100 \neq 0 \lor y \mod 400 = 0)$}\\
+        365& \textbf{otherwise}
+        \end{cases}\\
+        \gamma& = \frac{2 \pi}{d(y)}\left( N - 1 + \frac{h-12}{24}\right)
+        \end{align}
+
+.. |EqT| replace:: :math:`EqT`
+
+2.  From |gamma|, estimate the equation of time, |EqT| (in minutes).
+
+    ..  math::
+
+        \begin{align}
+        EqT& = 229.18 (0.000075 \\
+        &+ 0.001868 \cos \gamma - 0.032077 \sin \gamma\\
+        &- 0.014615 \cos 2\gamma - 0.040849 \sin 2\gamma)
+        \end{align}
+
+
+3.  From |gamma|, estimate the solar declension angle, :math:`\delta` (in radians).
+
+    ..  math::
+
+        \begin{align}
+        \delta& = 0.006918 - 0.399912 \cos \gamma + 0.070257 \sin \gamma \\
+        &- 0.006758 \cos 2 \gamma + 0.000907 \sin 2 \gamma \\
+        &- 0.002697 \cos 3 \gamma + 0.00148 \sin 3 \gamma
+        \end{align}
+
+4.  Find the time offset, in minutes, given the longitude, :math:`\lambda`, and the timezone hours, :math:`tz`, from UTC.
+    (example US_MST = -7)
+
+    ..  math::
+
+        t = EqT + 4 \lambda - 60 tz
+
+5.  Find the true solar time, in minutes.
+
+    ..  math::
+
+        T = 60 h + m + \frac{s}{60} + t
+
+6.  Compute the Hour Angle at the Zenith.
+    For the special case of sunrise or sunset, the zenith is set to :math:`90^{\circ}\!.833`
+    (the approximate correction for atmospheric refraction at sunrise and sunset, and the size of the solar disk),
+    and the hour angle becomes:
+
+    ..  math::
+
+        \cos H = \frac{\cos 90.833}{\cos \phi \cos \delta}-(\tan \phi \tan \delta)
+
+7.  Sunrise, :math:`T_r`.
+
+    ..  math::
+
+        720-4(\lambda + H) - EqT
+
+8.  Sunset, :math:`T_s`.
+
+    ..  math::
+
+        720-4(\lambda - H) - EqT
+
+9.  Noon, :math:`T_n`.
+
+    ..  math::
+
+        720-4\lambda - EqT
+
+
+Alternative 2
+=============
 
 See https://edwilliams.org/sunrise_sunset_algorithm.htm
 
@@ -181,6 +290,8 @@ The official citation:
 
     United States Naval Observatory. Nautical Almanac Office. (19801991).
     *Almanac for computers*. Washington, D.C.: Nautical Almanac Office, United States Naval Observatory.
+
+This  has a section, `Sunrise, Sunset and Twilight`_, which we reproduce much of.
 
 Day of the Year
 ---------------
@@ -195,7 +306,7 @@ Preliminary Information from Page B1 and B2.
 
 ..  math::
 
-    N = \left\lfloor \frac{275 M}{9} \right\rfloor – \left\lfloor \frac{M+9}{12} \right\rfloor \left(1+\left\lfloor \frac{K \mod 4+2}{3} \right\rfloor \right) + I - 30
+    N = \left\lfloor \frac{275 M}{9} \right\rfloor - \left\lfloor \frac{M+9}{12} \right\rfloor \left(1+\left\lfloor \frac{K \mod 4+2}{3} \right\rfloor \right) + I - 30
 
 Where |N| is the day of the year, :math:`K` is the year, :math:`M` is the month (:math:`1 \leq M \leq 12`),
 and :math:`I` is the day of the month (:math:`1 \leq I \leq 31`).
@@ -378,11 +489,11 @@ Example:
 
 Compute the time of sunrise on 25 June at Wayne, New Jersey.
 
-Latitude: :math:`40^{\circ}\!.9 \text{ North}`  :math:`\phi=+40^{\circ}\!.9` :math:`\sin \phi=+0.65474` :math:`\cos \phi=+0.75585`
+Latitude: :math:`40^{\circ}\!.9 \text{ North} \quad \phi=+40^{\circ}\!.9 \quad \sin \phi=+0.65474 \quad \cos \phi=+0.75585`
 
-Longitude: :math:`74^{\circ}\!.3 \text{ West}`  :math:`\lambda=-74^{\circ}\!.3/15 = -4^{h}\!.953`
+Longitude: :math:`74^{\circ}\!.3 \text{ West} \quad \lambda=-74^{\circ}\!.3/15 = -4^{h}\!.953`
 
-For sunrise: :math:`z=90^{\circ} 50^{\prime}`   :math:`\cos z = -0.01454`
+For sunrise: :math:`z=90^{\circ} 50^{\prime} \quad \cos z = -0.01454`
 
 ..  math::
 
@@ -404,3 +515,91 @@ For sunrise: :math:`z=90^{\circ} 50^{\prime}`   :math:`\cos z = -0.01454`
     \end{flalign*}
 
 Sunrise occurs at :math:`9^{h} 26^{m}` UT = :math:`5^{h} 26^{m}` EDT
+
+Alternative 3
+=============
+
+The official citation:
+
+    United States Naval Observatory. Nautical Almanac Office. (19801991).
+    *Almanac for computers*. Washington, D.C.: Nautical Almanac Office, United States Naval Observatory.
+
+This  has a section, `Equation of Time and Time of Solar Transit`_.
+This computes local mean time (LMT) of noon.
+
+We can offset this using the hour angle to compute sunrise and sunset.
+The hour angle requires the zenith, |z|, declension of the sun, |delta|, and the latitude, |phi|.
+This amounts to the `Alternative 2`_ solution, and doesn't offer any benefit.
+
+
+Equation of Time and Time of Solar Transit
+------------------------------------------
+
+This starts on Page B8.
+
+The equation of time |EqT| is the hour angle of the true Sun minus the hour angle of the mean sun.
+Thus it is the difference: apparent solar (sundial) time minus mean solar (clock) time.
+
+:|N|:
+    Integer number of days since 0 January, :math:`0^{h}` UT.
+
+:|t|:
+    Time since 0 January, :math:`0^{h}` UT, in fractional days.
+
+
+Approximation 1.
+
+..  math::
+
+    EqT = -7^{m}\!.66 sin(0^{\circ}\!.9856 t - 3^{\circ}\!.80) – 9^{m}\!.78 \sin(1^{\circ}\!.9712 t + 17^{\circ}\!.96)
+
+For higher accurancy, here is approximation 2.
+
+..  math::
+
+    \theta = 9^{\circ}\!.397 + 0^{\circ}\!.98561 t + 1^{\circ}\!.915 \sin(0^{\circ}\!.9856 t + 3^{\circ}\!.798)\\
+    + 0^{\circ}\!.014 \cos(0^{\circ}\!.9856 t + 3^{\circ}\!.798)\\
+    + 0^{\circ}\!.020 \sin(1^{\circ}\!.9712 t - 7^{\circ}\!.596)
+
+    EqT = 37^{m}\!.589 + 3^{m}\!.94244 t - 4^{m}\!.0 \arctan\left(\frac{\tan \theta}{0.91747}\right)
+
+.. |theta| replace:: :math:`\theta`
+
+In eq. (3), |EqT|, the arctangent should yield a result in degrees that is in the same quadrant as |theta|.
+Near the end of the year |theta| becomes greater than 360°. When this occurs the arctangent in eq. (3)
+should also be greater than 360°.
+
+... [C]ompute |EqT| for :math:`t=N + \frac{12^{h}-\lambda}{24}`, where |N| is the day of the year ... and
+|lambda| is the longitude (east positive, west negative) expressed in hours. Then the local mean time (LMT) of transit
+is given to an accurace of :math:`\pm 2` seconds by :math:`LMT = 12^{h} - EqT`. The univeral time of transit is
+then obtained with :math:`UT = LMT - \lambda`.
+
+Procedure:
+
+1.  Compute |t| from |N| and |lambda|. :math:`t=N + \frac{12^{h}-\lambda}{24}`
+
+2.  Compute |EqT| using one of the two approximations.
+
+3.  Compute LMT. :math:`LMT = 12^{h} - EqT`.
+
+4.  If needed, compute UT. :math:`UT = LMT - \lambda`.
+
+Example:
+
+Compute the time of solar transit at longitude :math:`73^{\circ}58^{\prime}` West on 17 June 1990.
+
+..  math::
+
+    \begin{flalign*}
+    \lambda& = -73^{\circ}\!.967 / 15 = -4^{h}\!.9311 = -4^{h}56^{m}\!.87 \\
+    &\text{for solar transit: } N = 168^{d} \quad t = 168^{d} + (12^{h} + 4^{h}\!.9311)/24 =  168^{d}\!.7055\\
+    \theta& =  9^{\circ}\!.397 + 0^{\circ}\!.98561 (168^{d}\!.7055) + 1^{\circ}\!.915 (0.3010)\\
+     &\quad + 0^{\circ}\!.014 (-0.9536) + 0^{\circ}\!.020 (-0.5742) \\
+    & = 176^{\circ}\!.226 \\
+    EqT& = 37^{m}\!.589 + 3^{m}\!.94244 (168^{d}\!.7055) - 4^{m}\!.0 \arctan\left(\frac{-0.06596}{0.91747}\right)\\
+    &= 37^{m}\!.589 + 665^{m}\!.111 - 4^{m}\!.0(175^{\circ}.888)\\
+    &= -0^{m}\!.85 \\
+    LMT& = 12^{h} + 0^{m}\!.85 = 12^{h}0^{m}\!.85\\
+    UT& = 12^{h}0^{m}\!.85 + 4^{h}56^{m}\!.87 = 16^{h}57^{m}\!.72 \text{UT}
+    \end{flalign*}
+

@@ -73,6 +73,7 @@ def test_parse_date(mock_today):
     assert parse_date("9-10-2021 11:12 PM") == datetime.datetime(2021, 9, 10, 23, 12)
     assert parse_date("2020-09-30T07:52:39Z") == datetime.datetime(2020, 9, 30, 7, 52, 39, tzinfo=datetime.timezone.utc)
     assert parse_date("2013-11-08T13:53:42-05:00") == datetime.datetime(2013, 11, 8, 13, 53, 42, tzinfo=datetime.timezone(datetime.timedelta(days=0, seconds=-5*60*60)))
+    assert parse_date("2011-06-04 13:12:32 +0000") == datetime.datetime(2011, 6, 4, 13, 12, 32, tzinfo=datetime.timezone.utc)
     with raises(ValueError):
         parse_date("9-10-2021 11:12 Nope")
 
@@ -299,7 +300,7 @@ def test_bad_gpx_to_LogEntry_2(bad_gpx_file_2):
     with raises(ValueError) as error:
         points = list(generator)
     assert error.value.args[0] == (
-        "time data '2010-09-06 Nope This is Invalid' does not match format '%Y-%m-%dT%H:%M:%SZ'"
+        "Cannot parse '2010-09-06 Nope This is Invalid'"
     )
 
 

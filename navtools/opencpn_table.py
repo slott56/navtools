@@ -136,13 +136,7 @@ class Leg:
                 # lat=navigation.Lat.fromstring(details["Latitude"]),
                 # lon=navigation.Lon.fromstring(details["Longitude"]),
                 ETE=Duration.parse(details["ETE"]),
-                ETA=(
-                    analysis.parse_date(
-                        eta_time
-                    )  # datetime.datetime.strptime(eta_time, "%m/%d/%Y %H:%M")
-                    if eta_time
-                    else None
-                ),
+                ETA=(analysis.parse_date(eta_time) if eta_time else None),
                 ETA_summary=eta_summary,
                 speed=float(details["Speed"]),
                 tide=details["Next tide event"],

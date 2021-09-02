@@ -48,9 +48,7 @@ See     https://gml.noaa.gov/grad/solcalc/calcdetails.html
 
 See     https://edwilliams.org/sunrise_sunset_algorithm.htm
 
-..  todo::
-
-    Add nautical twilight offsets.
+..  todo:: add nautical twilight option.
 """
 from __future__ import annotations
 import calendar
