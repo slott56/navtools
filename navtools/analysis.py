@@ -14,6 +14,7 @@ for fine-grained analysis of sailing performance.
 
 from __future__ import annotations
 
+import abc
 import argparse
 import csv
 from dataclasses import dataclass, field
@@ -238,31 +239,23 @@ def csv_reader(source: TextIO) -> csv.DictReader[str]:
     return reader
 
 
-def csv_to_LogEntry(
-    reader: csv.DictReader[str], date: Optional[datetime.date] = None,
-) -> Iterator[LogEntry]:
+class LogEntryReader(abc.ABC):
     """
-    Parses a CSV file to yield an iterable sequence
-    of :py:class:`LogEntry` objects. Headers must be provided, otherwise GPS_NAVX_HEADERS
-    will be assumed.
+    Reads a CSV file to yield an iterable sequence
+    of :py:class:`LogEntry` objects.
 
-    The headers issue.
-
-    -   GPS NavX doesn't provide headers. The list ``GPS_NAVX_HEADER`` is used as an external schema.
-
-    -   Other sources may use ['Time', 'Lat', 'Lon', 'COG', 'SOG', 'Rig', 'Engine', 'windAngle', 'windSpeed', ...
-
-    We "canonicalize" this by looking for ``date`` or ``time``, something starting with ``lat``
-    and something starting with ``lon``. These are the minimum required to compute distance and duration.
-
-    :param reader: csv.DictReader with proper headers
-    :param date: :py:class:`datetime.datetime` object used to fill in default
-        values for incomplete dates. By default, it's "now".
-    :returns: An iterator over :py:class:`LogEntry` objects.
-
-    ..  todo:: Refactor :func:`csv_to_LogEntry` into a class that can be extended.
+    Subclasses can extend this to cover numerous special cases.
     """
 
+    @abc.abstractmethod
+    def entry_iter(
+        self, reader: csv.DictReader[str], date: Optional[datetime.date] = None
+    ) -> Iterator[LogEntry]:
+        ...  # pragma: no cover
+
+
+class LogEntryReaderCSV(LogEntryReader):
+    @staticmethod
     def best_match(field_names: list[str], target: str) -> str:
         """Given a list of field_names, which field starts with the hoped-for target?"""
         for nm in field_names:
@@ -270,32 +263,70 @@ def csv_to_LogEntry(
                 return nm
         raise TypeError(f"Can't find a field like {target!r} in {field_names!r}")
 
-    header: list[str] = cast(list[str], reader.fieldnames)
+    def match_header(self, header: list[str]) -> tuple[str, str, str]:
+        if set(["date", "latitude", "longitude"]) <= set(header):
+            date_field = "date"
+            lat_field = "latitude"
+            lon_field = "longitude"
+        else:
+            try:
+                date_field = self.best_match(header, "date")
+            except TypeError:
+                date_field = self.best_match(header, "time")
+            lat_field = self.best_match(header, "lat")
+            lon_field = self.best_match(header, "lon")
+        return date_field, lat_field, lon_field
 
-    if set(["date", "latitude", "longitude"]) <= set(header):
-        date_field = "date"
-        lat_field = "latitude"
-        lon_field = "longitude"
-    else:
-        try:
-            date_field = best_match(header, "date")
-        except TypeError:
-            date_field = best_match(header, "time")
-        lat_field = best_match(header, "lat")
-        lon_field = best_match(header, "lon")
+    def entry_iter(
+        self, reader: csv.DictReader[str], date: Optional[datetime.date] = None,
+    ) -> Iterator[LogEntry]:
+        """
+        Parses a CSV file to yield an iterable sequence
+        of :py:class:`LogEntry` objects.
 
-    if date is None:
-        date = datetime.date.today()
+        Headers must be provided, otherwise GPS_NAVX_HEADERS will be assumed.
+        This subclass does a complex header-matching dance. This is not optimal.
+        Here are the two cases:
 
-    for row in reader:
-        try:
-            lat = navigation.Lat.fromstring(row[lat_field])
-            lon = navigation.Lon.fromstring(row[lon_field])
-            dt = parse_date(row[date_field], default=date)
-            yield LogEntry(time=dt, lat=lat, lon=lon, source_row=row)
-        except ValueError as e:
-            print(row)
-            print(e)
+        -   GPS NavX doesn't provide headers. The list ``GPS_NAVX_HEADER`` is used as an external schema.
+
+        -   Other sources may use ['Time', 'Lat', 'Lon', 'COG', 'SOG', 'Rig', 'Engine', 'windAngle', 'windSpeed', ...
+
+        We look for headers which are close match in name, irrespective of case.
+
+        -   ``date`` or ``time``,
+        -   something starting with ``lat``,
+        -   something starting with ``lon``.
+
+        A better approach to sniffing headers and then locating a subclass of :py:class:`LogEntryReader`
+        would be better.
+
+        These are the minimum required to compute distance and duration.
+
+        :param reader: csv.DictReader with proper headers
+        :param date: :py:class:`datetime.datetime` object used to fill in default
+            values for incomplete dates. By default, it's "now".
+        :returns: An iterator over :py:class:`LogEntry` objects.
+        """
+        if date is None:
+            date = datetime.date.today()
+
+        date_field, lat_field, lon_field = self.match_header(
+            cast(list[str], reader.fieldnames)
+        )
+
+        for row in reader:
+            try:
+                lat = navigation.Lat.fromstring(row[lat_field])
+                lon = navigation.Lon.fromstring(row[lon_field])
+                dt = parse_date(row[date_field], default=date)
+                yield LogEntry(time=dt, lat=lat, lon=lon, source_row=row)
+            except ValueError as e:
+                print(row)
+                print(e)
+
+
+csv_to_LogEntry = LogEntryReaderCSV().entry_iter
 
 
 def gpx_to_LogEntry(source: TextIO) -> Iterator[LogEntry]:
@@ -526,7 +557,7 @@ def main(argv: list[str]) -> None:
     parser.add_argument("tracks", nargs="*", type=Path)
     args = parser.parse_args(argv)
 
-    # Parse the assumed date for a time-only log in options.date
+    # Parse the assumed date to use for a time-only log
     dt: Optional[datetime.date]
     if args.date is not None:
         dt = parse_date(args.date).date()

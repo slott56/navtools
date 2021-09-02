@@ -274,15 +274,23 @@ See <code class="docutils literal notranslate"><span class="pre">GPS_NAVX_HEADER
 <dt class="sig sig-object py" id="navtools.analysis.csv_to_LogEntry">
 <span class="sig-prename descclassname"><span class="pre">navtools.analysis.</span></span><span class="sig-name descname"><span class="pre">csv_to_LogEntry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reader</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">csv.DictReader</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">datetime.date</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Iterator</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><span class="pre">LogEntry</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#navtools.analysis.csv_to_LogEntry" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parses a CSV file to yield an iterable sequence
-of <a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry</span></code></a> objects. Headers must be provided, otherwise GPS_NAVX_HEADERS
-will be assumed.</p>
-<p>The headers issue.</p>
+of <a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry</span></code></a> objects.</p>
+<p>Headers must be provided, otherwise GPS_NAVX_HEADERS will be assumed.
+This subclass does a complex header-matching dance. This is not optimal.
+Here are the two cases:</p>
 <ul class="simple">
 <li><p>GPS NavX doesn’t provide headers. The list <code class="docutils literal notranslate"><span class="pre">GPS_NAVX_HEADER</span></code> is used as an external schema.</p></li>
 <li><p>Other sources may use [‘Time’, ‘Lat’, ‘Lon’, ‘COG’, ‘SOG’, ‘Rig’, ‘Engine’, ‘windAngle’, ‘windSpeed’, …</p></li>
 </ul>
-<p>We “canonicalize” this by looking for <code class="docutils literal notranslate"><span class="pre">date</span></code> or <code class="docutils literal notranslate"><span class="pre">time</span></code>, something starting with <code class="docutils literal notranslate"><span class="pre">lat</span></code>
-and something starting with <code class="docutils literal notranslate"><span class="pre">lon</span></code>. These are the minimum required to compute distance and duration.</p>
+<p>We look for headers which are close match in name, irrespective of case.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">date</span></code> or <code class="docutils literal notranslate"><span class="pre">time</span></code>,</p></li>
+<li><p>something starting with <code class="docutils literal notranslate"><span class="pre">lat</span></code>,</p></li>
+<li><p>something starting with <code class="docutils literal notranslate"><span class="pre">lon</span></code>.</p></li>
+</ul>
+<p>A better approach to sniffing headers and then locating a subclass of <code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntryReader</span></code>
+would be better.</p>
+<p>These are the minimum required to compute distance and duration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -295,10 +303,6 @@ values for incomplete dates. By default, it’s “now”.</p></li>
 <dd class="field-even"><p>An iterator over <a class="reference internal" href="#navtools.analysis.LogEntry" title="navtools.analysis.LogEntry"><code class="xref py py-class docutils literal notranslate"><span class="pre">LogEntry</span></code></a> objects.</p>
 </dd>
 </dl>
-<div class="admonition-todo admonition" id="id1">
-<p class="admonition-title">Todo</p>
-<p>Refactor <a class="reference internal" href="#navtools.analysis.csv_to_LogEntry" title="navtools.analysis.csv_to_LogEntry"><code class="xref py py-func docutils literal notranslate"><span class="pre">csv_to_LogEntry()</span></code></a> into a class that can be extended.</p>
-</div>
 </dd></dl>
 
 </section>
