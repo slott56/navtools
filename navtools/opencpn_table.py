@@ -44,6 +44,22 @@ from the copy-and-paste output from OpenCPN's planner.
 
     PYTHONPATH=/Users/slott/github/local/navtools python -m navtools.opencpn_table route.txt >route.csv
 
+Notebook Use
+============
+
+In[ ]::
+    
+    openCPN = '''
+    the text
+    '''
+    
+In[ ]::
+
+    from navtools import opencpn_table
+    from io import StringIO
+    file = StringIO(openCPN)
+    route = opencpn_table.route = opencpn_table.Route.load(file)
+    
 """
 from __future__ import annotations
 import argparse
@@ -53,7 +69,7 @@ import datetime
 from pathlib import Path
 import re
 import sys
-from typing import Iterable, Callable, Any, Optional, ClassVar, cast
+from typing import Iterable, Callable, Any, Optional, ClassVar, TextIO, Union, cast
 from navtools import navigation
 from navtools import analysis
 from navtools.navigation import Waypoint
@@ -66,7 +82,7 @@ class Leg:
     and a more generic CSV with less fancy formatting.
 
     A Leg is the space between two Waypoints. One Waypoint is assumed (it's the "current" waypoint.)
-    The other is stated explicitly as the end-point for this leg.
+    The other is stated explicitly as the end-waypoint for this leg.
 
     This is a composite of a Waypoint
     plus some derived values.
@@ -173,15 +189,17 @@ class Route:
     The Name, Depart From, and Destination attributes are the most valuable.
     """
 
-    def __init__(
-        self, summary: dict[str, str], details: Iterable[dict[str, str]]
-    ) -> None:
+    def __init__(self, title: str, summary: dict[str, str], legs: list[Leg]) -> None:
         """Parse the heading dictionary and the sequence of legs into a Route document."""
+        self.title = title
         self.summary = summary
-        self.legs = [Leg.fromdict(d) for d in details]
+        self.legs = legs
+
+    def __repr__(self) -> str:
+        return f"Route({self.title!r},\n{self.summary!r},\n{self.legs!r})"
 
     @classmethod
-    def load(cls, path: Path) -> "Route":
+    def load(cls, source: TextIO) -> "Route":
         """
         Loads a Route from a given CSV file.
         This breaks the CSV into three parts:
@@ -192,31 +210,35 @@ class Route:
 
         - The leg rows, which have a large number of columns.
 
-
-        :param path: the Path to a CSV file.
+        :param source: a file-like object that contains the OpenCPN output.
+            This may be an open file. It may also be a StringIO() object with
+            the copied text.
         :returns: Route
         """
-        with path.open("r") as source:
-            rdr = csv.reader(source, delimiter="\t")
-            title = next(rdr)
-            summary = {}
-            for line in rdr:
-                # Blank line at the end of the header?
-                if len(line) == 0:
-                    break
-                # Name only line with no value?
-                elif len(line) == 1:
-                    summary[line[0]] = ""
-                # Name \t value line?
-                elif len(line) == 2:
-                    summary[line[0]] = line[1].strip()
-                # Ugh.
-                else:  # pragma: no cover
-                    # We may want to "\t".join(line[1:])
-                    raise ValueError("Unparsable summary line {line!r}")
-            details_header = next(rdr)
-            details = (dict(zip(details_header, row)) for row in rdr)
-            return Route(summary, details)
+        rdr = csv.reader(source, delimiter="\t")
+        title = ""
+        summary: dict[str, str] = {}
+        for line in rdr:
+            # Blank line after header?
+            if len(line) == 0 and summary:
+                break
+            # Blank Line before header?
+            elif len(line) == 0 and not summary:
+                continue
+            # Name only line with no value?
+            elif len(line) == 1:
+                title = title or line[0]
+            # Name \t value line?
+            elif len(line) == 2:
+                summary[line[0]] = line[1].strip()
+            # Ugh.
+            else:  # pragma: no cover
+                # We may want to "\t".join(line[1:])
+                raise ValueError(f"Unparsable summary line {line!r}")
+        details_header = next(rdr)
+        details = (dict(zip(details_header, row)) for row in rdr)
+        legs = [Leg.fromdict(d) for d in details]
+        return Route(title, summary, legs)
 
 
 @dataclass(eq=True, order=True, frozen=True)
@@ -243,6 +265,8 @@ class Duration:
     This must be done explicitly as Duration.fromfloat(minutes=60*distance/rate)
 
     Dataclass provides hash, equality, and ordering for us.
+
+    ..  todo:: See if this can be a subclass of datetime.timedelta.
     """
 
     d: int = 0
@@ -264,11 +288,17 @@ class Duration:
         }
         return cls(**raw)
 
-    def __add__(self, other: Any) -> "Duration":
-        return self.normalized(self.seconds + cast(Duration, other).seconds)
+    def __add__(self, other: Any) -> Union["Duration", datetime.datetime]:
+        if isinstance(other, Duration):
+            return self.normalized(self.seconds + other.seconds)
+        elif isinstance(other, datetime.datetime):
+            return self.timedelta + other
+        return NotImplemented
 
     def __sub__(self, other: Any) -> "Duration":
-        return self.normalized(self.seconds - cast(Duration, other).seconds)
+        if isinstance(other, Duration):
+            return self.normalized(self.seconds - other.seconds)
+        return NotImplemented
 
     @property
     def days(self) -> float:
@@ -289,6 +319,11 @@ class Duration:
     def seconds(self) -> int:
         """:returns: a single int in seconds"""
         return ((self.d * 24 + self.h) * 60 + self.m) * 60 + self.s
+
+    @property
+    def timedelta(self) -> datetime.timedelta:
+        """:returns: a datetime.timedelta"""
+        return datetime.timedelta(seconds=self.seconds)
 
     def __str__(self) -> str:
         """Numbers-friendly tags on hours, minutes and seconds."""
@@ -367,8 +402,9 @@ def main(argv: list[str]) -> None:
     parser.add_argument("source", nargs="*", type=Path)
     args = parser.parse_args(argv)
 
-    for file in args.source:
-        route = Route.load(file)
+    for path in args.source:
+        with path.open() as file:
+            route = Route.load(file)
         if args.format == "csv":
             to_csv(route)
         elif args.format == "html":

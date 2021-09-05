@@ -157,13 +157,13 @@ def test_gen_schedule_1(gen_schedule_1):
     assert len(points) == 3
 
     # First is always None -- this is our departure
-    assert points[0].point.name == "Fishing Bay"
+    assert points[0].waypoint.name == "Fishing Bay"
     assert points[0].distance is 0
     assert points[0].true_bearing is None
     assert points[0].magnetic is None
 
     # Next have computed values.
-    assert points[1].point.name == "Piankatank 6"
+    assert points[1].waypoint.name == "Piankatank 6"
     assert points[1].enroute_min == approx(12.6072302)
     assert points[1].distance == approx(1.05060252)
     assert points[1].true_bearing.deg == approx(112.9, rel=1E-3)
@@ -171,7 +171,7 @@ def test_gen_schedule_1(gen_schedule_1):
     assert points[1].enroute_min == approx(12.607230)
 
     # Next have computed values.
-    assert points[2].point.name == "Jackson Creek Entrance"
+    assert points[2].waypoint.name == "Jackson Creek Entrance"
     assert points[2].enroute_min == approx(7.19336232)
     assert points[2].distance == approx(0.59944686)
     assert points[2].true_bearing.deg == approx(348.0038223)

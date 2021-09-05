@@ -53,6 +53,7 @@ See     https://edwilliams.org/sunrise_sunset_algorithm.htm
 from __future__ import annotations
 import calendar
 import datetime
+import enum
 from typing import Optional
 from navtools.navigation import Lat, Lon
 from math import radians, degrees, pi, sin, cos, tan, asin, acos, atan2
@@ -61,6 +62,13 @@ US_EST = datetime.timedelta(seconds=-5 * 60 * 60)
 US_CST = datetime.timedelta(seconds=-6 * 60 * 60)
 US_MST = datetime.timedelta(seconds=-7 * 60 * 60)
 US_PST = datetime.timedelta(seconds=-8 * 60 * 60)
+
+
+class Zenith(enum.Enum):
+    VISIBLE = 90.833  # approx 90 + 50/60)
+    CIVIL_TWILIGHT = 96.0
+    NAUTICAL_TWILIGHT = 102.0
+    ASTRONOMICAL_TWILIGHT = 108.0
 
 
 def sun_times(
@@ -81,6 +89,9 @@ def sun_times(
     :param debug: True to display the columns of the spreadsheet with intermediate values.
     :return: Tuple with local apparent noon, surise, and sunset times.
     """
+    zenith = Zenith.VISIBLE.value  # The 90° 50' zenith for visible sunrise/sunset.
+    # Zenith.NAUTICAL_TWILIGHT.value
+
     D = now.date().toordinal() - datetime.date(1900, 1, 1).toordinal() + 2  # Date
     E = (
         (now - now.replace(hour=0, minute=0, second=0)).total_seconds() / 24 / 60 / 60
@@ -125,11 +136,9 @@ def sun_times(
         - 0.5 * U * U * sin(4 * radians(I))
         - 1.25 * K * K * sin(2 * radians(J))
     )  # Equation of time (minutes)
-    # NOTE: 90.833 is the 90° 50' zenith for sunrise/sunset.
-    # Use 102.0 to include Nautical Twilight.
     W = degrees(
         acos(
-            cos(radians(90.833)) / (cos(lat) * cos(radians(T)))
+            cos(radians(zenith)) / (cos(lat) * cos(radians(T)))
             - tan(lat) * tan(radians(T))
         )
     )  # Hour Angle of Sunrise (degrees)

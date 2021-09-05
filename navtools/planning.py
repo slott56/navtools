@@ -105,6 +105,7 @@ class SchedulePoint:
 
     ..  todo:: Unify with :py:class:`opencpn_table.Leg`.
 
+        - waypoint: Waypoint
         - leg: int
         - ETE: Optional["Duration"]
         - ETA: Optional[datetime.datetime]
@@ -116,7 +117,7 @@ class SchedulePoint:
         - course: Optional[float] = None
     """
 
-    point: Waypoint
+    waypoint: Waypoint
     distance: float
     true_bearing: Optional[navigation.Angle]
     magnetic: Optional[navigation.Angle]
@@ -177,7 +178,7 @@ def gen_schedule(
     previous, here = next(waypoints_iter), next(waypoints_iter)
     _, next_course = navigation.range_bearing(previous.point, here.point)
     yield SchedulePoint(
-        point=previous,
+        waypoint=previous,
         distance=0,
         true_bearing=None,
         magnetic=None,
@@ -195,7 +196,7 @@ def gen_schedule(
         start_datetime += datetime.timedelta(seconds=enroute_min * 60)
         _, next_true = navigation.range_bearing(here.point, end.point)
         yield SchedulePoint(
-            point=here,
+            waypoint=here,
             distance=r,
             true_bearing=theta,
             magnetic=magnetic,
@@ -210,11 +211,11 @@ def gen_schedule(
     r, theta = navigation.range_bearing(previous.point, here.point)
     magnetic = theta - variance(here.point, start_datetime)
     enroute_min = 60.0 * r / speed
-    print(f"{start_datetime} {enroute_min}")
+    # print(f"{start_datetime} {enroute_min}")
     start_datetime += datetime.timedelta(seconds=enroute_min * 60)
-    print(f"{start_datetime}")
+    # print(f"{start_datetime}")
     yield SchedulePoint(
-        point=here,
+        waypoint=here,
         distance=r,
         true_bearing=theta,
         magnetic=magnetic,
@@ -291,17 +292,17 @@ def write_csv(target: TextIO, sched_iter: Iterable[SchedulePoint]) -> None:
     rte_rhumb.writeheader()
     cumulative_distance = 0.0
     for leg, sched in enumerate(sched_iter):
-        lat, lon = sched.point.point.dm
+        lat, lon = sched.waypoint.point.dm
         cumulative_distance += sched.distance or 0
         h, m = divmod(round(sched.enroute_min), 60) if sched.enroute_min else (0, 0)
         enroute_hm = f"{h:02d}h {m:02d}m"
         rte_rhumb.writerow(
             {
                 "Leg": leg,
-                "Name": sched.point.name,
+                "Name": sched.waypoint.name,
                 "Lat": lat,
                 "Lon": lon,
-                "Desc": sched.point.description,
+                "Desc": sched.waypoint.description,
                 "Distance (nm)": nround(sched.distance, 1),
                 "True Bearing": (
                     None

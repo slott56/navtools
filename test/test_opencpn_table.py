@@ -75,7 +75,7 @@ def test_leg_bad(capsys):
 
 
 @fixture
-def route_file(tmp_path):
+def route_path(tmp_path):
     path = tmp_path / "test_1.csv"
     path.write_text(
         dedent(
@@ -104,8 +104,13 @@ def route_file(tmp_path):
     path.unlink()
 
 
-def test_route(route_file):
-    r = Route.load(route_file)
+def test_route(route_path):
+    with route_path.open() as route_file:
+        r = Route.load(route_file)
+    assert repr(r) == dedent("""\
+    Route('Herrington to Drum Point',
+    {'Name': 'Herrington to Drum Point', 'Total distance': '22.9 NMi', 'Speed (Kts)': '6', 'Departure Time (%x %H:%M)': '05/25/2021 08:43', 'Time enroute': '3H 49M'},
+    [Leg(waypoint=Waypoint(lat=38°44.200′N, lon=076°32.400′W, name='Herring Bay', description='', point=LatLon(38°44.200′N, 076°32.400′W), geocode='87C5PFP6+M26'), leg=0, ETE=Duration(d=0, h=0, m=24, s=51), ETA=datetime.datetime(2021, 5, 25, 8, 43), ETA_summary='MoTwilight', speed=6.0, tide='', distance=2.5, bearing=165.0, course=72.0), Leg(waypoint=Waypoint(lat=38°48.700′N, lon=076°21.900′W, name='Kent Point', description='', point=LatLon(38°48.700′N, 076°21.900′W), geocode='87C5RJ6P+M26'), leg=1, ETE=Duration(d=0, h=1, m=34, s=0), ETA=datetime.datetime(2021, 5, 25, 11, 51), ETA_summary='Daytime', speed=6.0, tide='', distance=9.4, bearing=72.0, course=66.0), Leg(waypoint=Waypoint(lat=38°52.900′N, lon=076°14.500′W, name='Eastern Bay', description='', point=LatLon(38°52.900′N, 076°14.500′W), geocode='87C5VQJ5+M88'), leg=2, ETE=Duration(d=0, h=1, m=11, s=0), ETA=datetime.datetime(2021, 5, 25, 13, 2), ETA_summary='Daytime', speed=6.0, tide='', distance=7.1, bearing=66.0, course=158.0), Leg(waypoint=Waypoint(lat=38°50.500′N, lon=076°12.500′W, name='Wye R. Entrance', description='', point=LatLon(38°50.500′N, 076°12.500′W), geocode='87C5RQRR+MM7'), leg=3, ETE=Duration(d=0, h=0, m=28, s=31), ETA=datetime.datetime(2021, 5, 25, 13, 31), ETA_summary='Daytime', speed=6.0, tide='', distance=2.9, bearing=158.0, course=44.0), Leg(waypoint=Waypoint(lat=38°51.800′N, lon=076°11.400′W, name='Bordley Pt.', description='', point=LatLon(38°51.800′N, 076°11.400′W), geocode='87C5VR76+82J'), leg=4, ETE=Duration(d=0, h=0, m=16, s=13), ETA=datetime.datetime(2021, 5, 25, 13, 47), ETA_summary='Daytime', speed=6.0, tide='', distance=1.6, bearing=44.0, course=14.0), Leg(waypoint=Waypoint(lat=38°53.200′N, lon=076°11.300′W, name='Drum Point', description='', point=LatLon(38°53.200′N, 076°11.300′W), geocode='87C5VRP6+MM7'), leg=5, ETE=Duration(d=0, h=0, m=13, s=43), ETA=datetime.datetime(2021, 5, 25, 14, 1), ETA_summary='Daytime', speed=6.0, tide='', distance=1.4, bearing=14.0, course=120.0), Leg(waypoint=Waypoint(lat=38°53.000′N, lon=076°10.700′W, name='Drum Point Anchorage', description='', point=LatLon(38°53.000′N, 076°10.700′W), geocode='87C5VRMC+8MM'), leg=6, ETE=Duration(d=0, h=0, m=4, s=52), ETA=datetime.datetime(2021, 5, 25, 14, 6), ETA_summary='Daytime', speed=6.0, tide='', distance=0.5, bearing=120.0, course=None)])""")
     assert r.summary["Name"] == "Herrington to Drum Point"
     assert r.summary["Total distance"] == "22.9 NMi"
     assert r.summary["Time enroute"] == "3H 49M"
@@ -130,9 +135,14 @@ def test_duration():
     assert d_2.days == approx(2.5 / 24)
     assert d_2.hours == approx(2.5)
     assert d_2.minutes == approx(2.5*60)
+    assert d_0 + datetime.datetime(2021, 9, 10, 11, 12, 13) == datetime.datetime(2021, 9, 10, 16, 19, 13)
+    with raises(TypeError):
+        d_0 + "random thing"
+    with raises(TypeError):
+        d_0 - "random thing"
 
 @fixture
-def route_file_2(tmp_path):
+def route_path_2(tmp_path):
     path = tmp_path / "test_2.csv"
     path.write_text(
         dedent(
@@ -156,16 +166,15 @@ def route_file_2(tmp_path):
     path.unlink()
 
 
-def test_to_html(route_file_2, capsys):
-    r = Route.load(route_file_2)
+def test_to_html(route_path_2, capsys):
+    with route_path_2.open() as route_file:
+        r = Route.load(route_file)
     to_html(r)
     out, err = capsys.readouterr()
     assert out == dedent(
         """\
     <table>
     <tr><td>Name</td><td>Herrington to Drum Point</td></tr>
-    <tr><td>Depart From</td><td></td></tr>
-    <tr><td>Destination</td><td></td></tr>
     <tr><td>Total distance</td><td>22.9 NMi</td></tr>
     <tr><td>Speed (Kts)</td><td>6</td></tr>
     <tr><td>Departure Time (%x %H:%M)</td><td>05/25/2021 08:43</td></tr>
@@ -182,8 +191,9 @@ def test_to_html(route_file_2, capsys):
     )
 
 
-def test_to_csv(route_file_2, capsys):
-    r = Route.load(route_file_2)
+def test_to_csv(route_path_2, capsys):
+    with route_path_2.open() as route_file:
+        r = Route.load(route_file)
     to_csv(r)
     out, err = capsys.readouterr()
     assert out == (
@@ -193,8 +203,8 @@ def test_to_csv(route_file_2, capsys):
     )
 
 
-def test_main_csv(route_file_2, capsys):
-    main([str(route_file_2)])
+def test_main_csv(route_path_2, capsys):
+    main([str(route_path_2)])
     out, err = capsys.readouterr()
     assert out == (
         "Leg,To waypoint,Distance,Bearing,Latitude,Longitude,ETE,ETA,Speed,Next tide event,Description,Course\r\n"
@@ -203,7 +213,7 @@ def test_main_csv(route_file_2, capsys):
     )
 
 
-def test_main_html(route_file_2, capsys):
-    main([str(route_file_2), "-f", "html"])
+def test_main_html(route_path_2, capsys):
+    main([str(route_path_2), "-f", "html"])
     out, err = capsys.readouterr()
     assert re.match(r"^\s*\<table\>.*\</table\>\s*$", out, re.M | re.S) is not None

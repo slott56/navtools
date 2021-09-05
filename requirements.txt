@@ -1,2 +1,4 @@
 tox==3.23.1
 sphinx==4.0.2
+jupyterlab==3.1.7
+pandoc==2.12

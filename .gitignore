@@ -71,3 +71,4 @@ data/WaypointsRoutesTracks.usr
 docs/_build/doctrees/*
 
 spike/*
+workflow/.ipynb_checkpoints/*

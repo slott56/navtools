@@ -264,6 +264,7 @@ class LogEntryReaderCSV(LogEntryReader):
         raise TypeError(f"Can't find a field like {target!r} in {field_names!r}")
 
     def match_header(self, header: list[str]) -> tuple[str, str, str]:
+        """Given the field names for a CSV file, look for date, lat, lon we can use."""
         if set(["date", "latitude", "longitude"]) <= set(header):
             date_field = "date"
             lat_field = "latitude"

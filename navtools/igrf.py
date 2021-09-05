@@ -203,7 +203,7 @@ class IGRF:
             return
 
         installed = pathlib.Path(__file__).with_name(self.name.name)
-        parent = installed.parent / self.name.name
+        parent = installed.parent.parent / self.name.name
         for location in self.name, installed, parent:
             try:
                 self.g, self.h, self.extrapolate = IGRF.load_coeffs(location)
@@ -211,6 +211,8 @@ class IGRF:
             except IOError as e:  # pragma: no cover
                 warnings.warn(f"Model not found in {location}")
                 continue
+        if not self.g or not self.h:
+            raise RuntimeError(f"Model not found in {self.name}, {installed}, {parent}")
 
     @staticmethod
     def load_coeffs(

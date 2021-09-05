@@ -41,13 +41,14 @@ files:
 
 -   Route Planning.
     Computes a schedule for arrival at the various waypoints.
+    This, in turn, can be used to build a float plan to share with others.
 
 -   Track Analysis.
     Annotates a historical log with distance and speed.
 
 -   OpenCPN Conversion.
     Transforms an OpenCPN route planning table into
-    more useful content for spreadsheet use.
+    more useful content for spreadsheet use and float plan creation.
 
 -   Waypoint Merge.
     Determines the differences among waypoints from multiple sources.
@@ -55,6 +56,46 @@ files:
 These provide a number of navigation planning and analysis capabilities.
 These are not intended for use while sailing, however, that is better
 done by tools like OpenCPN, iNavX, and chartplotters.
+
+Jupyter Lab
+===========
+
+While there is a lot of file processing, the essence of route planning
+is thinking and tinkering the speeds, destinations, departure times, and
+the like. While a spreadsheet is useful, Jupyter Lab is -- perhaps -- much better.
+
+The idea is to create Notebook with the plan details.
+In some cases, you may even want to create the seed
+for a data collection log book that can be updated with details of the actual voyage.
+
+You'll need to start JupyterLab with the navtools directory on the Python path.
+
+-   Install navtools.
+
+-   ``PYTHONPATH=/path/to/navtools jupyter lab`` to start the lab with the extra path setting.
+    Often this becomes ``PYTHONPATH=$(pwd) jupyter lab`` if you change to the navtools checkout.
+
+It's best to create a unique notebook for each specific voyage. When this involves multiple legs,
+then there may be multiple float plans generated from a single notebook source document.
+
+There are two publication options for the plan details.
+
+1.  A cell of the notebook creates a Markdown file with boilerplate and itinerary for a specific plan.
+    This is processed through pandoc. This is a pleasant approach because other formats
+    (like plain text) can be made from the Markdown source.
+
+    ::
+
+        pandoc --from markdown+pipe_tables "plan.md" -o "plan.pdf"
+
+2.  A separate notebook is built from boilerplate and itinerary.
+    This is processed through NBConvert.
+
+    ::
+
+        jupyter nbconvert "plan.ipynb" --to pdf --no-input
+
+The results are similar, and are small PDF's that can be shared widely.
 
 Documentation
 =============
